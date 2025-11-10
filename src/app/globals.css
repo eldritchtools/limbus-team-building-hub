@@ -1,0 +1,92 @@
+body {
+  background: #1f1f1f;
+  color: #ddd;
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0px;
+}
+
+button,
+select,
+input,
+textarea {
+  background-color: #2a2a2a;
+  color: #ddd;
+  border: 1px solid #555;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin: 2px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+button:hover,
+select:hover {
+  background-color: #3a3a3a;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #7ba7ff;
+  background-color: #262626;
+}
+
+button:disabled {
+  background-color: #1a1a1a;
+  color: #777;
+  cursor: "not-allowed";
+  opacity: 0.6;
+}
+
+input[type="checkbox"] {
+  accent-color: #0af;
+}
+
+.toggle-button {
+  background-color: #2a2a2a;
+  color: #ddd;
+  border: 1px solid #555;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin: 2px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.toggle-button:hover {
+  background-color: #3a3a3a;
+}
+
+.toggle-button:disabled {
+  background-color: #1a1a1a;
+  color: #777;
+  cursor: "not-allowed";
+  opacity: 0.6;
+}
+
+.toggle-button-active {
+  background-color: #3a3a3a;
+  color: #fff;
+  border-color: #4a4a4a;
+}
+
+.toggle-button-active:hover {
+  background-color: #4a4a4a;
+}
+
+a {
+  color: #4da6ff; /* bright blue */
+  text-decoration: underline;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+a:hover,
+a:focus {
+  color: #80cfff; /* lighter blue on hover */
+  text-shadow: 0 0 4px rgba(128, 207, 255, 0.6); /* subtle glow */
+}
+
+a:visited {
+  color: #b366ff; /* purple that's still bright enough */
+}
+
+a:active {
+  color: #ffcc66; /* amber for click */
+}

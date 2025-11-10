@@ -1,0 +1,90 @@
+import { Icon } from "@eldritchtools/limbus-shared-library";
+import { selectStyleWide } from "../styles";
+import TagSelector, { tagToTagSelectorOption } from "../components/TagSelector";
+import { useState } from "react";
+import { keywordIconConvert, keywordIdMapping, keywordToIdMapping } from "../keywordIds";
+import { EgoSelector, IdentitySelector } from "../components/Selectors";
+
+function KeywordSelector({ selectedKeywords, setSelectedKeywords }) {
+    const handleToggle = (filter, selected) => {
+        if (selected)
+            setSelectedKeywords(p => p.filter(x => x !== filter));
+        else
+            setSelectedKeywords(p => [...p, filter]);
+    }
+
+    const clearAll = () => {
+        setSelectedKeywords([]);
+    }
+
+    const toggleComponent = (filter, selected) => {
+        return <div key={filter} style={{
+            backgroundColor: selected ? "#3f3f3f" : "#1f1f1f", height: "32px", display: "flex",
+            alignItems: "center", justifyContent: "center", padding: "0.1rem 0.2rem", cursor: "pointer",
+            borderBottom: selected ? "2px #4caf50 solid" : "transparent",
+            transition: "all 0.2s"
+        }}
+            onClick={() => handleToggle(filter, selected)}
+        >
+            <Icon path={keywordIconConvert(filter)} style={{ height: "32px" }} />
+        </div>
+    }
+
+    return <div style={{ display: "flex", flexWrap: "wrap", border: "1px #777 dotted", borderRadius: "1rem", minWidth: "200px", padding: "0.5rem" }}>
+        {Object.keys(keywordToIdMapping).reduce((acc, kw) => [...acc, toggleComponent(kw, selectedKeywords.includes(kw))], [])}
+        {<div style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }} onClick={clearAll}>Clear All</div>}
+    </div>
+}
+
+export default function SearchComponent({ options = {} }) {
+    const [title, setTitle] = useState(options.title || "");
+    const [username, setUsername] = useState(options.username || "");
+    const [tags, setTags] = useState((options.tags || []).map(t => tagToTagSelectorOption(t)));
+    const [identities, setIdentities] = useState(options.identities || []);
+    const [egos, setEgos] = useState(options.egos || []);
+    const [keywords, setKeywords] = useState((options.keywords || []).map(kw => keywordIdMapping[kw]) || []);
+    const [sortBy, setSortBy] = useState(options.sortBy || "score");
+
+    const applyFilters = () => {
+        const searchFilters = {};
+        if (title !== "") searchFilters.title = title;
+        if (username !== "") searchFilters.username = username;
+        if (tags.length > 0) searchFilters.tags = tags.map(t => t.value);
+        if (identities.length > 0) searchFilters.identities = identities;
+        if (egos.length > 0) searchFilters.egos = egos;
+        if (keywords.length > 0) searchFilters.keywords = keywords;
+        if (sortBy !== "score") searchFilters.sortBy = sortBy;
+
+        const params = new URLSearchParams(searchFilters);
+        window.location.href = `/builds/search?${params.toString()}`;
+    };
+
+    return <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "0.5rem" }}>
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Title</span>
+            <div style={{ display: "flex" }}><input value={title} onChange={e => setTitle(e.target.value)} style={{width: "25rem"}} /></div>
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>User</span>
+            <div style={{ display: "flex" }}><input value={username} onChange={e => setUsername(e.target.value)} style={{width: "25rem"}} /></div>
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Tags</span>
+            <TagSelector selected={tags} onChange={setTags} creatable={false} wide={true} />
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Identities</span>
+            <IdentitySelector selected={identities} setSelected={setIdentities} isMulti={true} styles={selectStyleWide} />
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>EGOs</span>
+            <EgoSelector selected={egos} setSelected={setEgos} isMulti={true} styles={selectStyleWide} />
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Keywords</span>
+            <KeywordSelector selectedKeywords={keywords} setSelectedKeywords={setKeywords} />
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Sort By</span>
+            <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
+                <label>
+                    <input type="radio" name="sortBy" value={"score"} checked={sortBy === "score"} onChange={e => setSortBy(e.target.value)} />
+                    Score
+                </label>
+                <label>
+                    <input type="radio" name="sortBy" value={"recency"} checked={sortBy === "recency"} onChange={e => setSortBy(e.target.value)} />
+                    Newest
+                </label>
+            </div>
+        </div>
+        <button style={{ fontSize: "1.2rem" }} onClick={applyFilters}>Search Builds</button>
+    </div>
+}

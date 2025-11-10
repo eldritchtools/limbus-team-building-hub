@@ -1,0 +1,37 @@
+{
+  "name": "limbus-team-building-hub",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "start": "next start",
+    "lint": "eslint",
+    "build": "next build",
+    "export": "next export",
+    "deploy": "gh-pages -d out"
+  },
+  "dependencies": {
+    "@eldritchtools/limbus-shared-library": "file:../limbus-shared-library/eldritchtools-limbus-shared-library-0.1.0.tgz",
+    "@eldritchtools/shared-components": "file:../shared-components/eldritchtools-shared-components-1.0.0.tgz",
+    "@radix-ui/react-select": "^2.2.6",
+    "easymde": "^2.20.0",
+    "lodash.debounce": "^4.0.8",
+    "next": "15.5.4",
+    "next-sitemap": "^4.2.3",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-icons": "^5.5.0",
+    "react-markdown": "^10.1.0",
+    "react-select": "^5.10.2",
+    "react-simplemde-editor": "^5.2.0",
+    "remark-breaks": "^4.0.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.4",
+    "tailwindcss": "^4"
+  }
+}

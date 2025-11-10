@@ -1,0 +1,14 @@
+.log-in-out {
+    background: none; 
+    border: none; 
+    color: #4da6ff;
+    text-decoration: underline; 
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.log-in-out:hover,
+.log-in-out:focus {
+  color: #80cfff; /* lighter blue on hover */
+  text-shadow: 0 0 4px rgba(128, 207, 255, 0.6); /* subtle glow */
+}

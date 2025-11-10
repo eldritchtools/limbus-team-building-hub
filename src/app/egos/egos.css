@@ -1,0 +1,23 @@
+.clickable-ego {
+    background: #1f1f1f;
+}
+
+.clickable-ego:hover {
+    background: #2f2f2f;
+}
+
+.clickable-ego-card {
+    background: #1f1f1f;
+}
+
+.clickable-ego-card:hover {
+    background: #2f2f2f;
+}
+
+.clickable-table-row {
+    background: #1f1f1f;
+}
+
+.clickable-table-row:hover {
+    background: #2f2f2f;
+}

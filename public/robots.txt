@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://limbus-teams.eldritchtools.com
+
+# Sitemaps
+Sitemap: https://limbus-teams.eldritchtools.com/sitemap.xml

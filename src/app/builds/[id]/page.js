@@ -1,0 +1,348 @@
+"use client";
+
+import Tag from "@/app/components/Tag";
+import { getBuild } from "@/app/database/builds";
+import { affinityColorMapping, useTimeAgo } from "@/app/utils";
+import { EgoImg, Icon, IdentityImg, KeywordIcon, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
+import React, { useEffect, useRef, useState } from "react";
+import { deleteLike, insertLike, isLiked } from "@/app/database/likes";
+import { deleteSave, insertSave, isSaved } from "@/app/database/saves";
+import { useAuth } from "@/app/database/authProvider";
+import { useRouter } from "next/navigation";
+import { Modal } from "@/app/components/Modal";
+import { keywordIconConvert, keywordIdMapping } from "@/app/keywordIds";
+import Username from "@/app/components/Username";
+import CommentSection from "./commentSection";
+import Link from "next/link";
+
+import "./builds.css";
+import MarkdownRenderer from "@/app/components/MarkdownRenderer";
+import ImageStitcher from "@/app/components/ImageStitcher";
+
+export const metadata = {
+    title: "Team Build",
+    description: "View a team build"
+};
+
+function SkillTypes({ skillType }) {
+    return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.2rem" }}>
+        <Icon path={skillType.affinity} style={{ height: "40px" }} />
+        <Icon path={keywordIconConvert(skillType.type)} style={{ height: "40px" }} />
+        {skillType.type === "counter" ? <Icon path={keywordIconConvert(skillType.atkType)} style={{ height: "40px" }} /> : null}
+    </div>
+}
+
+
+function IdentityProfile({ identity, displayType }) {
+    return identity ? <Link href={`/identities/${identity.id}`}>
+        <div style={{ position: "relative" }}>
+            <IdentityImg identity={identity} uptie={4} displayName={false} scale={0.75} />
+            {displayType === 1 ? <div style={{
+                position: "absolute",
+                bottom: "5px",
+                right: "5px",
+                textAlign: "right",
+                textWrap: "balance",
+                textShadow: "1px 1px 4px #000, -1px 1px 4px #000, 1px -1px 4px #000, -1px -1px 4px #000, 0px 0px 8px rgba(0, 0, 0, 0.5), 0px 0px 12px rgba(0, 0, 0, 0.25)",
+                color: "#ddd"
+            }}>
+                {identity.name}
+            </div> : null}
+            {displayType === 2 ? <div style={{ position: "absolute", width: "192px", height: "192px", background: "rgba(0, 0, 0, 0.65)", top: 0, left: 0 }}>
+                <div style={{ display: "grid", gridTemplateRows: "repeat(4, 1fr)", width: "100%", height: "100%", justifyContent: "center" }}>
+                    {[0, 1, 2].map(x => <div key={x} style={{ display: "flex", justifyContent: "center" }}><SkillTypes skillType={identity.skillTypes[x].type} /></div>)}
+                    {<SkillTypes key={3} skillType={identity.defenseSkillTypes[0].type} />}
+                </div>
+            </div>
+                : null
+            }
+        </div>
+    </Link > : <div style={{ height: "192px", width: "192px", boxSizing: "border-box" }} />
+}
+
+function EgoProfile({ ego, displayType }) {
+    return ego ? <Link href={`/egos/${ego.id}`}>
+        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "158px", height: "46px" }}>
+            <EgoImg ego={ego} type={"awaken"} displayName={false} style={{ display: "block", height: "46px", width: "154px", objectFit: "cover" }} />
+            {displayType === 1 ? <div style={{
+                position: "absolute",
+                fontSize: "0.75rem",
+                color: affinityColorMapping[ego.awakeningType.affinity],
+                maxHeight: "100%",
+                overflow: "hidden",
+                textWrap: "balance",
+                textAlign: "center",
+                textShadow: "1px 1px 4px #000, -1px 1px 4px #000, 1px -1px 4px #000, -1px -1px 4px #000, 0px 0px 8px rgba(0, 0, 0, 0.5), 0px 0px 12px rgba(0, 0, 0, 0.25)"
+            }}>
+                {ego.name}
+            </div> : null}
+            {displayType === 2 ? <div style={{ position: "absolute", width: "156px", height: "46px", background: "rgba(0, 0, 0, 0.65)", top: 0, left: 0 }}>
+                <div style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
+                    <SkillTypes skillType={ego.awakeningType} />
+                </div>
+            </div>
+                : null
+            }
+        </div>
+    </Link> : <div style={{ height: "46px", width: "158px", boxSizing: "border-box" }} />
+}
+
+const deploymentComponentStyle = {
+    flex: 1,
+    fontSize: "1.5rem",
+    textAlign: "center",
+    height: "42px"
+}
+
+function DeploymentComponent({ order, activeSinners, sinnerId }) {
+    const index = order.findIndex(x => x === sinnerId);
+    if (index === -1) {
+        return <div style={deploymentComponentStyle}></div>
+    } else if (index < activeSinners) {
+        return <div style={{ ...deploymentComponentStyle, color: "#fefe3d" }}>Active {index + 1}</div>
+    } else {
+        return <div style={{ ...deploymentComponentStyle, color: "#29fee9" }}>Backup {index + 1 - activeSinners}</div>
+    }
+}
+
+export default function BuildPage({ params }) {
+    const { id } = React.use(params);
+    const { user } = useAuth();
+    const [build, setBuild] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [identities, identitiesLoading] = useData("identities");
+    const [egos, egosLoading] = useData("egos");
+    const createdTimeAgo = useTimeAgo(build ? build.created_at : null);
+    const modifiedTimeAgo = useTimeAgo(build && build.updated_at !== build.created_at ? build.updated_at : null);
+    const teamCodeRef = useRef(null);
+    const [copySuccess, setCopySuccess] = useState('');
+    const [liked, setLiked] = useState(false);
+    const [saved, setSaved] = useState(false);
+    const [likeCount, setLikeCount] = useState(0);
+    const [commentCount, setCommentCount] = useState(0);
+    const router = useRouter();
+    const [shareOpen, setShareOpen] = useState(false);
+    const [linkCopySuccess, setLinkCopySuccess] = useState('');
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [displayType, setDisplayType] = useState(1);
+
+    useEffect(() => {
+        if (loading)
+            getBuild(id).then(x => {
+                setBuild(x);
+                setLoading(false);
+                setLikeCount(x.like_count);
+                setCommentCount(x.comment_count);
+            });
+    }, [id, loading]);
+
+    useEffect(() => {
+        if (user) {
+            isLiked(id, user.id).then(x => setLiked(x));
+            isSaved(id, user.id).then(x => setSaved(x));
+        }
+    }, [id, user])
+
+    const handleTeamCodeCopy = async () => {
+        if (teamCodeRef.current) {
+            try {
+                await navigator.clipboard.writeText(teamCodeRef.current.value);
+                setCopySuccess('Copied!');
+                setTimeout(() => setCopySuccess(''), 2000);
+            } catch (err) {
+                setCopySuccess('Failed to copy!');
+                setTimeout(() => setCopySuccess(''), 2000);
+                console.error('Failed to copy text: ', err);
+            }
+        }
+    };
+
+    const toggleLike = async () => {
+        if (liked) {
+            await deleteLike(id);
+            setLiked(false);
+            setLikeCount(p => p - 1);
+        } else {
+            await insertLike(id);
+            setLiked(true);
+            setLikeCount(p => p + 1);
+        }
+    };
+
+    const toggleSave = async () => {
+        if (saved) {
+            await deleteSave(id);
+            setSaved(false);
+        } else {
+            await insertSave(id);
+            setSaved(true);
+        }
+    };
+
+    const handleLinkCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href);
+            setLinkCopySuccess('Copied!');
+            setTimeout(() => setLinkCopySuccess(''), 2000);
+        } catch (err) {
+            setLinkCopySuccess('Failed to copy!');
+            setTimeout(() => setLinkCopySuccess(''), 2000);
+            console.error('Failed to copy text: ', err);
+        }
+    };
+
+    const editBuild = () => {
+        router.push(`/builds/${id}/edit`);
+    }
+
+    const deleteBuild = async () => {
+        const data = await deleteBuild(id);
+        if (data && data.deleted) {
+            router.push(`/builds`);
+        }
+    }
+
+    return loading ? <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontSize: "1.5rem", fontWeight: "bold" }}>
+        Loading...
+    </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "end" }}>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+                <h2 style={{ display: "flex", fontSize: "1.2rem", fontWeight: "bold", alignItems: "center" }}>
+                    <div style={{ display: "flex", gap: "0.2rem" }}>
+                        {build.keyword_ids.map(id => <KeywordIcon key={id} id={keywordIdMapping[id]} />)}
+                    </div>
+                    {build.title}
+                </h2>
+                <div style={{ fontSize: "0.9rem", marginBottom: "0.5rem", color: "#ddd" }}>
+                    by <Username username={build.username} /> • {createdTimeAgo} {modifiedTimeAgo ? ` • Last edited ${modifiedTimeAgo}` : null}
+                </div>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "10rem", gap: "0.2rem" }}>
+                <div>Display Type</div>
+                <button onClick={() => setDisplayType(p => (p + 1) % 3)}>{displayType === 0 ? "Icons Only" : (displayType === 1 ? "Icons with Names" : "Skill Types")}</button>
+            </div>
+        </div>
+
+        {identitiesLoading || egosLoading ? null :
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 360px)", width: "100%", justifyContent: "center", gap: "0.5rem" }}>
+                {Array.from({ length: 12 }, (_, index) =>
+                    <div key={index} style={{ display: "flex", flexDirection: "row", width: "350px", height: "230px", border: "1px #444 solid" }}>
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                            {build.identity_ids[index] ?
+                                <IdentityProfile identity={identities[build.identity_ids[index]]} displayType={displayType} /> :
+                                <div style={{ height: "192px", width: "192px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    <SinnerIcon num={index + 1} style={{ height: "144px" }} />
+                                </div>
+                            }
+                            <DeploymentComponent order={build.deployment_order} activeSinners={build.active_sinners} sinnerId={index + 1} />
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+                            {Array.from({ length: 5 }, (_, rank) => <EgoProfile key={rank} ego={egos[build.ego_ids[index][rank]] || null} displayType={displayType} />)}
+                        </div>
+                    </div>
+                )}
+            </div>
+        }
+        <div style={{ display: "flex", flexDirection: "row", width: "90%", alignSelf: "center" }}>
+            <div style={{ display: "flex", flexDirection: "column", paddingRight: "0.5rem", width: "70%" }}>
+                <span style={{ fontSize: "1.2rem" }}>Description</span>
+                <div className={{ maxWidth: "48rem", marginLeft: "auto", marginRight: "auto" }}>
+                    <div>
+                        <MarkdownRenderer content={build.body} />
+                    </div>
+                </div>
+            </div>
+
+            <div style={{ border: "1px #777 solid" }} />
+
+            <div style={{ display: "flex", flexDirection: "column", paddingLeft: "0.5rem", width: "30%", gap: "0.25rem" }}>
+                {build.team_code.trim().length > 0 ? <>
+                    <div>
+                        <span style={{ fontSize: "1.2rem", borderBottom: "1px #ddd dotted" }} data-tooltip-id="team-code-tooltip">Team Code</span>
+                    </div>
+                    <div style={{ position: "relative", width: "100%" }}>
+                        <textarea value={build.team_code} ref={teamCodeRef} readOnly={true} style={{ width: "100%", height: "3rem", cursor: "pointer" }} onClick={handleTeamCodeCopy} />
+                        {copySuccess !== '' ?
+                            <div className="copy-popup">
+                                <div className="copy-popup-box">
+                                    {copySuccess}
+                                </div>
+                            </div> :
+                            null
+                        }
+                    </div>
+                </> : null
+                }
+                <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+                    Tags: {build.tags.map((t, i) => <Tag key={i} tag={t.name} />)}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <button onClick={toggleLike} className={liked ? "toggle-button-active" : "toggle-button"} disabled={!user}>
+                        👍 {likeCount}
+                    </button>
+                    {
+                        user ?
+                            <button onClick={toggleSave} className={saved ? "toggle-button-active" : "toggle-button"}>
+                                ⭐ {saved ? "Saved" : "Save"}
+                            </button> : null
+                    }
+                    <button onClick={() => setShareOpen(true)}>
+                        🔗 Share
+                    </button>
+                    {
+                        user && user.id === build.user_id ?
+                            <button onClick={editBuild}>
+                                ✎ Edit
+                            </button> : null
+                    }
+                    {
+                        user && user.id === build.user_id ?
+                            <button onClick={() => setDeleteOpen(true)}>
+                                🗑️ Delete
+                            </button> : null
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div style={{ border: "1px #777 solid" }} />
+        {build.is_published ?
+            <div style={{ width: "clamp(800px, 60%, 100%)", alignSelf: "center" }}>
+                <CommentSection buildId={id} commentCount={commentCount} />
+            </div> :
+            <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>No comments while the build is not published.</p>
+        }
+        <Modal isOpen={shareOpen} onClose={() => setShareOpen(false)}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem", padding: "0.5rem" }}>
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", alignSelf: "start" }}>
+                    Address (click to copy):
+                    <div style={{ position: "relative" }}>
+                        <input value={window.location.href} onClick={handleLinkCopy} readOnly={true} style={{ width: "25rem" }} />
+                        {linkCopySuccess !== '' ?
+                            <div className="copy-popup">
+                                <div className="copy-popup-box">
+                                    {linkCopySuccess}
+                                </div>
+                            </div> :
+                            null
+                        }
+                    </div>
+                </div>
+                <ImageStitcher identitiesList={build.identity_ids} outputFileName={`${build.id}.png`} />
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <button onClick={() => setShareOpen(false)}>Close</button>
+                </div>
+            </div>
+        </Modal>
+        <Modal isOpen={deleteOpen} onClose={() => setDeleteOpen(false)}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem" }}>
+                <span>Are you sure you want to delete this build?</span>
+                <span>This is a non-recoverable action.</span>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <button onClick={() => deleteBuild()}>Yes</button>
+                    <button onClick={() => setDeleteOpen(false)}>No</button>
+                </div>
+            </div>
+        </Modal>
+    </div>
+}

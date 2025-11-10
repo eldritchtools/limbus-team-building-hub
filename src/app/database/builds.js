@@ -1,0 +1,97 @@
+import supabase from "./connection";
+
+async function getPopularBuilds(page = 1, pageSize = 20) {
+    const start = (page - 1) * pageSize;
+
+    const { data, error } = await supabase
+        .from('popular_builds_cache')
+        .select('*')
+        .eq('ranking_type', 'recent')
+        .order('score', { ascending: false })
+        .range(start, start + pageSize - 1);
+
+    if (error) throw error;
+    return data.map(x => {return {...x, id: x.build_id}});
+}
+
+async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", page = 1, pageSize = 20) {
+    const start = (page - 1) * pageSize;
+
+    const options = {};
+    if ("title" in filters) options["title_filter"] = filters["title"];
+    if ("build_id" in filters) options["build_id_filter"] = filters["build_id"];
+    if ("user_id" in filters) options["user_id_filter"] = filters["user_id"];
+    if ("username" in filters) options["username_filter"] = filters["username"];
+    if ("username_exact" in filters) options["username_exact_filter"] = filters["username_exact"];
+    if ("tags" in filters) options["tag_filter"] = filters["tags"];
+    if ("identities" in filters) options["identity_filter"] = filters["identities"];
+    if ("egos" in filters) options["ego_filter"] = filters["egos"];
+    if ("keywords" in filters) options["keyword_filter"] = filters["keywords"];
+    options.p_published = isPublished;
+    options.sort_by = sortBy;
+    options.limit_count = pageSize;
+    options.offset_count = start;
+
+    const { data, error } = await supabase.rpc('get_filtered_builds', options);
+
+    if (error) throw (error);
+    return data;
+}
+
+async function getBuild(id, forEdit = false) {
+    const { data, error } = await supabase.rpc("get_build_details", {
+        p_build_id: id,
+        p_for_edit: forEdit,
+    });
+
+    if (error) throw error;
+    return data;
+}
+
+async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, tags, is_published) {
+    const { data, error } = await supabase.rpc('create_build_with_tags', {
+        p_user_id: user_id,
+        p_title: title,
+        p_body: body,
+        p_identity_ids: identity_ids,
+        p_ego_ids: ego_ids,
+        p_keyword_ids: keyword_ids,
+        p_deployment_order: deployment_order,
+        p_active_sinners: active_sinners,
+        p_team_code: team_code,
+        p_tags: tags,
+        p_published: is_published
+    });
+
+    if (error) throw (error);
+    return data;
+}
+
+async function updateBuild(build_id, user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, tags, is_published) {
+    const { error } = await supabase.rpc('update_build_with_tags', {
+        p_build_id: build_id,
+        p_user_id: user_id,
+        p_title: title,
+        p_body: body,
+        p_identity_ids: identity_ids,
+        p_ego_ids: ego_ids,
+        p_keyword_ids: keyword_ids,
+        p_deployment_order: deployment_order,
+        p_active_sinners: active_sinners,
+        p_team_code: team_code,
+        p_tags: tags,
+        p_published: is_published
+    });
+
+    if (error) throw (error);
+    return build_id;
+}
+
+async function deleteBuild(build_id) {
+    const { error } = await supabase.from("builds").delete().eq("build_id", build_id);
+
+    if (error) throw error;
+    return { deleted: true };
+}
+
+export { getPopularBuilds, getFilteredBuilds, getBuild, insertBuild, updateBuild, deleteBuild };

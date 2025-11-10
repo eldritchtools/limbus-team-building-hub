@@ -1,0 +1,56 @@
+.uptie-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    box-sizing: border-box;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.uptie-select-trigger:hover {
+    background-color: #555;
+    border-radius: 4px;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.uptie-select-value {
+    display: flex;
+    align-items: center;
+}
+
+.uptie-select-content {
+    background: #1f1f1f;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 10rem;
+    max-height: 2.5rem;
+    z-index: 100;
+}
+
+.uptie-select-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.uptie-select-item {
+    position: relative;
+    padding: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.uptie-select-item:focus,
+.uptie-select-item:hover {
+    background: #555;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.uptie-item-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

@@ -1,0 +1,23 @@
+.clickable-id {
+    background: #1f1f1f;
+}
+
+.clickable-id:hover {
+    background: #2f2f2f;
+}
+
+.clickable-id-card {
+    background: #1f1f1f;
+}
+
+.clickable-id-card:hover {
+    background: #2f2f2f;
+}
+
+.clickable-table-row {
+    background: #1f1f1f;
+}
+
+.clickable-table-row:hover {
+    background: #2f2f2f;
+}

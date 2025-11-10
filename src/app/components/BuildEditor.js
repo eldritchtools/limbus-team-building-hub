@@ -194,6 +194,7 @@ export default function BuildEditor({ mode, buildId }) {
     useEffect(() => {
         if (mode === "edit") {
             getBuild(buildId, true).then(build => {
+                if (!build) router.back();
                 if (build.username) {
                     setTitle(build.title);
                     setBody(build.body);
@@ -209,7 +210,7 @@ export default function BuildEditor({ mode, buildId }) {
                 }
             });
         }
-    }, [mode, buildId]);
+    }, [mode, buildId, router]);
 
     const identityOptions = useMemo(() => identitiesLoading ? null : Object.entries(identities).reverse().reduce((acc, [_, identity]) => {
         acc[identity.sinnerId].push(identity); return acc;
@@ -246,10 +247,10 @@ export default function BuildEditor({ mode, buildId }) {
         setSaving(true);
         if (mode === "edit") {
             const data = await updateBuild(buildId, user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, tagsConverted, isPublished);
-            router.push(`/builds/${data}`);
+            router.push(`/builds/view?id=${buildId}`);
         } else {
             const data = await insertBuild(user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, tagsConverted, isPublished);
-            router.push(`/builds/${data}`);
+            router.push(`/builds/view?id=${buildId}`);
         }
     }
 

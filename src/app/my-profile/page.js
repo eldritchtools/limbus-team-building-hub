@@ -7,11 +7,6 @@ import { getFilteredBuilds } from "../database/builds";
 import { useAuth } from "../database/authProvider";
 import { getSaves } from "../database/saves";
 
-export const metadata = {
-    title: "My Profile",
-    description: "View the user's builds or edit details"
-};
-
 export default function ProfilePage() {
     const { user, profile, loading, updateUsername, refreshProfile } = useAuth();
     const [username, setUsername] = useState("");

@@ -5,11 +5,6 @@ import './LoginPage.css';
 import supabase from '../database/connection';
 import Link from 'next/link';
 
-export const metadata = {
-    title: "Login",
-    description: "Login page"
-};
-
 function AuthForm() {
     const router = useRouter();
 

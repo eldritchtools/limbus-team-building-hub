@@ -1,0 +1,13 @@
+{
+  "name": "Limbus Company Team Building Hub",
+  "short_name": "Limbus Team Building",
+  "description": "View team builds or create your own to share. Look up relevant information on identities and E.G.Os",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#1e1e1e",
+  "icons": [
+    { "src": "/icon-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

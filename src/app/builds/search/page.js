@@ -6,11 +6,6 @@ import { getFilteredBuilds } from "../../database/builds";
 import SearchComponent from "../SearchComponent";
 import { keywordToIdMapping } from "../../keywordIds";
 
-export const metadata = {
-    title: "Team Builds",
-    description: "Browse team builds"
-};
-
 export default function SearchBuildsPage() {
     const searchParams = useSearchParams();
 

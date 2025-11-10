@@ -4,11 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import supabase from '@/app/database/connection';
 
-export const metadata = {
-    title: "Reset Password",
-    description: "Reset password"
-};
-
 export default function ResetPasswordPage() {
     const router = useRouter();
     const [password, setPassword] = useState('');

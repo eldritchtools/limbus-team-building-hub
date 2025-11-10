@@ -65,7 +65,7 @@ function BuildItem({ id }) {
         invalid ?
             <span>{`{build:${id}}`}</span> :
             <span>
-                <Link href={`/builds/${id}`} data-tooltip-id={`markdown-build-tooltip`} data-tooltip-content={encodeURIComponent(JSON.stringify(build))}>
+                <Link href={`/builds/view?id=${id}`} data-tooltip-id={`markdown-build-tooltip`} data-tooltip-content={encodeURIComponent(JSON.stringify(build))}>
                     {build.title}
                 </Link>
             </span>
@@ -87,12 +87,12 @@ export default function MarkdownRenderer({ content }) {
                     switch (tokenType) {
                         case "identity":
                             if (tokenValue in identities)
-                                return <Link href={`/identities/${tokenValue}`}>[{sinnerMapping[identities[tokenValue].sinnerId]}] {identities[tokenValue].name}</Link>;
+                                return <Link href={`/identities/view?id=${tokenValue}`}>[{sinnerMapping[identities[tokenValue].sinnerId]}] {identities[tokenValue].name}</Link>;
                             else
                                 return <span>{`{${tokenType}:${tokenValue}}`}</span>
                         case "ego":
                             if (tokenValue in egos)
-                                return <Link href={`/egos/${tokenValue}`}>[{sinnerMapping[egos[tokenValue].sinnerId]}] {egos[tokenValue].name}</Link>
+                                return <Link href={`/egos/view?id=${tokenValue}`}>[{sinnerMapping[egos[tokenValue].sinnerId]}] {egos[tokenValue].name}</Link>
                             else
                                 return <span>{`{${tokenType}:${tokenValue}}`}</span>
                         case "status":
@@ -109,7 +109,7 @@ export default function MarkdownRenderer({ content }) {
                         case "build":
                             return <BuildItem id={tokenValue} />
                         case "user":
-                            return <Link href={`/profiles/${tokenValue}`}>{tokenValue}</Link>
+                            return <Link href={`/profiles/view?username=${tokenValue}`}>{tokenValue}</Link>
                         default:
                             return <span>{`{${tokenType}:${tokenValue}}`}</span>;
                     }

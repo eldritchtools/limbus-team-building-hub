@@ -11,8 +11,8 @@
     "deploy": "gh-pages -d out"
   },
   "dependencies": {
-    "@eldritchtools/limbus-shared-library": "file:../limbus-shared-library/eldritchtools-limbus-shared-library-0.1.0.tgz",
-    "@eldritchtools/shared-components": "file:../shared-components/eldritchtools-shared-components-1.0.0.tgz",
+    "@eldritchtools/limbus-shared-library": "github:eldritchtools/limbus-shared-library#v0.5.0",
+    "@eldritchtools/shared-components": "github:eldritchtools/shared-components#v1.3.0",
     "@radix-ui/react-select": "^2.2.6",
     "easymde": "^2.20.0",
     "lodash.debounce": "^4.0.8",

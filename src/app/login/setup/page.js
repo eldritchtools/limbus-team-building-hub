@@ -3,11 +3,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/database/authProvider';
 
-export const metadata = {
-    title: "Setup",
-    description: "First time setup of a user's account"
-};
-
 export default function UsernameSetup() {
     const router = useRouter();
     const { user, profile, loading, updateUsername, refreshProfile } = useAuth();

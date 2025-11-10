@@ -1,4 +1,3 @@
-import Link from "next/link";
 import "./UserStatus.css";
 import { useAuth } from "../database/authProvider";
 import { useRouter } from "next/navigation";

@@ -1,6 +1,6 @@
 "use client";
 
-import { IdentityImg, KeywordIcon } from "@eldritchtools/limbus-shared-library";
+import { KeywordIcon } from "@eldritchtools/limbus-shared-library";
 import { keywordIdMapping } from "../keywordIds";
 import Tag from "./Tag";
 import { useTimeAgo } from "../utils";
@@ -13,7 +13,7 @@ export default function BuildEntry({ build }) {
 
     return (
         <div style={{ width: "720px", display: "flex", flexDirection: "column", border: "1px #777 solid", borderRadius: "1rem", padding: "1rem", boxSizing: "border-box", textAlign: "left" }}>
-            <Link href={`/builds/${build.id}`}>
+            <Link href={`/builds/view?id=${build.id}`}>
                 <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", marginTop: "0.2rem", marginBottom: "0.5rem" }}>{build.title}</h2>
             </Link>
             <div style={{ fontSize: "0.8rem", marginBottom: "0.5rem", color: "#ddd" }}>

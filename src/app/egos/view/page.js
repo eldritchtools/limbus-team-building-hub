@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Icon, EgoImg, RarityImg, useData, SinnerIcon } from '@eldritchtools/limbus-shared-library';
-import { useParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ColorResist, getSeasonString, sinnerMapping } from "@/app/utils";
 import SkillCard from "@/app/components/SkillCard";
 import PassiveCard from "@/app/components/PassiveCard";
@@ -10,20 +10,18 @@ import UptieSelector from "@/app/components/UptieSelector";
 
 const affinities = ["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"];
 
-export const metadata = {
-    title: "E.G.O Page",
-    description: "Browse information on E.G.Os"
-};
-
-export default function Ego() {
+export default function EgoPage() {
     const [egos, egosLoading] = useData("egos");
-    const { id } = useParams();
+    const searchParams = useSearchParams();
+    const id = useMemo(() => searchParams.get("id"), [searchParams]);
     const [skillData, skillDataLoading] = useData(`egos/${id}`);
     const egoData = egosLoading ? null : egos[id];
     const [uptie, setUptie] = useState(4);
+    const router = useRouter();
 
     const passives = skillDataLoading ? null : skillData.passiveList;
 
+    if (!id) router.back();
     if (egosLoading || skillDataLoading) return null;
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>

@@ -3,11 +3,6 @@
 import { useState } from 'react';
 import supabase from '@/app/database/connection';
 
-export const metadata = {
-    title: "Forgot Password",
-    description: "Forgot password"
-};
-
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');

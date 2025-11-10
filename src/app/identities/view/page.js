@@ -1,17 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Icon, IdentityImg, RarityImg, SinnerIcon, useData } from '@eldritchtools/limbus-shared-library';
-import { useParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ColorResist, getSeasonString, sinnerMapping } from "@/app/utils";
 import SkillCard from "@/app/components/SkillCard";
 import PassiveCard from "@/app/components/PassiveCard";
 import UptieSelector from "@/app/components/UptieSelector";
-
-export const metadata = {
-    title: "Identity Page",
-    description: "Browse information on identities"
-};
 
 const LEVEL_CAP = 55;
 
@@ -62,15 +57,18 @@ function LevelInput({ value, setValue, min = 1, max = 100 }) {
 
 export default function Identity() {
     const [identities, identitiesLoading] = useData("identities");
-    const { id } = useParams();
+    const searchParams = useSearchParams();
+    const id = useMemo(() => searchParams.get("id"), [searchParams]);
     const [skillData, skillDataLoading] = useData(`identities/${id}`);
     const identityData = identitiesLoading ? null : identities[id];
     const [uptie, setUptie] = useState(4);
     const [level, setLevel] = useState(LEVEL_CAP);
+    const router = useRouter();
 
     const combatPassives = skillDataLoading ? null : skillData.combatPassives.findLast(passives => passives.level <= uptie);
     const supportPassives = skillDataLoading ? null : skillData.supportPassives.findLast(passives => passives.level <= uptie);
 
+    if (!id) router.back();
     if (identitiesLoading || skillDataLoading) return null;
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>

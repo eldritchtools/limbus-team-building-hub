@@ -4,11 +4,6 @@ import BuildEntry from "../components/BuildEntry";
 import { getFilteredBuilds, getPopularBuilds } from "../database/builds";
 import SearchComponent from "./SearchComponent";
 
-export const metadata = {
-    title: "Team Builds",
-    description: "Browse team builds"
-};
-
 export default function BuildsPage() {
     const [builds, setBuilds] = useState([]);
     const [loading, setLoading] = useState(true);

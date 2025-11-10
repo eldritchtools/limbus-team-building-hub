@@ -4,11 +4,6 @@ import { useState } from "react";
 import { EgoSelector, IdentitySelector, KeywordSelector, StatusSelector } from "../components/Selectors";
 import MarkdownRenderer from "../components/MarkdownRenderer";
 
-export const metadata = {
-    title: "Markdown Tokens",
-    description: "View the list of token types that can be included in markdown text"
-};
-
 const headerStyle = { fontSize: "1.2rem", fontWeight: "bold" };
 
 export default function MarkdownTokens() {

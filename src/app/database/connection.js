@@ -2,16 +2,14 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseApiKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 let supabase = global.supabase || null;
 
 export function getSupabase() {
     if (supabase) return supabase;
 
     supabase = createClient(
-        supabaseUrl,
-        supabaseApiKey,
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
         {
             auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
         }

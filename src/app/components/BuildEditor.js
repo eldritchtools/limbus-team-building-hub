@@ -247,10 +247,10 @@ export default function BuildEditor({ mode, buildId }) {
         setSaving(true);
         if (mode === "edit") {
             const data = await updateBuild(buildId, user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, tagsConverted, isPublished);
-            router.push(`/builds/${buildId}`);
+            router.push(`/builds/${data}`);
         } else {
             const data = await insertBuild(user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, tagsConverted, isPublished);
-            router.push(`/builds/${buildId}`);
+            router.push(`/builds/${data}`);
         }
     }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Tag from "@/app/components/Tag";
-import { getBuild } from "@/app/database/builds";
+import { deleteBuild, getBuild } from "@/app/database/builds";
 import { affinityColorMapping, useTimeAgo } from "@/app/utils";
 import { EgoImg, Icon, IdentityImg, KeywordIcon, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
 import React, { useEffect, useRef, useState } from "react";
@@ -119,6 +119,7 @@ export default function BuildPage({ params }) {
     const [shareOpen, setShareOpen] = useState(false);
     const [linkCopySuccess, setLinkCopySuccess] = useState('');
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const [deleting, setDeleting] = useState(false);
     const [displayType, setDisplayType] = useState(1);
 
     useEffect(() => {
@@ -190,11 +191,13 @@ export default function BuildPage({ params }) {
         router.push(`/builds/${id}/edit`);
     }
 
-    const deleteBuild = async () => {
+    const handleDeleteBuild = async () => {
+        setDeleting(true);
         const data = await deleteBuild(id);
         if (data && data.deleted) {
             router.push(`/builds`);
         }
+        setDeleting(false);
     }
 
     return loading ? <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontSize: "1.5rem", fontWeight: "bold" }}>
@@ -334,7 +337,7 @@ export default function BuildPage({ params }) {
                 <span>Are you sure you want to delete this build?</span>
                 <span>This is a non-recoverable action.</span>
                 <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <button onClick={() => deleteBuild()}>Yes</button>
+                    <button onClick={() => handleDeleteBuild()} disabled={deleting}>Yes</button>
                     <button onClick={() => setDeleteOpen(false)}>No</button>
                 </div>
             </div>

@@ -90,7 +90,7 @@ async function updateBuild(build_id, user_id, title, body, identity_ids, ego_ids
 }
 
 async function deleteBuild(build_id) {
-    const { error } = await getSupabase().from("builds").delete().eq("build_id", build_id);
+    const { error } = await getSupabase().from("builds").delete().eq("id", build_id);
 
     if (error) throw error;
     return { deleted: true };

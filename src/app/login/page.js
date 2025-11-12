@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import './LoginPage.css';
-import supabase from '../database/connection';
+import { getSupabase } from '../database/connection';
 import Link from 'next/link';
 
 function AuthForm() {
@@ -29,8 +29,8 @@ function AuthForm() {
         document.body.style.pointerEvents = "none";
 
         const { error } = isLogin
-            ? await supabase.auth.signInWithPassword({ email, password })
-            : await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth/callback` } });
+            ? await getSupabase().auth.signInWithPassword({ email, password })
+            : await getSupabase().auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth/callback` } });
 
         setLoading(false);
         document.body.style.cursor = "default";
@@ -53,7 +53,7 @@ function AuthForm() {
         setLoading(true);
         document.body.style.cursor = "wait";
         document.body.style.pointerEvents = "none";
-        const { error } = await supabase.auth.signInWithOAuth({
+        const { error } = await getSupabase().auth.signInWithOAuth({
             provider: 'google',
             options: {
                 redirectTo: `${window.location.origin}/auth/callback`,

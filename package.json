@@ -5,18 +5,18 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "start": "next start",
-    "lint": "eslint",
     "build": "next build",
-    "export": "next export",
-    "deploy": "gh-pages -d out"
+    "lint": "eslint",
+    "sitemap": "next-sitemap"
   },
   "dependencies": {
-    "@eldritchtools/limbus-shared-library": "github:eldritchtools/limbus-shared-library#v0.5.0",
+    "@eldritchtools/limbus-shared-library": "github:eldritchtools/limbus-shared-library#v0.5.1",
     "@eldritchtools/shared-components": "github:eldritchtools/shared-components#v1.3.0",
     "@radix-ui/react-select": "^2.2.6",
+    "@supabase/supabase-js": "^2.81.1",
     "easymde": "^2.20.0",
     "lodash.debounce": "^4.0.8",
-    "next": "15.5.4",
+    "next": "16.0.1",
     "next-sitemap": "^4.2.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -30,8 +30,10 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
+    "source-map-support": "^0.5.21",
     "tailwindcss": "^4"
   }
 }

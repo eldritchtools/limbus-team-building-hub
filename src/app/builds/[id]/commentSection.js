@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { addComment, deleteComment, getComments, updateComment } from "@/app/database/comments";
 import { useTimeAgo } from "@/app/utils";

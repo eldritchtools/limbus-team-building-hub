@@ -1,7 +1,9 @@
-import supabase from "./connection";
+"use client";
+
+import { getSupabase } from "./connection";
 
 async function getComments(id, page = 1) {
-    const { data, error } = await supabase.rpc("get_build_comments", {
+    const { data, error } = await getSupabase().rpc("get_build_comments", {
         p_build_id: id,
         p_limit: 20,
         p_offset: (page - 1) * 20
@@ -12,7 +14,7 @@ async function getComments(id, page = 1) {
 }
 
 async function addComment(buildId, body, parentId = null) {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
         .from("comments")
         .insert([{ build_id: buildId, body, parent_id: parentId }])
         .select()
@@ -23,7 +25,7 @@ async function addComment(buildId, body, parentId = null) {
 }
 
 async function updateComment(buildId, body) {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
         .from("comments")
         .update({ body })
         .eq("id", buildId)
@@ -33,9 +35,9 @@ async function updateComment(buildId, body) {
 }
 
 async function deleteComment(commentId) {
-    const { error } = await supabase
+    const { error } = await getSupabase()
         .from("comments")
-        .update({body: "", deleted: true})
+        .update({ body: "", deleted: true })
         .eq("id", commentId);
 
     if (error) throw error;

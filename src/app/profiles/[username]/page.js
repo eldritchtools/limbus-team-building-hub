@@ -1,22 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { checkUsername } from "@/app/database/users";
 import BuildEntry from "@/app/components/BuildEntry";
 import { getFilteredBuilds } from "@/app/database/builds";
-import { useRouter, useSearchParams } from "next/navigation";
+import React from "react";
 
-export default function ProfilePage() {
-    const searchParams = useSearchParams();
-    const username = useMemo(() => searchParams.get("username"), [searchParams]);
+export default function ProfilePage({params}) {
+    const { username } = React.use(params);
     const [builds, setBuilds] = useState([]);
     const [buildsLoading, setBuildsLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [userExists, setUserExists] = useState(false);
     const [checkingUser, setCheckingUser] = useState(true);
-    const router = useRouter();
-
-    if (!username) router.back();
 
     useEffect(() => {
         checkUsername(username).then(x => {

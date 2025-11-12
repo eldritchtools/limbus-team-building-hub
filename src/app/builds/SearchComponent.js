@@ -1,3 +1,5 @@
+"use client";
+
 import { Icon } from "@eldritchtools/limbus-shared-library";
 import { selectStyleWide } from "../styles";
 import TagSelector, { tagToTagSelectorOption } from "../components/TagSelector";

@@ -4,11 +4,11 @@ import Tag from "@/app/components/Tag";
 import { getBuild } from "@/app/database/builds";
 import { affinityColorMapping, useTimeAgo } from "@/app/utils";
 import { EgoImg, Icon, IdentityImg, KeywordIcon, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { deleteLike, insertLike, isLiked } from "@/app/database/likes";
 import { deleteSave, insertSave, isSaved } from "@/app/database/saves";
 import { useAuth } from "@/app/database/authProvider";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Modal } from "@/app/components/Modal";
 import { keywordIconConvert, keywordIdMapping } from "@/app/keywordIds";
 import Username from "@/app/components/Username";
@@ -29,7 +29,7 @@ function SkillTypes({ skillType }) {
 
 
 function IdentityProfile({ identity, displayType }) {
-    return identity ? <Link href={`/identities/view?id=${identity.id}`}>
+    return identity ? <Link href={`/identities/${identity.id}`}>
         <div style={{ position: "relative" }}>
             <IdentityImg identity={identity} uptie={4} displayName={false} scale={0.75} />
             {displayType === 1 ? <div style={{
@@ -56,7 +56,7 @@ function IdentityProfile({ identity, displayType }) {
 }
 
 function EgoProfile({ ego, displayType }) {
-    return ego ? <Link href={`/egos/view?id=${ego.id}`}>
+    return ego ? <Link href={`/egos/${ego.id}`}>
         <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "158px", height: "46px" }}>
             <EgoImg ego={ego} type={"awaken"} displayName={false} style={{ display: "block", height: "46px", width: "154px", objectFit: "cover" }} />
             {displayType === 1 ? <div style={{
@@ -100,9 +100,8 @@ function DeploymentComponent({ order, activeSinners, sinnerId }) {
     }
 }
 
-export default function BuildPage() {
-    const searchParams = useSearchParams();
-    const id = useMemo(() => searchParams.get("id"), [searchParams]);
+export default function BuildPage({ params }) {
+    const { id } = React.use(params);
     const { user } = useAuth();
     const [build, setBuild] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -121,8 +120,6 @@ export default function BuildPage() {
     const [linkCopySuccess, setLinkCopySuccess] = useState('');
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [displayType, setDisplayType] = useState(1);
-
-    if (!id) router.back();
 
     useEffect(() => {
         if (loading)
@@ -190,7 +187,7 @@ export default function BuildPage() {
     };
 
     const editBuild = () => {
-        router.push(`/builds/edit?id=${id}`);
+        router.push(`/builds/${id}/edit`);
     }
 
     const deleteBuild = async () => {

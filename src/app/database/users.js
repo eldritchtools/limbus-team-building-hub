@@ -1,7 +1,9 @@
-import supabase from "./connection";
+"use client";
+
+import { getSupabase } from "./connection";
 
 async function checkUsername(username) {
-    const { data: user } = await supabase
+    const { data: user } = await getSupabase()
         .from("users")
         .select("*")
         .eq("username", username)

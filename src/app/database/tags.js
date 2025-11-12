@@ -1,8 +1,10 @@
-import supabase from "./connection";
+"use client";
+
+import { getSupabase } from "./connection";
 
 async function fetchTags(prefix) {
     if (!prefix) return [];
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
         .from("tags")
         .select("name")
         .ilike("name", `%${prefix}%`)
@@ -18,7 +20,7 @@ async function fetchTags(prefix) {
 }
 
 async function handleCreateTag(name) {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
         .from("tags")
         .insert({ name: name })
         .select("name")

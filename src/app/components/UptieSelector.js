@@ -1,3 +1,5 @@
+"use client";
+
 import * as Select from "@radix-ui/react-select";
 import { useRef, useState } from "react";
 import "./uptieSelector.css";

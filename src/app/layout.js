@@ -7,7 +7,7 @@ export const metadata = {
     description: "View team builds or create your own to share. Look up relevant information on identities and E.G.Os",
     metadataBase: new URL("https://limbus-builds.eldritchtools.com"),
     alternates: {
-        canonical: "/",
+        canonical: "https://limbus-builds.eldritchtools.com",
     }
 };
 

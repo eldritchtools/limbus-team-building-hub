@@ -1,10 +1,10 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import supabase from './connection';
+import { getSupabase } from './connection';
 import { useRouter } from 'next/navigation';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext({ user: null, profile: null, loading: true, refreshProfile: () => { }, updateUsername: () => { }, logout: () => { } });
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
@@ -13,14 +13,16 @@ export function AuthProvider({ children }) {
     const router = useRouter();
 
     const loadProfile = useCallback(async userId => {
-        const { data, error } = await supabase
+        const promise = getSupabase()
             .from('users')
             .select('*')
             .eq('id', userId)
             .maybeSingle();
-
-        if (error) console.error(error);
-        setProfile(data);
+            
+        promise.then(({error, data}) => {
+            if (error) throw error;
+            setProfile(data); 
+        }).catch(err => console.error(err));
     }, []);
 
     useEffect(() => {
@@ -34,7 +36,7 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         const init = async () => {
-            const { data, error } = await supabase.auth.getSession();
+            const { data, error } = await getSupabase().auth.getSession();
             if (error) console.error(error);
             const session = data?.session;
             const currentUser = session?.user ?? null;
@@ -45,12 +47,12 @@ export function AuthProvider({ children }) {
         };
         init();
 
-        const { data: listener } = supabase.auth.onAuthStateChange(
+        const { data: listener } = getSupabase().auth.onAuthStateChange(
             async (event, session) => {
                 if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
                     const currentUser = session?.user ?? null;
                     setUser(currentUser);
-                    if (currentUser) await loadProfile(currentUser.id);
+                    if (currentUser) loadProfile(currentUser.id).then(_ => {});
                 } else if (event === 'SIGNED_OUT') {
                     setUser(null);
                     setProfile(null);
@@ -65,10 +67,10 @@ export function AuthProvider({ children }) {
         const handleVisibilityChange = async () => {
             if (document.visibilityState === 'visible') {
                 try {
-                    await supabase.auth.refreshSession();
+                    await getSupabase().auth.refreshSession();
                 } catch {
                     console.warn("Reauth failed, signing out.");
-                    await supabase.auth.signOut();
+                    await getSupabase().auth.signOut();
                 }
             }
         };
@@ -78,7 +80,7 @@ export function AuthProvider({ children }) {
     }, []);
 
     const updateUsername = async (id, username) => {
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from("users")
             .update({ username })
             .eq("id", id)
@@ -90,7 +92,7 @@ export function AuthProvider({ children }) {
     }
 
     const logout = async () => {
-        await supabase.auth.signOut();
+        await getSupabase().auth.signOut();
         router.refresh();
     };
 

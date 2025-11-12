@@ -1,3 +1,5 @@
+"use client";
+
 import { IdentityImg, KeywordIcon, useData } from "@eldritchtools/limbus-shared-library";
 import { Tooltip } from "react-tooltip";
 import { tooltipStyle } from "../styles";

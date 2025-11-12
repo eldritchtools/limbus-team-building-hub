@@ -37,7 +37,7 @@ function SkillTypeIcons({ skill }) {
 
 function EgoDetails({ id, ego }) {
     const wrapCell = contents => <td style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid", verticalAlign: "middle" }}>
-        <Link key={id} href={`/egos/view?id=${id}`} style={{ color: "#ddd", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "128px" }}>
+        <Link key={id} href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "128px" }}>
             {contents}
         </Link>
     </td>
@@ -138,7 +138,7 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
 
     if (displayType === "icon") {
         const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(128px, 1fr))", width: "100%", overflowY: "auto", gap: "0.5rem" }}>
-            {list.map(([id, ego]) => <div key={id}><Link href={`/egos/view?id=${id}`} style={{ color: "#ddd", textDecoration: "none" }}>
+            {list.map(([id, ego]) => <div key={id}><Link href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }}>
                 <div className="clickable-ego"><EgoImg key={id} ego={ego} type={"awaken"} displayName={true} scale={0.5} /></div>
             </Link></div>)}
         </div>
@@ -158,7 +158,7 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
         }
     } else if (displayType === "card") {
         const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 420px)", width: "100%", overflowY: "auto", gap: "0.5rem", justifyContent: "center" }}>
-            {list.map(([id, ego]) => <div key={id}><Link href={`/egos/view?id=${id}`} style={{ color: "#ddd", textDecoration: "none" }}><EgoCard key={id} ego={ego} /></Link></div>)}
+            {list.map(([id, ego]) => <div key={id}><Link href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }}><EgoCard key={id} ego={ego} /></Link></div>)}
         </div>
 
         if (separateSinners) {

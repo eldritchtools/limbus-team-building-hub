@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Icon, EgoImg, RarityImg, useData, SinnerIcon } from '@eldritchtools/limbus-shared-library';
-import { useRouter, useSearchParams } from 'next/navigation'
 import { ColorResist, getSeasonString, sinnerMapping } from "@/app/utils";
 import SkillCard from "@/app/components/SkillCard";
 import PassiveCard from "@/app/components/PassiveCard";
@@ -10,18 +9,15 @@ import UptieSelector from "@/app/components/UptieSelector";
 
 const affinities = ["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"];
 
-export default function EgoPage() {
+export default function EgoPage({ params }) {
+    const { id } = React.use(params);
     const [egos, egosLoading] = useData("egos");
-    const searchParams = useSearchParams();
-    const id = useMemo(() => searchParams.get("id"), [searchParams]);
     const [skillData, skillDataLoading] = useData(`egos/${id}`);
     const egoData = egosLoading ? null : egos[id];
     const [uptie, setUptie] = useState(4);
-    const router = useRouter();
 
     const passives = skillDataLoading ? null : skillData.passiveList;
 
-    if (!id) router.back();
     if (egosLoading || skillDataLoading) return null;
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
@@ -35,12 +31,12 @@ export default function EgoPage() {
                     </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem", justifyContent: "center", padding: "0.5rem" }}>
-                    <SinnerIcon num={egoData.sinnerId} style={{height: "40px"}}/>
+                    <SinnerIcon num={egoData.sinnerId} style={{ height: "40px" }} />
                     Threadspin: <UptieSelector value={uptie} setValue={setUptie} />
                 </div>
                 <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                     <EgoImg ego={egoData} type={"awaken"} scale={0.75} />
-                    {"corrosionType" in egoData ? <EgoImg ego={egoData} type={"erosion"} scale={0.75} /> : null }
+                    {"corrosionType" in egoData ? <EgoImg ego={egoData} type={"erosion"} scale={0.75} /> : null}
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", textAlign: "center" }}>
                     <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.2rem" }}>
@@ -70,10 +66,10 @@ export default function EgoPage() {
                 </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "0.5rem" }}>
-                <div style={{display: "flex"}}>
+                <div style={{ display: "flex" }}>
                     <SkillCard skill={skillData.awakeningSkill} uptie={uptie} type={"awakening"} />
                 </div>
-                {"corrosionSkill" in skillData ? <div style={{display: "flex"}}><SkillCard skill={skillData.corrosionSkill} uptie={uptie} type={"corrosion"} /></div> : null}
+                {"corrosionSkill" in skillData ? <div style={{ display: "flex" }}><SkillCard skill={skillData.corrosionSkill} uptie={uptie} type={"corrosion"} /></div> : null}
                 {uptie >= 2 && passives ?
                     <div style={{ display: "flex", flexDirection: "column" }}>
                         <div style={{ color: "#aaa", fontWeight: "bold", fontSize: "1.25rem" }}>Passives</div>

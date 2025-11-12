@@ -53,7 +53,7 @@ function processTag(tag, removeStyles = false) {
 
 function IdentityDetails({ id, identity }) {
     const wrapCell = contents => <td style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid", verticalAlign: "middle" }}>
-        <Link key={id} href={`/identities/view?id=${id}`} style={{ color: "#ddd", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "128px" }}>
+        <Link key={id} href={`/identities/${id}`} style={{ color: "#ddd", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "128px" }}>
             {contents}
         </Link>
     </td>
@@ -142,7 +142,7 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
 
     if (displayType === "icon") {
         const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(128px, 1fr))", width: "100%", overflowY: "auto", gap: "0.5rem" }}>
-            {list.map(([id, identity]) => <div key={id}><Link href={`/identities/view?id=${id}`} style={{ color: "#ddd", textDecoration: "none" }}>
+            {list.map(([id, identity]) => <div key={id}><Link href={`/identities/${id}`} style={{ color: "#ddd", textDecoration: "none" }}>
                 <div className="clickable-id"><IdentityImg key={id} identity={identity} uptie={4} displayName={true} scale={0.5} /></div>
             </Link></div>)}
         </div>
@@ -162,7 +162,7 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
         }
     } else if (displayType === "card") {
         const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 420px)", width: "100%", overflowY: "auto", gap: "0.5rem", justifyContent: "center" }}>
-            {list.map(([id, identity]) => <div key={id}><Link href={`/identities/view?id=${id}`} style={{ color: "#ddd", textDecoration: "none" }}><IdentityCard key={id} identity={identity} /></Link></div>)}
+            {list.map(([id, identity]) => <div key={id}><Link href={`/identities/${id}`} style={{ color: "#ddd", textDecoration: "none" }}><IdentityCard key={id} identity={identity} /></Link></div>)}
         </div>
 
         if (separateSinners) {

@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Icon, IdentityImg, RarityImg, SinnerIcon, useData } from '@eldritchtools/limbus-shared-library';
-import { useRouter, useSearchParams } from 'next/navigation'
 import { ColorResist, getSeasonString, sinnerMapping } from "@/app/utils";
 import SkillCard from "@/app/components/SkillCard";
 import PassiveCard from "@/app/components/PassiveCard";
@@ -55,20 +54,17 @@ function LevelInput({ value, setValue, min = 1, max = 100 }) {
     );
 }
 
-export default function Identity() {
+export default function Identity({ params }) {
+    const { id } = React.use(params);
     const [identities, identitiesLoading] = useData("identities");
-    const searchParams = useSearchParams();
-    const id = useMemo(() => searchParams.get("id"), [searchParams]);
     const [skillData, skillDataLoading] = useData(`identities/${id}`);
     const identityData = identitiesLoading ? null : identities[id];
     const [uptie, setUptie] = useState(4);
     const [level, setLevel] = useState(LEVEL_CAP);
-    const router = useRouter();
 
     const combatPassives = skillDataLoading ? null : skillData.combatPassives.findLast(passives => passives.level <= uptie);
     const supportPassives = skillDataLoading ? null : skillData.supportPassives.findLast(passives => passives.level <= uptie);
 
-    if (!id) router.back();
     if (identitiesLoading || skillDataLoading) return null;
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
@@ -82,7 +78,7 @@ export default function Identity() {
                     </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem", justifyContent: "center", padding: "0.5rem" }}>
-                    <SinnerIcon num={identityData.sinnerId} style={{height: "40px"}}/>
+                    <SinnerIcon num={identityData.sinnerId} style={{ height: "40px" }} />
                     Uptie: <UptieSelector value={uptie} setValue={setUptie} />
                     Level: <LevelInput value={level} setValue={setLevel} min={1} max={LEVEL_CAP} />
                 </div>

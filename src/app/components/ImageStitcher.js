@@ -1,4 +1,6 @@
-import { getIdentityImgSrc, getSinnerIconSrc, IdentityImg, useData } from '@eldritchtools/limbus-shared-library';
+"use client";
+
+import { getIdentityImgSrc, getSinnerIconSrc, useData } from '@eldritchtools/limbus-shared-library';
 import React, { useRef } from 'react';
 import IdentityImgSpread from './IdentityImgSpread';
 

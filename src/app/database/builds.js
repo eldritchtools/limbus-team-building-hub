@@ -1,9 +1,11 @@
-import supabase from "./connection";
+"use client";
+
+import { getSupabase } from "./connection";
 
 async function getPopularBuilds(page = 1, pageSize = 20) {
     const start = (page - 1) * pageSize;
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
         .from('popular_builds_cache')
         .select('*')
         .eq('ranking_type', 'recent')
@@ -11,7 +13,7 @@ async function getPopularBuilds(page = 1, pageSize = 20) {
         .range(start, start + pageSize - 1);
 
     if (error) throw error;
-    return data.map(x => {return {...x, id: x.build_id}});
+    return data.map(x => { return { ...x, id: x.build_id } });
 }
 
 async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", page = 1, pageSize = 20) {
@@ -32,14 +34,14 @@ async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", 
     options.limit_count = pageSize;
     options.offset_count = start;
 
-    const { data, error } = await supabase.rpc('get_filtered_builds', options);
+    const { data, error } = await getSupabase().rpc('get_filtered_builds', options);
 
     if (error) throw (error);
     return data;
 }
 
 async function getBuild(id, forEdit = false) {
-    const { data, error } = await supabase.rpc("get_build_details", {
+    const { data, error } = await getSupabase().rpc("get_build_details", {
         p_build_id: id,
         p_for_edit: forEdit,
     });
@@ -49,7 +51,7 @@ async function getBuild(id, forEdit = false) {
 }
 
 async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, tags, is_published) {
-    const { data, error } = await supabase.rpc('create_build_with_tags', {
+    const { data, error } = await getSupabase().rpc('create_build_with_tags', {
         p_user_id: user_id,
         p_title: title,
         p_body: body,
@@ -68,7 +70,7 @@ async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_
 }
 
 async function updateBuild(build_id, user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, tags, is_published) {
-    const { error } = await supabase.rpc('update_build_with_tags', {
+    const { error } = await getSupabase().rpc('update_build_with_tags', {
         p_build_id: build_id,
         p_user_id: user_id,
         p_title: title,
@@ -88,7 +90,7 @@ async function updateBuild(build_id, user_id, title, body, identity_ids, ego_ids
 }
 
 async function deleteBuild(build_id) {
-    const { error } = await supabase.from("builds").delete().eq("build_id", build_id);
+    const { error } = await getSupabase().from("builds").delete().eq("build_id", build_id);
 
     if (error) throw error;
     return { deleted: true };

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import supabase from '@/app/database/connection';
+import { getSupabase } from '@/app/database/connection';
 
 export default function ResetPasswordPage() {
     const router = useRouter();
@@ -41,7 +41,7 @@ export default function ResetPasswordPage() {
         const timeout = setTimeout(() => controller.abort(), 6000);
 
         try {
-            const { error, data } = await supabase.auth.updateUser({ password });
+            const { error, data } = await getSupabase().auth.updateUser({ password });
             clearTimeout(timeout);
 
             if (error) throw error;
@@ -98,8 +98,10 @@ export default function ResetPasswordPage() {
 
     return (
         <main style={{ display: 'flex', alignItems: "center", justifyContent: 'center', marginTop: 48, height: "90vh" }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", 
-                    border: "1px #555 solid", borderRadius: "12px", padding: "2rem" }}>
+            <div style={{
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                border: "1px #555 solid", borderRadius: "12px", padding: "2rem"
+            }}>
                 <form onSubmit={handleReset} style={{ width: 380 }}>
                     <h2 style={{ textAlign: 'center', marginBottom: 12 }}>Reset Password</h2>
 

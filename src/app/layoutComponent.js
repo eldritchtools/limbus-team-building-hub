@@ -17,9 +17,8 @@ const paths = [
 ]
 
 const description = <span>
-    Limbus Company Team Building Hub is a free fan-made tool for players to create, share, and search for team builds.
-    <br />
-    View team builds created by other players or share your own. Look up information on identities and E.G.Os or builds that utilize them.
+    Limbus Company Team Building Hub is a free fan-made tool for players to create, share, and search for team builds. 
+    References are also available for players to look up information on identities and E.G.Os.
 </span>;
 
 export default function LayoutComponent({ children }) {

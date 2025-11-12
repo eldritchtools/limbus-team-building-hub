@@ -1,18 +1,22 @@
+"use client";
+
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseApiKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 let supabase = global.supabase || null;
 
-if (!supabase) {
+export function getSupabase() {
+    if (supabase) return supabase;
+
     supabase = createClient(
         supabaseUrl,
         supabaseApiKey,
         {
-            auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+            auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
         }
     );
-    if (process.env.NODE_ENV !== 'production') global.supabase = supabase;
+    global.supabase = supabase;
 
     const originalFetch = supabase.rest.fetch.bind(supabase.rest);
 
@@ -31,6 +35,5 @@ if (!supabase) {
         }
     };
 
+    return supabase;
 }
-
-export default supabase;

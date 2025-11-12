@@ -13,7 +13,7 @@ export default function BuildEntry({ build }) {
 
     return (
         <div style={{ width: "720px", display: "flex", flexDirection: "column", border: "1px #777 solid", borderRadius: "1rem", padding: "1rem", boxSizing: "border-box", textAlign: "left" }}>
-            <Link href={`/builds/view?id=${build.id}`}>
+            <Link href={`/builds/${build.id}`}>
                 <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", marginTop: "0.2rem", marginBottom: "0.5rem" }}>{build.title}</h2>
             </Link>
             <div style={{ fontSize: "0.8rem", marginBottom: "0.5rem", color: "#ddd" }}>
@@ -31,7 +31,7 @@ export default function BuildEntry({ build }) {
                 </div>
             </div>
             <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
-                Tags: {build.tags.map((t, i) => <Tag key={i} tag={t} />)}
+                Tags: {build.tags.map((t, i) => t ? <Tag key={i} tag={t} /> : null)}
             </div>
             <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
                 👍 {build.like_count} 💬 {build.comment_count}

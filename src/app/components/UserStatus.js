@@ -19,9 +19,7 @@ function UserStatus() {
     useEffect(() => {
         if (!user) return;
         const fetchNotifs = async () => {
-            const userNotifs = await getNotifications(user.id, 5);
-            setNotifs(userNotifs);
-            setUnreadCount(userNotifs.filter(x => !x.is_read).length);
+            setNotifs(await getNotifications(user.id, 5));
         }
         fetchNotifs();
     }, [user]);
@@ -35,6 +33,14 @@ function UserStatus() {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    const updateNotif = (notif) => {
+        setNotifs(p => p.map(n => n.id === notif.id ? notif : n));
+    }
+
+    useEffect(() => {
+        setUnreadCount(notifs.filter(x => !x.is_read).length);
+    }, [notifs]);
 
     return <div style={{ padding: "0.5rem", paddingLeft: "1rem", borderBottom: "1px #444 solid", fontSize: "0.875rem" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -50,10 +56,10 @@ function UserStatus() {
                         </button>
                         {notifsOpen ?
                             <div style={{ position: "absolute", right: 0, top: "110%", width: "200px", background: "#222", color: "#ddd", border: "1px solid #444", borderRadius: "6px", boxShadow: "0 4px 12px rgba(0,0,0,0.3)", zIndex: "50" }}>
-                                <div style={{ maxHeight: "300px", overflowY: "auto", padding: "10px" }}>
+                                <div style={{ maxHeight: "300px", overflowY: "auto", overflowX: "hidden", padding: "10px", boxSizing: "border-box" }}>
                                     {notifs.length === 0 ?
                                         <div style={{ textAlign: "center", padding: "15px", color: "#aaa" }}>No notifications</div> :
-                                        notifs.map(notif => <Notification key={notif.id} notif={notif} />)
+                                        notifs.map(notif => <Notification key={notif.id} notif={notif} updateNotif={updateNotif} />)
                                     }
                                 </div>
                                 <div style={{ borderTop: "1px solid #444", padding: "8px", textAlign: "center" }}>

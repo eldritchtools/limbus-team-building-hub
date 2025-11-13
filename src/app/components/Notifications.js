@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { setNotificationRead } from "../database/notifications";
 import { getTimeAgo } from "../utils";
+import "./Notifications.css";
 
 function constructActorStr(actors) {
     if (actors.length >= 4) return `${actors[0]}, ${actors[1]}, and ${actors.length - 2} more users`;
@@ -14,21 +15,21 @@ function constructActorStr(actors) {
 function constructNotifMessage(notif) {
     const actorsStr = constructActorStr(notif.actors);
 
-    return type === "comment" ?
-        `${actorsStr} commented on your build ${build_title}` :
-        `${actorsStr} replied to your comment to the build ${build_title}`;
+    return notif.type === "comment" ?
+        `${actorsStr} commented on your build ${notif.build_title}` :
+        `${actorsStr} replied to your comment to the build ${notif.build_title}`;
 }
 
-export default function Notification({ notif }) {
+export default function Notification({ notif, updateNotif }) {
     const router = useRouter();
 
     const handleNotifClick = async (notif) => {
         await setNotificationRead(notif.id);
+        if (updateNotif && !notif.is_read) updateNotif({ ...notif, is_read: true });
         router.push(`/builds/${notif.build_id}`);
     }
 
-    return <div onClick={() => handleNotifClick(notif)}
-        style={{ marginBottom: "10px", padding: "8px", borderRadius: "4px", background: notif.is_read ? "transparent" : "#333", cursor: "pointer" }}>
+    return <div onClick={() => handleNotifClick(notif)} className={notif.is_read ? "notif-read" : "notif"}>
         <div style={{ fontSize: "1rem", marginBottom: "4px" }} onClick={() => handleNotifClick(notif)}>
             {constructNotifMessage(notif)}
         </div>

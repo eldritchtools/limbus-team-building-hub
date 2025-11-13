@@ -1,6 +1,6 @@
 "use client";
 
-import { DataProvider, StatusTooltip } from "@eldritchtools/limbus-shared-library";
+import { DataProvider, getMeta, StatusTooltip } from "@eldritchtools/limbus-shared-library";
 import { Layout } from "@eldritchtools/shared-components";
 import Link from "next/link";
 import { IdentityTooltip } from "./components/IdentityTooltip";
@@ -8,6 +8,7 @@ import { EgoTooltip } from "./components/EgoTooltip";
 import { TeamCodeTooltip } from "./components/TeamCodeTooltip";
 import UserStatus from "./components/UserStatus";
 import { AuthProvider } from "./database/authProvider";
+import { useEffect, useState } from "react";
 
 const paths = [
     { path: "/builds", title: "Explore Team Builds" },
@@ -22,10 +23,16 @@ const description = <span>
 </span>;
 
 export default function LayoutComponent({ children }) {
+    const [lastUpdated, setLastUpdated] = useState(process.env.NEXT_PUBLIC_LAST_UPDATED);
+
+    useEffect(() => {
+        getMeta().then(meta => setLastUpdated(p => p > meta.datetime ? p : meta.datetime));
+    }, [])
+
     return <AuthProvider>
         <Layout
             title={"Limbus Company Team Building Hub"}
-            lastUpdated={process.env.REACT_APP_LAST_UPDATED}
+            lastUpdated={lastUpdated}
             linkSet={"limbus"}
             description={description}
             gameName={"Limbus Company"}

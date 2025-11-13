@@ -3,15 +3,11 @@
 import { getSupabase } from "./connection";
 
 async function getNotifications(userId, limit=null) {
-    let query = getSupabase()
-        .from('notifications')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+    let options = {p_user_id: userId};
 
-    if (limit) query = query.limit(limit);
+    if (limit) options.p_limit = limit;
     
-    const { data, error } = await query;
+    const { data, error } = await getSupabase().rpc('get_user_notifications', options);
 
     if (error) throw error;
     return data;

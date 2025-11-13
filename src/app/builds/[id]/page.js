@@ -30,7 +30,7 @@ function SkillTypes({ skillType }) {
 
 function IdentityProfile({ identity, displayType }) {
     return identity ? <Link href={`/identities/${identity.id}`}>
-        <div style={{ position: "relative" }}>
+        <div style={{ position: "relative" }} data-tooltip-id="identity-tooltip" data-tooltip-content={identity.id}>
             <IdentityImg identity={identity} uptie={4} displayName={false} scale={0.75} />
             {displayType === 1 ? <div style={{
                 position: "absolute",
@@ -57,7 +57,7 @@ function IdentityProfile({ identity, displayType }) {
 
 function EgoProfile({ ego, displayType }) {
     return ego ? <Link href={`/egos/${ego.id}`}>
-        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "158px", height: "46px" }}>
+        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "158px", height: "46px" }} data-tooltip-id="ego-tooltip" data-tooltip-content={ego.id}>
             <EgoImg ego={ego} type={"awaken"} displayName={false} style={{ display: "block", height: "46px", width: "154px", objectFit: "cover" }} />
             {displayType === 1 ? <div style={{
                 position: "absolute",

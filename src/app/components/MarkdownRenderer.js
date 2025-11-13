@@ -87,12 +87,16 @@ export default function MarkdownRenderer({ content }) {
                     switch (tokenType) {
                         case "identity":
                             if (tokenValue in identities)
-                                return <Link href={`/identities/${tokenValue}`}>[{sinnerMapping[identities[tokenValue].sinnerId]}] {identities[tokenValue].name}</Link>;
+                                return <Link href={`/identities/${tokenValue}`} data-tooltip-id="identity-tooltip" data-tooltip-content={tokenValue}>
+                                    [{sinnerMapping[identities[tokenValue].sinnerId]}] {identities[tokenValue].name}
+                                </Link>;
                             else
                                 return <span>{`{${tokenType}:${tokenValue}}`}</span>
                         case "ego":
                             if (tokenValue in egos)
-                                return <Link href={`/egos/${tokenValue}`}>[{sinnerMapping[egos[tokenValue].sinnerId]}] {egos[tokenValue].name}</Link>
+                                return <Link href={`/egos/${tokenValue}`} data-tooltip-id="ego-tooltip" data-tooltip-content={tokenValue}>
+                                    [{sinnerMapping[egos[tokenValue].sinnerId]}] {egos[tokenValue].name}
+                                </Link>
                             else
                                 return <span>{`{${tokenType}:${tokenValue}}`}</span>
                         case "status":

@@ -3,9 +3,12 @@
 import React, { useState } from "react";
 import { Icon, EgoImg, RarityImg, useData, SinnerIcon } from '@eldritchtools/limbus-shared-library';
 import { ColorResist, getSeasonString, sinnerMapping } from "@/app/utils";
+import { Tooltip } from "react-tooltip";
+import { tooltipStyle } from "../../styles";
 import SkillCard from "@/app/components/SkillCard";
 import PassiveCard from "@/app/components/PassiveCard";
 import UptieSelector from "@/app/components/UptieSelector";
+import MarkdownRenderer from "@/app/components/MarkdownRenderer";
 
 const affinities = ["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"];
 
@@ -63,6 +66,38 @@ export default function EgoPage({ params }) {
                             {<ColorResist resist={egoData.resists[affinity]} />}
                         </span>
                     ])}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.2rem", gap: "0.2rem" }}>
+                    <div data-tooltip-id="ego-explanation" style={{ alignSelf: "center", textAlign: "center", borderBottom: "1px #aaa dotted" }}>
+                        Skill Explanation
+                    </div>
+                    <Tooltip id="ego-explanation" style={tooltipStyle}>
+                        <div>
+                            This section is only meant to serve as a short explanation of the E.G.O&apos;s mechanics.
+                            <br />
+                            It will generally not contain things such as:
+                            <ul>
+                                <li>Meta analysis</li>
+                                <li>Comparisons to other E.G.Os</li>
+                                <li>Rankings</li>
+                                <li>Combos with other identities/E.G.Os (unless explicitly stated in their respective kits)</li>
+                                <li>Optimizations and special use cases</li>
+                                <li>And so on...</li>
+                            </ul>
+                        </div>
+                    </Tooltip>
+                    <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
+                        Short explanation
+                    </div>
+                    {egoData.explanation && egoData.explanation.short ?
+                        <MarkdownRenderer content={egoData.explanation.short} /> :
+                        <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
+                    <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
+                        Long explanation
+                    </div>
+                    {egoData.explanation && egoData.explanation.long ?
+                        <MarkdownRenderer content={egoData.explanation.long} /> :
+                        <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
                 </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "0.5rem" }}>

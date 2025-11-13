@@ -1,11 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Icon, IdentityImg, RarityImg, SinnerIcon, useData } from '@eldritchtools/limbus-shared-library';
+import { Icon, IdentityImg, KeywordIcon, RarityImg, SinnerIcon, useData } from '@eldritchtools/limbus-shared-library';
 import { ColorResist, getSeasonString, sinnerMapping } from "@/app/utils";
+import { Tooltip } from "react-tooltip";
+import { tooltipStyle } from "../../styles";
 import SkillCard from "@/app/components/SkillCard";
 import PassiveCard from "@/app/components/PassiveCard";
 import UptieSelector from "@/app/components/UptieSelector";
+import MarkdownRenderer from "@/app/components/MarkdownRenderer";
 
 const LEVEL_CAP = 55;
 
@@ -118,6 +121,41 @@ export default function Identity({ params }) {
                         <div style={{ display: "flex", justifyContent: "center" }}><Icon path={"Blunt"} style={{ height: "32px" }} /></div>
                         <span style={{ borderLeft: "1px #777 dotted" }}><ColorResist resist={identityData.resists.blunt} /></span>
                     </div>
+                </div>
+                <div style={{ border: "1px #777 dotted", padding: "0.2rem", textAlign: "center" }}>
+                    {identityData.skillKeywordList.map(x => <KeywordIcon key={x} id={x} />)}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.2rem", gap: "0.2rem" }}>
+                    <div data-tooltip-id="identity-kit-explanation" style={{ alignSelf: "center", textAlign: "center", borderBottom: "1px #aaa dotted" }}>
+                        Kit Explanation
+                    </div>
+                    <Tooltip id="identity-kit-explanation" style={tooltipStyle}>
+                        <div>
+                            This section is only meant to serve as a short explanation of the identity&apos;s mechanics.
+                            <br />
+                            It will generally not contain things such as:
+                            <ul>
+                                <li>Meta analysis</li>
+                                <li>Comparisons to other identities</li>
+                                <li>Rankings</li>
+                                <li>Combos with other identities/E.G.Os (unless explicitly stated in their respective kits)</li>
+                                <li>Optimizations and special use cases</li>
+                                <li>And so on...</li>
+                            </ul>
+                        </div>
+                    </Tooltip>
+                    <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
+                        Short explanation
+                    </div>
+                    {identityData.explanation && identityData.explanation.short ?
+                        <MarkdownRenderer content={identityData.explanation.short} /> :
+                        <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
+                    <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
+                        Long explanation
+                    </div>
+                    {identityData.explanation && identityData.explanation.long ?
+                        <MarkdownRenderer content={identityData.explanation.long} /> :
+                        <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
                 </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "0.5rem" }}>

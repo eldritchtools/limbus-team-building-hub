@@ -107,4 +107,4 @@ function useTimeAgo(timestamp, refreshMs = 60000) {
 }
 
 
-export { romanMapping, sinnerMapping, affinityColorMapping, getSeasonString, capitalizeFirstLetter, ProcessedText, ColorResist, useTimeAgo };
+export { romanMapping, sinnerMapping, affinityColorMapping, getSeasonString, capitalizeFirstLetter, ProcessedText, ColorResist, getTimeAgo, useTimeAgo };

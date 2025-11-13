@@ -74,6 +74,17 @@ CREATE TABLE public.build_tags (
   PRIMARY KEY (build_id, tag_id)
 );
 
+CREATE TABLE public.notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  actor_ids UUID[] DEFAULT '{}',
+  build_id UUID REFERENCES builds(id) ON DELETE CASCADE,
+  type TEXT NOT NULL CHECK (type IN ('comment', 'reply')),
+  parent_comment_id UUID REFERENCES comments(id),
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ========================
 -- 4. OPTIONAL CACHES
 -- ========================

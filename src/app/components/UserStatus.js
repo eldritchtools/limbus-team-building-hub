@@ -4,9 +4,10 @@ import "./UserStatus.css";
 import { useAuth } from "../database/authProvider";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { getNotifications } from "../database/notifications";
+import { getNotifications, getUnreadNotificationsCount } from "../database/notifications";
 import Link from "next/link";
 import Notification from "./Notifications";
+import { getSupabase } from "../database/connection";
 
 function UserStatus() {
     const { user, profile, logout } = useAuth();
@@ -15,14 +16,6 @@ function UserStatus() {
     const [unreadCount, setUnreadCount] = useState(0);
     const [notifsOpen, setNotifsOpen] = useState(false);
     const popoverRef = useRef(null);
-
-    useEffect(() => {
-        if (!user) return;
-        const fetchNotifs = async () => {
-            setNotifs(await getNotifications(user.id, 5));
-        }
-        fetchNotifs();
-    }, [user]);
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -39,8 +32,33 @@ function UserStatus() {
     }
 
     useEffect(() => {
-        setUnreadCount(notifs.filter(x => !x.is_read).length);
-    }, [notifs]);
+        if (!user) return;
+
+        const refreshNotifications = async () => {
+            setNotifs(await getNotifications(user.id, 5));
+            setUnreadCount(await getUnreadNotificationsCount(user.id));
+        }
+
+        refreshNotifications();
+
+        const channel = getSupabase()
+            .channel("notifications")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "notifications",
+                    filter: `user_id=eq.${user.id}`,
+                },
+                () => {
+                    refreshNotifications();
+                }
+            )
+            .subscribe();
+
+        return () => supabase.removeChannel(channel);
+    }, [user]);
 
     return <div style={{ padding: "0.5rem", paddingLeft: "1rem", borderBottom: "1px #444 solid", fontSize: "0.875rem" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

@@ -4,9 +4,10 @@ import { useMemo, useState } from "react";
 import { Icon, IdentityImg, RarityImg, SinnerIcon, Status, useData } from "@eldritchtools/limbus-shared-library";
 import { capitalizeFirstLetter, sinnerMapping } from "../utils";
 import { selectStyle } from "../styles";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import "./identities.css";
+
+import dynamic from "next/dynamic";
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const mainFilters = {

@@ -2,11 +2,11 @@
 
 import { getSupabase } from "./connection";
 
-async function getNotifications(userId, limit=null) {
-    let options = {p_user_id: userId};
+async function getNotifications(userId, limit = null) {
+    let options = { p_user_id: userId };
 
     if (limit) options.p_limit = limit;
-    
+
     const { data, error } = await getSupabase().rpc('get_user_notifications', options);
 
     if (error) throw error;
@@ -23,4 +23,15 @@ async function setNotificationRead(id) {
     return data;
 }
 
-export { getNotifications, setNotificationRead };
+async function getUnreadNotificationsCount(userId) {
+    const { count, error } = await getSupabase()
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq('user_id', userId)
+        .eq('is_read', false);
+
+    if (error) throw error;
+    return count ?? 0;
+}
+
+export { getNotifications, setNotificationRead, getUnreadNotificationsCount};

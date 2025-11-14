@@ -75,6 +75,23 @@
 .dark .editor-preview { ... }
 */
 
+/* Fix text selection for Monokai theme */
+.CodeMirror .CodeMirror-selected,
+.CodeMirror-focused .CodeMirror-selected {
+    background: #49483E !important;   /* darker Monokai-style selection */
+    color: inherit !important;         /* keep original text color */
+}
+
+/* Also fix selection when not focused */
+.CodeMirror .CodeMirror-selected {
+    background: #49483E !important;
+}
+
+/* Fix selection inside active line */
+.CodeMirror .cm-selectionBackground {
+    background: #49483E !important;
+}
+
 /* Apply to vertical scrollbar */
 .CodeMirror-vscrollbar::-webkit-scrollbar {
   width: 12px;

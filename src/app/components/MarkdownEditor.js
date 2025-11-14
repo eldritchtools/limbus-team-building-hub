@@ -2,13 +2,33 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { constructMdeOptions } from "../styles";
+
+import "easymde/dist/easymde.min.css";
+import "codemirror/theme/monokai.css";
+import "./MarkdownEditor.css";
 
 import dynamic from "next/dynamic";
 const SimpleMDE = dynamic(() => import("react-simplemde-editor"), { ssr: false });
 
 export default function MarkdownEditor({ value, onChange, placeholder }) {
-    const mdeOptions = useMemo(() => { return { ...constructMdeOptions(placeholder), height: "auto", minHeight: "10rem", maxHeight: "20rem" }; }, [placeholder]);
+    const mdeOptions = useMemo(() => {
+        return {
+            theme: "monokai",
+            spellChecker: false,
+            autofocus: true,
+            placeholder: placeholder,
+            status: false,
+            toolbar: [
+                "bold", "italic", "heading", "|",
+                "quote", "unordered-list", "ordered-list", "|",
+                "link", "image", "|",
+                "preview", "guide"
+            ],
+            height: "auto",
+            minHeight: "10rem",
+            maxHeight: "20rem"
+        };
+    }, [placeholder]);
 
     return <div style={{ display: "flex", flexDirection: "column", gap: "0.1rem" }}>
         <SimpleMDE value={value} onChange={onChange} options={mdeOptions} />

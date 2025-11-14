@@ -1,8 +1,3 @@
-
-import "easymde/dist/easymde.min.css";
-import "codemirror/theme/monokai.css";
-import "./SimpleMDE.css";
-
 const selectStyle = {
     control: (provided, state) => ({
         ...provided,
@@ -81,18 +76,4 @@ const selectStyleWide = {
 
 const tooltipStyle = { outlineStyle: "solid", outlineColor: "#ddd", outlineWidth: "1px", backgroundColor: "#000000", borderRadius: "1rem", zIndex: "9999" };
 
-const constructMdeOptions = (placeholder) => {return {
-    theme: "monokai",
-    spellChecker: false,
-    autofocus: true,
-    placeholder: placeholder,
-    status: false,
-    toolbar: [
-        "bold", "italic", "heading", "|",
-        "quote", "unordered-list", "ordered-list", "|",
-        "link", "image", "|",
-        "preview", "guide"
-    ],
-}};
-
-export { tooltipStyle, selectStyle, selectStyleWide, constructMdeOptions };
+export { tooltipStyle, selectStyle, selectStyleWide };

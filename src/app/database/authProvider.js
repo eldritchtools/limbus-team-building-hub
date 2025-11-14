@@ -18,10 +18,10 @@ export function AuthProvider({ children }) {
             .select('*')
             .eq('id', userId)
             .maybeSingle();
-            
-        promise.then(({error, data}) => {
+
+        promise.then(({ error, data }) => {
             if (error) throw error;
-            setProfile(data); 
+            setProfile(data);
         }).catch(err => console.error(err));
     }, []);
 
@@ -51,8 +51,8 @@ export function AuthProvider({ children }) {
             async (event, session) => {
                 if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
                     const currentUser = session?.user ?? null;
-                    setUser(currentUser);
-                    if (currentUser) loadProfile(currentUser.id).then(_ => {});
+                    if (user?.id !== session?.user?.id) setUser(currentUser);
+                    if (currentUser) loadProfile(currentUser.id).then(_ => { });
                 } else if (event === 'SIGNED_OUT') {
                     setUser(null);
                     setProfile(null);

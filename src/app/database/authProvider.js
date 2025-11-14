@@ -61,7 +61,7 @@ export function AuthProvider({ children }) {
         );
 
         return () => listener.subscription.unsubscribe();
-    }, [loadProfile]);
+    }, [user?.id, loadProfile]);
 
     useEffect(() => {
         const handleVisibilityChange = async () => {

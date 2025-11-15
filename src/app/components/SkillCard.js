@@ -33,7 +33,7 @@ export default function SkillCard({ skill, uptie, count = 0, level, type = "atta
     return <div style={{ width: "100%", minWidth: "600px", height: "100%", display: "flex", flexDirection: "column", border: `1px ${affinityColorMapping[skillData.affinity]} solid`, borderRadius: "0.5rem", padding: "0.5rem", boxSizing: "border-box" }}>
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginBottom: "0.25rem" }}>
             <div style={{ display: "flex", flexDirection: "row", gap: "0.25rem", alignItems: "center" }}>
-                <Icon path={skillData.affinity} style={{ width: "32px" }} />
+                {skillData.affinity !== "none" ? <Icon path={skillData.affinity} style={{ width: "32px" }} /> : null}
                 {skillData.defType !== "attack" ? <Icon path={capitalizeFirstLetter(skillData.defType)} style={{ width: "32px" }} /> : null}
                 {skillData.defType === "attack" || skillData.defType === "counter" ? <Icon path={capitalizeFirstLetter(skillData.atkType)} style={{ width: "32px" }} /> : null}
                 <div style={{ borderRadius: "5px", backgroundColor: affinityColorMapping[skillData.affinity], padding: "5px", color: "#ddd", textShadow: "black 1px 1px 5px", fontWeight: "bold" }}>{skillText.name}</div>

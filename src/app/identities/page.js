@@ -14,7 +14,8 @@ const mainFilters = {
     "tier": ["0", "00", "000"],
     "affinity": ["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"],
     "skillType": ["Slash", "Pierce", "Blunt", "Guard", "Evade", "Counter"],
-    "keyword": ["Burn", "Bleed", "Tremor", "Rupture", "Sinking", "Poise", "Charge"]
+    "keyword": ["Burn", "Bleed", "Tremor", "Rupture", "Sinking", "Poise", "Charge"],
+    "sinner": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 }
 
 const mainFiltersMapping = Object.entries(mainFilters).reduce((acc, [type, list]) => list.reduce((acc2, filter) => { acc2[filter] = type; return acc2 }, acc), {});
@@ -121,6 +122,8 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
                 if (!filters[type].some(x => identity.skillTypes.some(s => s.type.type === x.toLowerCase()) || identity.defenseSkillTypes.some(s => s.type.type === x.toLowerCase()))) return false;
             } else if (type === "keyword") {
                 if (!filters[type].some(x => identity.skillKeywordList.includes(x))) return false;
+            } else if (type === "sinner") {
+                if (!filters[type].some(x => x === identity.sinnerId)) return false;
             }
         }
 
@@ -229,7 +232,7 @@ function MainFilterSelector({ selectedMainFilters, setSelectedMainFilters }) {
         }}
             onClick={() => handleToggle(filter, selected)}
         >
-            <Icon path={filter} style={{ height: "32px" }} />
+            {Number.isInteger(filter) ? <SinnerIcon num={filter} style={{height: "32px"}} /> : <Icon path={filter} style={{ height: "32px" }} />}
         </div>
     }
 

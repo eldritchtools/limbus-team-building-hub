@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { EgoSelector, IdentitySelector, KeywordSelector, StatusSelector } from "../components/Selectors";
+import { EgoSelector, IdentitySelector, KeywordSelector, SinnerSelector, StatusSelector } from "../components/Selectors";
 import MarkdownRenderer from "../components/MarkdownRenderer";
 
 const headerStyle = { fontSize: "1.2rem", fontWeight: "bold" };
@@ -15,6 +15,7 @@ export default function MarkdownTokens() {
     const [buildTestString, setBuildTestString] = useState("");
     const [username, setUsername] = useState("");
     const [usernameTestString, setUsernameTestString] = useState("");
+    const [sinner, setSinner] = useState(null);
 
     const handleTestBuild = () => {
         setBuildTestString(`Sample markdown referencing {build:${buildId}}`);
@@ -28,7 +29,7 @@ export default function MarkdownTokens() {
         <div>This is a list of things that can be referenced in builds and comments.</div>
         <h2 style={headerStyle}>Identities</h2>
         <div>
-            Reference an identity using <code>{"{identity:id}"}</code>, which will show a link to the identity&apos;s page consisting of the sinner and identity names.
+            Reference an identity using <code>{"{identity:id}"}</code>, which will show a link to the identity&apos;s page consisting of the sinner and identity names. Hovering over the link will show a tooltip for the identity.
             <br /> <br />
             You can find an identity&apos;s id in the URL of its respective page or search for it below.
             <br /> <br />
@@ -45,7 +46,7 @@ export default function MarkdownTokens() {
         </div>
         <h2 style={headerStyle}>E.G.Os</h2>
         <div>
-            Reference an E.G.O using <code>{"{ego:id}"}</code>, which will show a link to the E.G.O&apos;s page consisting of the sinner and E.G.O names.
+            Reference an E.G.O using <code>{"{ego:id}"}</code>, which will show a link to the E.G.O&apos;s page consisting of the sinner and E.G.O names. Hovering over the link will show a tooltip for the E.G.O.
             <br /> <br />
             You can find an E.G.O&apos;s id in the URL of its respective page or search for it below.
             <br /> <br />
@@ -130,6 +131,21 @@ export default function MarkdownTokens() {
                     <code>{usernameTestString}</code>
                     <div style={{fontSize: "1.2rem"}}>→</div>
                     <MarkdownRenderer content={usernameTestString} />
+                </div> :
+                null
+            }
+        </div>
+        <h2 style={headerStyle}>Sinner</h2>
+        <div>
+            Reference a sinner using <code>{"{sinner:id}"}</code>, which will show the name of the sinner.
+            <br /> <br />
+            <SinnerSelector selected={sinner} setSelected={setSinner} />
+
+            {sinner ?
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <code>{`Sample markdown referencing {sinner:${sinner}}`}</code>
+                    <div style={{fontSize: "1.2rem"}}>→</div>
+                    <MarkdownRenderer content={`Sample markdown referencing {sinner:${sinner}}`} />
                 </div> :
                 null
             }

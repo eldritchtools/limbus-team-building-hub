@@ -126,12 +126,12 @@ export default function Identity({ params }) {
                     {identityData.skillKeywordList.map(x => <KeywordIcon key={x} id={x} />)}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.2rem", gap: "0.2rem" }}>
-                    <div data-tooltip-id="identity-kit-explanation" style={{ alignSelf: "center", textAlign: "center", borderBottom: "1px #aaa dotted" }}>
-                        Kit Explanation
+                    <div data-tooltip-id="identity-notes" style={{ alignSelf: "center", textAlign: "center", borderBottom: "1px #aaa dotted" }}>
+                        Notes, Comments, Explanation
                     </div>
-                    <Tooltip id="identity-kit-explanation" style={tooltipStyle}>
+                    <Tooltip id="identity-notes" style={tooltipStyle}>
                         <div>
-                            This section is only meant to serve as a short explanation of the identity&apos;s mechanics.
+                            This section is only meant to contain details about the identity&apos;s mechanics.
                             <br />
                             It will generally not contain things such as:
                             <ul>
@@ -139,22 +139,22 @@ export default function Identity({ params }) {
                                 <li>Comparisons to other identities</li>
                                 <li>Rankings</li>
                                 <li>Combos with other identities/E.G.Os (unless explicitly stated in their respective kits)</li>
-                                <li>Optimizations and special use cases</li>
+                                <li>Hyper optimizations and special use cases</li>
                                 <li>And so on...</li>
                             </ul>
                         </div>
                     </Tooltip>
                     <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
-                        Short explanation
+                        Short
                     </div>
-                    {identityData.explanation && identityData.explanation.short ?
-                        <MarkdownRenderer content={identityData.explanation.short} /> :
+                    {identityData.notes && identityData.notes.short ?
+                        <MarkdownRenderer content={identityData.notes.short} /> :
                         <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
                     <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
-                        Long explanation
+                        Full
                     </div>
-                    {identityData.explanation && identityData.explanation.long ?
-                        <MarkdownRenderer content={identityData.explanation.long} /> :
+                    {identityData.notes && identityData.notes.full ?
+                        <MarkdownRenderer content={identityData.notes.full} /> :
                         <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
                 </div>
             </div>

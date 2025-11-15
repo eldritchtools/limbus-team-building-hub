@@ -91,29 +91,35 @@ export default function MarkdownRenderer({ content }) {
                                     [{sinnerMapping[identities[tokenValue].sinnerId]}] {identities[tokenValue].name}
                                 </Link>;
                             else
-                                return <span>{`{${tokenType}:${tokenValue}}`}</span>
+                                return <span>{`{${tokenType}:${tokenValue}}`}</span>;
                         case "ego":
                             if (tokenValue in egos)
                                 return <Link href={`/egos/${tokenValue}`} data-tooltip-id="ego-tooltip" data-tooltip-content={tokenValue}>
                                     [{sinnerMapping[egos[tokenValue].sinnerId]}] {egos[tokenValue].name}
-                                </Link>
+                                </Link>;
                             else
-                                return <span>{`{${tokenType}:${tokenValue}}`}</span>
+                                return <span>{`{${tokenType}:${tokenValue}}`}</span>;
                         case "status":
                             if (tokenValue in statuses)
                                 return <Status id={tokenValue} status={statuses[tokenValue]} includeTooltip={true} />;
                             else
-                                return <span>{`{${tokenType}:${tokenValue}}`}</span>
+                                return <span>{`{${tokenType}:${tokenValue}}`}</span>;
                         case "keyword":
                             const path = keywordIconConvert(tokenValue);
                             if (path)
                                 return <Icon path={path} style={{ display: "inline-block", width: "2rem", height: "2rem", verticalAlign: "middle" }} />;
                             else
-                                return <span>{`{${tokenType}:${tokenValue}}`}</span>
+                                return <span>{`{${tokenType}:${tokenValue}}`}</span>;
                         case "build":
-                            return <BuildItem id={tokenValue} />
+                            return <BuildItem id={tokenValue} />;
                         case "user":
-                            return <Link href={`/profiles/${tokenValue}`}>{tokenValue}</Link>
+                            return <Link href={`/profiles/${tokenValue}`}>{tokenValue}</Link>;
+                        case "sinner":
+                            try {
+                                return <span>{sinnerMapping[parseInt(tokenValue)]}</span>;
+                            } catch (err) {
+                                return <span>{`{${tokenType}:${tokenValue}}`}</span>;
+                            }
                         default:
                             return <span>{`{${tokenType}:${tokenValue}}`}</span>;
                     }

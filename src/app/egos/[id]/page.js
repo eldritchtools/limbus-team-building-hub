@@ -68,12 +68,12 @@ export default function EgoPage({ params }) {
                     ])}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.2rem", gap: "0.2rem" }}>
-                    <div data-tooltip-id="ego-explanation" style={{ alignSelf: "center", textAlign: "center", borderBottom: "1px #aaa dotted" }}>
-                        Skill Explanation
+                    <div data-tooltip-id="ego-notes" style={{ alignSelf: "center", textAlign: "center", borderBottom: "1px #aaa dotted" }}>
+                        Notes, Comments, Explanation
                     </div>
-                    <Tooltip id="ego-explanation" style={tooltipStyle}>
+                    <Tooltip id="ego-notes" style={tooltipStyle}>
                         <div>
-                            This section is only meant to serve as a short explanation of the E.G.O&apos;s mechanics.
+                            This section is only meant to contain details about the E.G.O&apos;s mechanics.
                             <br />
                             It will generally not contain things such as:
                             <ul>
@@ -81,22 +81,22 @@ export default function EgoPage({ params }) {
                                 <li>Comparisons to other E.G.Os</li>
                                 <li>Rankings</li>
                                 <li>Combos with other identities/E.G.Os (unless explicitly stated in their respective kits)</li>
-                                <li>Optimizations and special use cases</li>
+                                <li>Hyper optimizations and special use cases</li>
                                 <li>And so on...</li>
                             </ul>
                         </div>
                     </Tooltip>
                     <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
-                        Short explanation
+                        Short
                     </div>
-                    {egoData.explanation && egoData.explanation.short ?
-                        <MarkdownRenderer content={egoData.explanation.short} /> :
+                    {egoData.notes && egoData.notes.short ?
+                        <MarkdownRenderer content={egoData.notes.short} /> :
                         <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
                     <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
-                        Long explanation
+                        Full
                     </div>
-                    {egoData.explanation && egoData.explanation.long ?
-                        <MarkdownRenderer content={egoData.explanation.long} /> :
+                    {egoData.notes && egoData.notes.full ?
+                        <MarkdownRenderer content={egoData.notes.full} /> :
                         <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
                 </div>
             </div>

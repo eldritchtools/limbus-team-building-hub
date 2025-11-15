@@ -126,4 +126,26 @@ function KeywordSelector({ selected, setSelected, isMulti = false, styles = sele
     />;
 }
 
-export { IdentitySelector, EgoSelector, StatusSelector, KeywordSelector };
+function SinnerSelector({ selected, setSelected, isMulti = false, styles = selectStyle }) {
+    const optionsMapped = useMemo(() => Object.entries(sinnerMapping).reduce((acc, [id, sinner]) => {
+        acc[id] = {
+            value: id,
+            label: sinner,
+            name: sinner
+        };
+        return acc;
+    }, {}), []);
+
+    return <Select
+        isMulti={isMulti}
+        isClearable={true}
+        options={Object.values(optionsMapped)}
+        value={isMulti ? selected.map(id => optionsMapped[id]) : (selected ? optionsMapped[selected]: selected)}
+        onChange={isMulti ? items => setSelected(items.map(x => x.value)) : item => setSelected(item ? item.value : item)}
+        placeholder={"Search Sinner..."}
+        filterOption={(candidate, input) => checkSearch(candidate.data.name, null, input)}
+        styles={styles}
+    />;
+}
+
+export { IdentitySelector, EgoSelector, StatusSelector, KeywordSelector, SinnerSelector };

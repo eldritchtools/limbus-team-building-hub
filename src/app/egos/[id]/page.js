@@ -20,6 +20,7 @@ export default function EgoPage({ params }) {
     const [uptie, setUptie] = useState(4);
 
     const passives = skillDataLoading ? null : skillData.passiveList;
+    const notes = skillDataLoading ? null : skillData.notes;
 
     if (egosLoading || skillDataLoading) return null;
 
@@ -89,14 +90,14 @@ export default function EgoPage({ params }) {
                     <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
                         Short
                     </div>
-                    {egoData.notes && egoData.notes.short ?
-                        <MarkdownRenderer content={egoData.notes.short} /> :
+                    {notes && notes.short ?
+                        <MarkdownRenderer content={notes.short} /> :
                         <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
                     <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
                         Full
                     </div>
-                    {egoData.notes && egoData.notes.full ?
-                        <MarkdownRenderer content={egoData.notes.full} /> :
+                    {notes && notes.full ?
+                        <MarkdownRenderer content={notes.full} /> :
                         <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
                 </div>
             </div>

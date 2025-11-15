@@ -67,6 +67,7 @@ export default function Identity({ params }) {
 
     const combatPassives = skillDataLoading ? null : skillData.combatPassives.findLast(passives => passives.level <= uptie);
     const supportPassives = skillDataLoading ? null : skillData.supportPassives.findLast(passives => passives.level <= uptie);
+    const notes = skillDataLoading ? null : skillData.notes;
 
     if (identitiesLoading || skillDataLoading) return null;
 
@@ -147,14 +148,14 @@ export default function Identity({ params }) {
                     <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
                         Short
                     </div>
-                    {identityData.notes && identityData.notes.short ?
-                        <MarkdownRenderer content={identityData.notes.short} /> :
+                    {notes && notes.short ?
+                        <MarkdownRenderer content={notes.short} /> :
                         <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
                     <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
                         Full
                     </div>
-                    {identityData.notes && identityData.notes.full ?
-                        <MarkdownRenderer content={identityData.notes.full} /> :
+                    {notes && notes.full ?
+                        <MarkdownRenderer content={notes.full} /> :
                         <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
                 </div>
             </div>

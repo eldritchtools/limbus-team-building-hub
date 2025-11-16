@@ -57,6 +57,17 @@ function LevelInput({ value, setValue, min = 1, max = 100 }) {
     );
 }
 
+function constructPassive(passiveId, passiveData) {
+    const passive = passiveData[passiveId];
+    if ("condition" in passive) return passive;
+    Object.entries(passiveData).forEach(([_, p]) => {
+        if ("condition" in p && p.name === passive.name)
+            passive["condition"] = p.condition;
+    })
+
+    return passive;
+}
+
 export default function Identity({ params }) {
     const { id } = React.use(params);
     const [identities, identitiesLoading] = useData("identities");
@@ -126,7 +137,7 @@ export default function Identity({ params }) {
                 <div style={{ border: "1px #777 dotted", padding: "0.2rem", textAlign: "center" }}>
                     {identityData.skillKeywordList.map(x => <KeywordIcon key={x} id={x} />)}
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.2rem", gap: "0.2rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.5rem", gap: "0.2rem" }}>
                     <div data-tooltip-id="identity-notes" style={{ alignSelf: "center", textAlign: "center", borderBottom: "1px #aaa dotted" }}>
                         Notes, Comments, Explanation
                     </div>
@@ -162,6 +173,7 @@ export default function Identity({ params }) {
             <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "0.5rem" }}>
                 {[1, 2, 3, 4].map(tier => {
                     const list = identityData.skillTypes.filter(skill => skill.type.tier === tier);
+                    if (list.length === 0) return null;
                     return <div key={tier} style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
                         {list.map((skill, index) => <div key={skill.id} style={{ flex: 1 }}><SkillCard skill={skillData.skills[skill.id]} uptie={uptie} count={skill.num} level={level} index={index} /></div>)}
                     </div>
@@ -173,7 +185,7 @@ export default function Identity({ params }) {
                     <div style={{ display: "flex", flexDirection: "column" }}>
                         <div style={{ color: "#aaa", fontWeight: "bold", fontSize: "1.25rem" }}>Combat Passives</div>
                         <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-                            {combatPassives.passives.map((passive, i) => <div key={i} style={{ flex: 1 }}><PassiveCard passive={skillData.passiveData[passive]} /></div>)}
+                            {combatPassives.passives.map((passive, i) => <div key={i} style={{ flex: 1 }}><PassiveCard passive={constructPassive(passive, skillData.passiveData)} /></div>)}
                         </div>
                     </div> :
                     null

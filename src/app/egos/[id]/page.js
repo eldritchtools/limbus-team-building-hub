@@ -68,7 +68,7 @@ export default function EgoPage({ params }) {
                         </span>
                     ])}
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.2rem", gap: "0.2rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.5rem", gap: "0.2rem" }}>
                     <div data-tooltip-id="ego-notes" style={{ alignSelf: "center", textAlign: "center", borderBottom: "1px #aaa dotted" }}>
                         Notes, Comments, Explanation
                     </div>

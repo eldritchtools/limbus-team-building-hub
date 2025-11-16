@@ -137,7 +137,7 @@ export default function Identity({ params }) {
                 <div style={{ border: "1px #777 dotted", padding: "0.2rem", textAlign: "center" }}>
                     {identityData.skillKeywordList.map(x => <KeywordIcon key={x} id={x} />)}
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.2rem", gap: "0.2rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.5rem", gap: "0.2rem" }}>
                     <div data-tooltip-id="identity-notes" style={{ alignSelf: "center", textAlign: "center", borderBottom: "1px #aaa dotted" }}>
                         Notes, Comments, Explanation
                     </div>

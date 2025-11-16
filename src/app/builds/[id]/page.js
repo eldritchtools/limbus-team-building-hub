@@ -242,7 +242,7 @@ export default function BuildPage({ params }) {
             </div>
         }
         <div style={{ display: "flex", flexDirection: "row", width: "90%", alignSelf: "center" }}>
-            <div style={{ display: "flex", flexDirection: "column", paddingRight: "0.5rem", width: "70%" }}>
+            <div style={{ display: "flex", flexDirection: "column", paddingRight: "0.5rem", gap: "0.5rem", width: "70%" }}>
                 <span style={{ fontSize: "1.2rem" }}>Description</span>
                 <div className={{ maxWidth: "48rem", marginLeft: "auto", marginRight: "auto" }}>
                     <div>

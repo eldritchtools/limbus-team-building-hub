@@ -123,7 +123,10 @@ export default function MarkdownRenderer({ content }) {
                         default:
                             return <span>{`{${tokenType}:${tokenValue}}`}</span>;
                     }
-                }
+                },
+                p: ({ node, ...props }) => (
+                    <p style={{ margin: 0 }} {...props} />
+                )
             }}
         >
             {content}
@@ -133,7 +136,9 @@ export default function MarkdownRenderer({ content }) {
     return identitiesLoading || egosLoading || statusesLoading ?
         <div>Loading...</div> :
         <div>
-            {renderedMarkdown}
+            <div style={{ lineHeight: "1.4", textAlign: "justify" }}>
+                {renderedMarkdown}
+            </div>
 
             <Tooltip
                 id="markdown-build-tooltip"

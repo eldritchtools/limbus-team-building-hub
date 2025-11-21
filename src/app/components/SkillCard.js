@@ -66,7 +66,7 @@ export default function SkillCard({ skill, uptie, count = 0, level, type = "atta
             {skillText.coinDescs.map((coinDescs, index) => coinDescs.length > 0 ?
                 <div key={index} style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
                     <Coin num={index + 1} />
-                    <div style={{ display: "flex", flex: 1, flexDirection: "column", gap: "0.1rem" }}>
+                    <div style={{ display: "flex", flex: 1, flexDirection: "column", whiteSpace: "pre-wrap", gap: "0.1rem" }}>
                         {coinDescs.map((desc, innerIndex) => <ProcessedText key={`${innerIndex}-text`} text={desc} />)}
                     </div>
                 </div> : null

@@ -30,7 +30,7 @@ export default function SkillCard({ skill, uptie, count = 0, level, type = "atta
 
     if (Object.keys(skillData).length === 0 || Object.keys(skillText).length === 0) return null;
 
-    return <div style={{ width: "100%", minWidth: "600px", height: "100%", display: "flex", flexDirection: "column", border: `1px ${affinityColorMapping[skillData.affinity]} solid`, borderRadius: "0.5rem", padding: "0.5rem", boxSizing: "border-box" }}>
+    return <div style={{ width: "100%", minWidth: "480px", height: "100%", display: "flex", flexDirection: "column", border: `1px ${affinityColorMapping[skillData.affinity]} solid`, borderRadius: "0.5rem", padding: "0.5rem", boxSizing: "border-box" }}>
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginBottom: "0.25rem" }}>
             <div style={{ display: "flex", flexDirection: "row", gap: "0.25rem", alignItems: "center" }}>
                 {skillData.affinity !== "none" ? <Icon path={skillData.affinity} style={{ width: "32px" }} /> : null}

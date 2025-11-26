@@ -29,7 +29,7 @@ function SkillTypes({ skillType }) {
 
 
 function IdentityProfile({ identity, displayType }) {
-    return identity ? <Link href={`/identities/${identity.id}`}>
+    return identity && displayType !== null ? <Link href={`/identities/${identity.id}`}>
         <div style={{ position: "relative" }} data-tooltip-id="identity-tooltip" data-tooltip-content={identity.id}>
             <IdentityImg identity={identity} uptie={4} displayName={false} scale={0.75} />
             {displayType === 1 ? <div style={{
@@ -56,7 +56,7 @@ function IdentityProfile({ identity, displayType }) {
 }
 
 function EgoProfile({ ego, displayType }) {
-    return ego ? <Link href={`/egos/${ego.id}`}>
+    return ego && displayType !== null ? <Link href={`/egos/${ego.id}`}>
         <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "158px", height: "46px" }} data-tooltip-id="ego-tooltip" data-tooltip-content={ego.id}>
             <EgoImg ego={ego} type={"awaken"} displayName={false} style={{ display: "block", height: "46px", width: "154px", objectFit: "cover" }} />
             {displayType === 1 ? <div style={{
@@ -120,7 +120,17 @@ export default function BuildPage({ params }) {
     const [linkCopySuccess, setLinkCopySuccess] = useState('');
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
-    const [displayType, setDisplayType] = useState(1);
+
+    const [displayType, setDisplayType] = useState(null);
+
+    useEffect(() => {
+        const saved = localStorage.getItem("buildDisplayType");
+        if (saved) setDisplayType(JSON.parse(saved));
+        else setDisplayType(1);
+    }, [])
+    useEffect(() => {
+        if (displayType !== null) localStorage.setItem("buildDisplayType", JSON.stringify(displayType));
+    }, [displayType]);
 
     useEffect(() => {
         if (loading)
@@ -241,6 +251,7 @@ export default function BuildPage({ params }) {
                 )}
             </div>
         }
+        <div style={{ height: "0.5rem" }} />
         <div style={{ display: "flex", flexDirection: "row", width: "90%", alignSelf: "center" }}>
             <div style={{ display: "flex", flexDirection: "column", paddingRight: "0.5rem", gap: "0.5rem", width: "70%" }}>
                 <span style={{ fontSize: "1.2rem" }}>Description</span>

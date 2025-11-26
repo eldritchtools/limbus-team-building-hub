@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Icon, EgoImg, RarityImg, SinnerIcon, Status, statuses, useData } from "@eldritchtools/limbus-shared-library";
 import { capitalizeFirstLetter, ColorResist, sinnerMapping } from "../utils";
 import { selectStyle } from "../styles";
@@ -177,7 +177,7 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
         } else {
             return listToComponents(list);
         }
-    } else {
+    } else if (displayType === "full") {
         return <table style={{ borderCollapse: "collapse", width: "100%" }}>
             <thead>
                 <tr style={{ height: "1.25rem" }}>
@@ -206,6 +206,8 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
                 }
             </tbody>
         </table>
+    } else {
+        return null;
     }
 }
 
@@ -256,7 +258,17 @@ export default function EgosPage() {
 
     const [searchString, setSearchString] = useState("");
     const [selectedMainFilters, setSelectedMainFilters] = useState([]);
-    const [displayType, setDisplayType] = useState("full");
+    const [displayType, setDisplayType] = useState(null);
+
+    useEffect(() => {
+        const saved = localStorage.getItem("idEgoDisplayType");
+        if (saved) setDisplayType(saved);
+        else setDisplayType("full");
+    }, [])
+    useEffect(() => {
+        if (displayType) localStorage.setItem("idEgoDisplayType", displayType);
+    }, [displayType]);
+
     const [separateSinners, setSeparateSinners] = useState(false);
     const [selectedKeywords, setSelectedKeywords] = useState([]);
 

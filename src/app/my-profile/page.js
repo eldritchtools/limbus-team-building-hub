@@ -6,6 +6,7 @@ import BuildEntry from "../components/BuildEntry";
 import { getFilteredBuilds } from "../database/builds";
 import { useAuth } from "../database/authProvider";
 import { getSaves } from "../database/saves";
+import { tabStyle } from "../styles";
 
 export default function ProfilePage() {
     const { user, profile, loading, updateUsername, refreshProfile } = useAuth();
@@ -95,9 +96,9 @@ export default function ProfilePage() {
             <Link href="/builds/new" style={{ textDecoration: "none" }}>
                 <div style={{ fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", color: "#777" }}>+New Build</div>
             </Link>
-            <div style={{ fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", color: activeTab === "published" ? "#ddd" : "#777", transition: "all 0.2s" }} onClick={() => setActiveTab("published")}>Published</div>
-            <div style={{ fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", color: activeTab === "drafts" ? "#ddd" : "#777", transition: "all 0.2s" }} onClick={() => setActiveTab("drafts")}>Drafts</div>
-            <div style={{ fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", color: activeTab === "saved" ? "#ddd" : "#777", transition: "all 0.2s" }} onClick={() => setActiveTab("saved")}>Saved</div>
+            <div style={{ ...tabStyle, color: activeTab === "published" ? "#ddd" : "#777" }} onClick={() => setActiveTab("published")}>Published</div>
+            <div style={{ ...tabStyle, color: activeTab === "drafts" ? "#ddd" : "#777" }} onClick={() => setActiveTab("drafts")}>Drafts</div>
+            <div style={{ ...tabStyle, color: activeTab === "saved" ? "#ddd" : "#777" }} onClick={() => setActiveTab("saved")}>Saved</div>
         </div>
 
         {buildsLoading ?

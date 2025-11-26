@@ -13,6 +13,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getFilteredBuilds } from "../database/builds";
 import { tooltipStyle } from "../styles";
 import BuildEntry from "./BuildEntry";
+import "./MarkdownRenderer.css";
 
 function tokenExtractionPlugin() {
     return (tree) => {
@@ -125,7 +126,7 @@ export default function MarkdownRenderer({ content }) {
                     }
                 },
                 p: ({ node, ...props }) => (
-                    <p style={{ margin: 0 }} {...props} />
+                    <p className="markdown-p" {...props} />
                 )
             }}
         >

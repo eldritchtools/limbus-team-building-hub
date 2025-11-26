@@ -36,7 +36,7 @@ export default function MarkdownTokens() {
             <IdentitySelector selected={identity} setSelected={setIdentity} />
 
             {identity ?
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <code>{`Sample markdown referencing {identity:${identity}}`}</code>
                     <div style={{fontSize: "1.2rem"}}>→</div>
                     <MarkdownRenderer content={`Sample markdown referencing {identity:${identity}}`} />
@@ -53,7 +53,7 @@ export default function MarkdownTokens() {
             <EgoSelector selected={ego} setSelected={setEgo} />
 
             {ego ?
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <code>{`Sample markdown referencing {ego:${ego}}`}</code>
                     <div style={{fontSize: "1.2rem"}}>→</div>
                     <MarkdownRenderer content={`Sample markdown referencing {ego:${ego}}`} />
@@ -70,7 +70,7 @@ export default function MarkdownTokens() {
             <StatusSelector selected={status} setSelected={setStatus} />
 
             {status ?
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <code>{`Sample markdown referencing {status:${status}}`}</code>
                     <div style={{fontSize: "1.2rem"}}>→</div>
                     <MarkdownRenderer content={`Sample markdown referencing {status:${status}}`} />
@@ -87,7 +87,7 @@ export default function MarkdownTokens() {
             <KeywordSelector selected={keyword} setSelected={setKeyword} />
 
             {keyword ?
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <code>{`Sample markdown referencing {keyword:${keyword}}. Lowercase {keyword:${keyword.toLowerCase()}} Uppercase {keyword:${keyword.toUpperCase()}}`}</code>
                     <div style={{fontSize: "1.2rem"}}>→</div>
                     <MarkdownRenderer content={`Sample markdown referencing {keyword:${keyword}}. Lowercase {keyword:${keyword.toLowerCase()}} Uppercase {keyword:${keyword.toUpperCase()}}`} />
@@ -107,7 +107,7 @@ export default function MarkdownTokens() {
             </div>
 
             {buildTestString.length > 0 ?
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <code>{buildTestString}</code>
                     <div style={{fontSize: "1.2rem"}}>→</div>
                     <MarkdownRenderer content={buildTestString} />
@@ -127,7 +127,7 @@ export default function MarkdownTokens() {
             </div>
 
             {usernameTestString.length > 0 ?
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <code>{usernameTestString}</code>
                     <div style={{fontSize: "1.2rem"}}>→</div>
                     <MarkdownRenderer content={usernameTestString} />
@@ -142,7 +142,7 @@ export default function MarkdownTokens() {
             <SinnerSelector selected={sinner} setSelected={setSinner} />
 
             {sinner ?
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <code>{`Sample markdown referencing {sinner:${sinner}}`}</code>
                     <div style={{fontSize: "1.2rem"}}>→</div>
                     <MarkdownRenderer content={`Sample markdown referencing {sinner:${sinner}}`} />

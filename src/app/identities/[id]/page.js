@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Icon, IdentityImg, KeywordIcon, RarityImg, SinnerIcon, useData } from '@eldritchtools/limbus-shared-library';
 import { ColorResist, getSeasonString, sinnerMapping } from "@/app/utils";
 import { Tooltip } from "react-tooltip";
-import { tooltipStyle } from "../../styles";
+import { tabStyle, tooltipStyle } from "../../styles";
 import SkillCard from "@/app/components/SkillCard";
 import PassiveCard from "@/app/components/PassiveCard";
 import UptieSelector from "@/app/components/UptieSelector";
 import MarkdownRenderer from "@/app/components/MarkdownRenderer";
+import BuildEntry from "@/app/components/BuildEntry";
+import { getFilteredBuilds } from "@/app/database/builds";
 
 const LEVEL_CAP = 55;
 
@@ -68,6 +70,36 @@ function constructPassive(passiveId, passiveData) {
     return passive;
 }
 
+function NotesTab({ notes }) {
+    if (!notes || !notes.main) return <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>;
+    if (!notes.other)
+        return <div style={{ display: "flex", flexDirection: "column" }}>
+            {notes.main.map((str, i) => <div key={i} style={{ display: "flex", flexDirection: "row", gap: "0.25rem", lineHeight: "1.4" }}>
+                • <MarkdownRenderer content={str} />
+            </div>)}
+        </div>
+
+    return <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ color: "#aaa", fontSize: "0.8rem" }}>Main</div>
+        {notes.main.map((str, i) => <div key={i} style={{ display: "flex", flexDirection: "row", gap: "0.25rem", lineHeight: "1.4" }}>
+            • <MarkdownRenderer content={str} />
+        </div>)}
+        <div style={{ height: "0.5rem" }} />
+        <div style={{ color: "#aaa", fontSize: "0.8rem" }}>Other</div>
+        {notes.other.map((str, i) => <div key={i} style={{ display: "flex", flexDirection: "row", gap: "0.25rem", lineHeight: "1.4" }}>
+            • <MarkdownRenderer content={str} />
+        </div>)}
+    </div>
+}
+
+function BuildsTab({ builds }) {
+    if (!builds) return <div style={{ color: "#777", textAlign: "center" }}>Loading builds...</div>;
+    if (builds.length === 0) return <div style={{ color: "#777", textAlign: "center" }}>No builds found.</div>;
+    return <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        {builds.map(build => <BuildEntry key={build.id} build={build} minified={true} />)}
+    </div>
+}
+
 export default function Identity({ params }) {
     const { id } = React.use(params);
     const [identities, identitiesLoading] = useData("identities");
@@ -75,16 +107,25 @@ export default function Identity({ params }) {
     const identityData = identitiesLoading ? null : identities[id];
     const [uptie, setUptie] = useState(4);
     const [level, setLevel] = useState(LEVEL_CAP);
+    const [activeTab, setActiveTab] = useState("notes");
+    const [builds, setBuilds] = useState(null);
 
-    const combatPassives = skillDataLoading ? null : skillData.combatPassives.findLast(passives => passives.level <= uptie);
-    const supportPassives = skillDataLoading ? null : skillData.supportPassives.findLast(passives => passives.level <= uptie);
-    const notes = skillDataLoading ? null : skillData.notes;
+    useEffect(() => {
+        const fetchBuilds = async () => {
+            setBuilds(await getFilteredBuilds({ "identities": [id] }, true, "score", 1, 6) || []);
+        }
+
+        if (activeTab === "builds" && !builds) fetchBuilds();
+    }, [activeTab, builds, id])
 
     if (identitiesLoading || skillDataLoading) return null;
 
+    const combatPassives = skillData.combatPassives.findLast(passives => passives.level <= uptie);
+    const supportPassives = skillData.supportPassives.findLast(passives => passives.level <= uptie);
+
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
         <div style={{ display: "flex", flexDirection: "row", width: "100%" }}>
-            <div style={{ display: "flex", flexDirection: "column", padding: "1rem", width: "384px" }}>
+            <div style={{ display: "flex", flexDirection: "column", padding: "1rem", minWidth: "480px", width: "480px", maxWidth: "480px" }}>
                 <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: "100%" }}>
                     <RarityImg rarity={identityData.rank} style={{ display: "inline", height: "2rem" }} />
                     <div style={{ display: "flex", flexDirection: "column", fontSize: "1.2rem", fontWeight: "bold", alignItems: "center" }}>
@@ -134,12 +175,14 @@ export default function Identity({ params }) {
                         <span style={{ borderLeft: "1px #777 dotted" }}><ColorResist resist={identityData.resists.blunt} /></span>
                     </div>
                 </div>
-                <div style={{ border: "1px #777 dotted", padding: "0.2rem", textAlign: "center" }}>
-                    {identityData.skillKeywordList.map(x => <KeywordIcon key={x} id={x} />)}
+                <div style={{ border: "1px #777 dotted", padding: "0.2rem", textAlign: "center", display: "flex", flexDirection: "column" }}>
+                    <div style={{ borderBottom: "1px #777 dotted" }}>Keywords</div>
+                    <div style={{ marginTop: "0.2rem" }}>{identityData.skillKeywordList.map(x => <KeywordIcon key={x} id={x} />)}</div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.5rem", gap: "0.2rem" }}>
-                    <div data-tooltip-id="identity-notes" style={{ alignSelf: "center", textAlign: "center", borderBottom: "1px #aaa dotted" }}>
-                        Notes, Comments, Explanation
+                    <div style={{ display: "flex", gap: "1rem", alignSelf: "center" }}>
+                        <div data-tooltip-id="identity-notes" style={{ ...tabStyle, fontSize: "1rem", color: activeTab === "notes" ? "#ddd" : "#777" }} onClick={() => setActiveTab("notes")}>Notes/Explanation</div>
+                        <div data-tooltip-id="identity-builds" style={{ ...tabStyle, fontSize: "1rem", color: activeTab === "builds" ? "#ddd" : "#777" }} onClick={() => setActiveTab("builds")}>Popular Builds</div>
                     </div>
                     <Tooltip id="identity-notes" style={tooltipStyle}>
                         <div>
@@ -156,49 +199,48 @@ export default function Identity({ params }) {
                             </ul>
                         </div>
                     </Tooltip>
-                    <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
-                        Short
-                    </div>
-                    {notes && notes.short ?
-                        <MarkdownRenderer content={notes.short} /> :
-                        <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
-                    <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
-                        Full
-                    </div>
-                    {notes && notes.full ?
-                        <MarkdownRenderer content={notes.full} /> :
-                        <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
+                    <Tooltip id="identity-builds" style={tooltipStyle}>
+                        <div>Loads the most popular builds that use this identity.</div>
+                    </Tooltip>
+                    {
+                        activeTab === "notes" ?
+                            <NotesTab notes={skillData.notes} /> :
+                            <BuildsTab builds={builds} />
+                    }
                 </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "0.5rem" }}>
-                {[1, 2, 3, 4].map(tier => {
-                    const list = identityData.skillTypes.filter(skill => skill.type.tier === tier);
-                    if (list.length === 0) return null;
-                    return <div key={tier} style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-                        {list.map((skill, index) => <div key={skill.id} style={{ flex: 1 }}><SkillCard skill={skillData.skills[skill.id]} uptie={uptie} count={skill.num} level={level} index={index} /></div>)}
+                <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "0.5rem" }}>
+                    {[1, 2, 3, 4].map(tier => {
+                        const list = identityData.skillTypes.filter(skill => skill.type.tier === tier);
+                        if (list.length === 0) return null;
+                        return <div key={tier} style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+                            {list.map((skill, index) => <div key={skill.id} style={{ flex: 1 }}><SkillCard skill={skillData.skills[skill.id]} uptie={uptie} count={skill.num} level={level} index={index} /></div>)}
+                        </div>
+                    })}
+                    <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+                        {identityData.defenseSkillTypes.map(skill => <div key={skill.id} style={{ flex: 1 }}><SkillCard key={skill.id} skill={skillData.skills[skill.id]} uptie={uptie} level={level} type={"defense"} /></div>)}
                     </div>
-                })}
-                <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-                    {identityData.defenseSkillTypes.map(skill => <div key={skill.id} style={{ flex: 1 }}><SkillCard key={skill.id} skill={skillData.skills[skill.id]} uptie={uptie} level={level} type={"defense"} /></div>)}
+                    {combatPassives ?
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                            <div style={{ color: "#aaa", fontWeight: "bold", fontSize: "1.25rem" }}>Combat Passives</div>
+                            <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+                                {combatPassives.passives.map((passive, i) => <div key={i} style={{ flex: 1 }}><PassiveCard passive={constructPassive(passive, skillData.passiveData)} /></div>)}
+                            </div>
+                        </div> :
+                        null
+                    }
+                    {supportPassives ?
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                            <div style={{ color: "#aaa", fontWeight: "bold", fontSize: "1.25rem" }}>Support Passives</div>
+                            <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+                                {supportPassives.passives.map((passive, i) => <div key={i} style={{ flex: 1 }}><PassiveCard passive={skillData.passiveData[passive]} /></div>)}
+                            </div>
+                        </div> :
+                        null
+                    }
                 </div>
-                {combatPassives ?
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                        <div style={{ color: "#aaa", fontWeight: "bold", fontSize: "1.25rem" }}>Combat Passives</div>
-                        <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-                            {combatPassives.passives.map((passive, i) => <div key={i} style={{ flex: 1 }}><PassiveCard passive={constructPassive(passive, skillData.passiveData)} /></div>)}
-                        </div>
-                    </div> :
-                    null
-                }
-                {supportPassives ?
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                        <div style={{ color: "#aaa", fontWeight: "bold", fontSize: "1.25rem" }}>Support Passives</div>
-                        <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-                            {supportPassives.passives.map((passive, i) => <div key={i} style={{ flex: 1 }}><PassiveCard passive={skillData.passiveData[passive]} /></div>)}
-                        </div>
-                    </div> :
-                    null
-                }
+
             </div>
         </div>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Icon, IdentityImg, RarityImg, SinnerIcon, Status, useData } from "@eldritchtools/limbus-shared-library";
 import { capitalizeFirstLetter, sinnerMapping } from "../utils";
 import { selectStyle } from "../styles";
@@ -182,7 +182,7 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
         } else {
             return listToComponents(list);
         }
-    } else {
+    } else if (displayType === "full") {
         return <table style={{ borderCollapse: "collapse", width: "100%" }}>
             <thead>
                 <tr style={{ height: "1.25rem" }}>
@@ -210,6 +210,8 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
                 }
             </tbody>
         </table>
+    } else {
+        return null;
     }
 }
 
@@ -232,7 +234,7 @@ function MainFilterSelector({ selectedMainFilters, setSelectedMainFilters }) {
         }}
             onClick={() => handleToggle(filter, selected)}
         >
-            {Number.isInteger(filter) ? <SinnerIcon num={filter} style={{height: "32px"}} /> : <Icon path={filter} style={{ height: "32px" }} />}
+            {Number.isInteger(filter) ? <SinnerIcon num={filter} style={{ height: "32px" }} /> : <Icon path={filter} style={{ height: "32px" }} />}
         </div>
     }
 
@@ -261,7 +263,17 @@ export default function Identities() {
 
     const [searchString, setSearchString] = useState("");
     const [selectedMainFilters, setSelectedMainFilters] = useState([]);
-    const [displayType, setDisplayType] = useState("full");
+    const [displayType, setDisplayType] = useState(null);
+
+    useEffect(() => {
+        const saved = localStorage.getItem("idEgoDisplayType");
+        if (saved) setDisplayType(saved);
+        else setDisplayType("full");
+    }, [])
+    useEffect(() => {
+        if (displayType) localStorage.setItem("idEgoDisplayType", displayType);
+    }, [displayType]);
+
     const [separateSinners, setSeparateSinners] = useState(false);
     const [selectedKeywords, setSelectedKeywords] = useState([]);
     const [selectedFactionTags, setSelectedFactionTags] = useState([]);

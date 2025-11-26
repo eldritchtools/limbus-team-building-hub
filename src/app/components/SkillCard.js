@@ -30,7 +30,7 @@ export default function SkillCard({ skill, uptie, count = 0, level, type = "atta
 
     if (Object.keys(skillData).length === 0 || Object.keys(skillText).length === 0) return null;
 
-    return <div style={{ width: "100%", minWidth: "600px", height: "100%", display: "flex", flexDirection: "column", border: `1px ${affinityColorMapping[skillData.affinity]} solid`, borderRadius: "0.5rem", padding: "0.5rem", boxSizing: "border-box" }}>
+    return <div style={{ width: "100%", minWidth: "480px", height: "100%", display: "flex", flexDirection: "column", border: `1px ${affinityColorMapping[skillData.affinity]} solid`, borderRadius: "0.5rem", padding: "0.5rem", boxSizing: "border-box" }}>
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginBottom: "0.25rem" }}>
             <div style={{ display: "flex", flexDirection: "row", gap: "0.25rem", alignItems: "center" }}>
                 {skillData.affinity !== "none" ? <Icon path={skillData.affinity} style={{ width: "32px" }} /> : null}
@@ -62,11 +62,11 @@ export default function SkillCard({ skill, uptie, count = 0, level, type = "atta
         <div style={{ whiteSpace: "pre-wrap", lineHeight: "1.2", marginBottom: "0.25rem" }}>
             <ProcessedText text={skillText.desc} />
         </div>
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
             {skillText.coinDescs.map((coinDescs, index) => coinDescs.length > 0 ?
                 <div key={index} style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
                     <Coin num={index + 1} />
-                    <div style={{ display: "flex", flex: 1, flexDirection: "column", gap: "0.1rem" }}>
+                    <div style={{ display: "flex", flex: 1, flexDirection: "column", whiteSpace: "pre-wrap", gap: "0.1rem" }}>
                         {coinDescs.map((desc, innerIndex) => <ProcessedText key={`${innerIndex}-text`} text={desc} />)}
                     </div>
                 </div> : null

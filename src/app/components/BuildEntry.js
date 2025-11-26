@@ -8,8 +8,21 @@ import Link from "next/link";
 import Username from "./Username";
 import IdentityImgSpread from "./IdentityImgSpread";
 
-export default function BuildEntry({ build }) {
+export default function BuildEntry({ build, minified }) {
     const timeAgo = useTimeAgo(build.created_at);
+
+    if (minified)
+        return <div style={{ width: "450px", display: "flex", flexDirection: "column", border: "1px #777 solid", borderRadius: "1rem", padding: "0.5rem", boxSizing: "border-box", textAlign: "left" }}>
+            <Link href={`/builds/${build.id}`}>
+                <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", marginTop: "0rem", marginBottom: "0.2rem" }}>{build.title}</h2>
+            </Link>
+            <div style={{ fontSize: "0.8rem", marginBottom: "0.5rem", color: "#ddd" }}>
+                by <Username username={build.username} /> •{" "}{timeAgo}
+            </div>
+            <div style={{ display: "flex", flexDirection: "row", alignSelf: "center" }}>
+                <IdentityImgSpread identityIds={build.identity_ids} scale={.275} />
+            </div>
+        </div>
 
     return (
         <div style={{ width: "720px", display: "flex", flexDirection: "column", border: "1px #777 solid", borderRadius: "1rem", padding: "1rem", boxSizing: "border-box", textAlign: "left" }}>
@@ -36,6 +49,6 @@ export default function BuildEntry({ build }) {
             <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
                 👍 {build.like_count} 💬 {build.comment_count}
             </div>
-        </div >
+        </div>
     );
 }

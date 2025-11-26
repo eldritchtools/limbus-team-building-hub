@@ -76,4 +76,6 @@ const selectStyleWide = {
 
 const tooltipStyle = { outlineStyle: "solid", outlineColor: "#ddd", outlineWidth: "1px", backgroundColor: "#000000", borderRadius: "1rem", zIndex: "9999" };
 
-export { tooltipStyle, selectStyle, selectStyleWide };
+const tabStyle = { fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.2s" };
+
+export { tooltipStyle, selectStyle, selectStyleWide, tabStyle };

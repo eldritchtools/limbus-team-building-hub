@@ -1,16 +1,48 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Icon, EgoImg, RarityImg, useData, SinnerIcon } from '@eldritchtools/limbus-shared-library';
 import { ColorResist, getSeasonString, sinnerMapping } from "@/app/utils";
 import { Tooltip } from "react-tooltip";
-import { tooltipStyle } from "../../styles";
+import { tabStyle, tooltipStyle } from "../../styles";
 import SkillCard from "@/app/components/SkillCard";
 import PassiveCard from "@/app/components/PassiveCard";
 import UptieSelector from "@/app/components/UptieSelector";
 import MarkdownRenderer from "@/app/components/MarkdownRenderer";
+import BuildEntry from "@/app/components/BuildEntry";
+import { getFilteredBuilds } from "@/app/database/builds";
 
 const affinities = ["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"];
+
+function NotesTab({ notes }) {
+    if (!notes || !notes.main) return <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>;
+    if (!notes.other)
+        return <div style={{ display: "flex", flexDirection: "column" }}>
+            {notes.main.map((str, i) => <div key={i} style={{ display: "flex", flexDirection: "row", gap: "0.25rem", lineHeight: "1.4" }}>
+                • <MarkdownRenderer content={str} />
+            </div>)}
+        </div>
+
+    return <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ color: "#aaa", fontSize: "0.8rem" }}>Main</div>
+        {notes.main.map((str, i) => <div key={i} style={{ display: "flex", flexDirection: "row", gap: "0.25rem", lineHeight: "1.4" }}>
+            • <MarkdownRenderer content={str} />
+        </div>)}
+        <div style={{ height: "0.5rem" }} />
+        <div style={{ color: "#aaa", fontSize: "0.8rem" }}>Other</div>
+        {notes.other.map((str, i) => <div key={i} style={{ display: "flex", flexDirection: "row", gap: "0.25rem", lineHeight: "1.4" }}>
+            • <MarkdownRenderer content={str} />
+        </div>)}
+    </div>
+}
+
+function BuildsTab({ builds }) {
+    if (!builds) return <div style={{ color: "#777", textAlign: "center" }}>Loading builds...</div>;
+    if (builds.length === 0) return <div style={{ color: "#777", textAlign: "center" }}>No builds found.</div>;
+    return <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        {builds.map(build => <BuildEntry key={build.id} build={build} minified={true} />)}
+    </div>
+}
 
 export default function EgoPage({ params }) {
     const { id } = React.use(params);
@@ -18,15 +50,24 @@ export default function EgoPage({ params }) {
     const [skillData, skillDataLoading] = useData(`egos/${id}`);
     const egoData = egosLoading ? null : egos[id];
     const [uptie, setUptie] = useState(4);
+    const [activeTab, setActiveTab] = useState("notes");
+    const [builds, setBuilds] = useState(null);
 
-    const passives = skillDataLoading ? null : skillData.passiveList;
-    const notes = skillDataLoading ? null : skillData.notes;
+    useEffect(() => {
+        const fetchBuilds = async () => {
+            setBuilds(await getFilteredBuilds({ "egos": [id] }, true, "score", 1, 6) || []);
+        }
+
+        if (activeTab === "builds" && !builds) fetchBuilds();
+    }, [activeTab, builds, id])
 
     if (egosLoading || skillDataLoading) return null;
 
+    const passives = skillData.passiveList;
+
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
         <div style={{ display: "flex", flexDirection: "row", width: "100%" }}>
-            <div style={{ display: "flex", flexDirection: "column", padding: "1rem", width: "384px" }}>
+            <div style={{ display: "flex", flexDirection: "column", padding: "1rem", minWidth: "480px", width: "480px", maxWidth: "480px" }}>
                 <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: "100%" }}>
                     <RarityImg rarity={egoData.rank.toLowerCase()} style={{ display: "inline", height: "2rem" }} />
                     <div style={{ display: "flex", flexDirection: "column", fontSize: "1.2rem", fontWeight: "bold", alignItems: "center" }}>
@@ -69,8 +110,9 @@ export default function EgoPage({ params }) {
                     ])}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.5rem", gap: "0.2rem" }}>
-                    <div data-tooltip-id="ego-notes" style={{ alignSelf: "center", textAlign: "center", borderBottom: "1px #aaa dotted" }}>
-                        Notes, Comments, Explanation
+                    <div style={{ display: "flex", gap: "1rem", alignSelf: "center" }}>
+                        <div data-tooltip-id="identity-notes" style={{ ...tabStyle, fontSize: "1rem", color: activeTab === "notes" ? "#ddd" : "#777" }} onClick={() => setActiveTab("notes")}>Notes/Explanation</div>
+                        <div data-tooltip-id="identity-builds" style={{ ...tabStyle, fontSize: "1rem", color: activeTab === "builds" ? "#ddd" : "#777" }} onClick={() => setActiveTab("builds")}>Popular Builds</div>
                     </div>
                     <Tooltip id="ego-notes" style={tooltipStyle}>
                         <div>
@@ -87,18 +129,14 @@ export default function EgoPage({ params }) {
                             </ul>
                         </div>
                     </Tooltip>
-                    <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
-                        Short
-                    </div>
-                    {notes && notes.short ?
-                        <MarkdownRenderer content={notes.short} /> :
-                        <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
-                    <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
-                        Full
-                    </div>
-                    {notes && notes.full ?
-                        <MarkdownRenderer content={notes.full} /> :
-                        <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>}
+                    <Tooltip id="identity-builds" style={tooltipStyle}>
+                        <div>Loads the most popular builds that use this identity.</div>
+                    </Tooltip>
+                    {
+                        activeTab === "notes" ?
+                            <NotesTab notes={skillData.notes} /> :
+                            <BuildsTab builds={builds} />
+                    }
                 </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "0.5rem" }}>

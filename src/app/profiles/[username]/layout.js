@@ -1,5 +1,5 @@
 export const metadata = {
-    title: "Profile",
+    title: "Profile | Limbus Company Team Building Hub",
     description: "View a user's builds"
 };
 

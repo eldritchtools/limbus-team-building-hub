@@ -1,5 +1,5 @@
 export const metadata = {
-    title: "Identities",
+    title: "Identities | Limbus Company Team Building Hub",
     description: "Browse information on identities"
 };
 

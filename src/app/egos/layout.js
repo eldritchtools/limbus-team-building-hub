@@ -1,5 +1,5 @@
 export const metadata = {
-    title: "E.G.Os",
+    title: "E.G.Os | Limbus Company Team Building Hub",
     description: "Browse information on E.G.Os"
 };
 

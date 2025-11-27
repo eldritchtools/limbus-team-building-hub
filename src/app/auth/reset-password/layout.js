@@ -1,5 +1,5 @@
 export const metadata = {
-    title: "Reset Password",
+    title: "Reset Password | Limbus Company Team Building Hub",
     description: "Reset password"
 };
 

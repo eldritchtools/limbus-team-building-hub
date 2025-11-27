@@ -118,6 +118,10 @@ export default function Identity({ params }) {
         if (activeTab === "builds" && !builds) fetchBuilds();
     }, [activeTab, builds, id])
 
+    useEffect(() => {
+        if (identityData) document.title = `${sinnerMapping[identityData.sinnerId]} ${identityData.name} | Limbus Company Team Building Hub`;
+    }, [identityData])
+
     if (identitiesLoading || skillDataLoading) return null;
 
     const combatPassives = skillData.combatPassives.findLast(passives => passives.level <= uptie);

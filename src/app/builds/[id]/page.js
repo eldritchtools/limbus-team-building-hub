@@ -139,6 +139,7 @@ export default function BuildPage({ params }) {
                 setLoading(false);
                 setLikeCount(x.like_count);
                 setCommentCount(x.comment_count);
+                document.title = `${x.title} | Limbus Company Team Building Hub`;
             });
     }, [id, loading]);
 

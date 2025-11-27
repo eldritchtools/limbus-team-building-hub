@@ -61,6 +61,10 @@ export default function EgoPage({ params }) {
         if (activeTab === "builds" && !builds) fetchBuilds();
     }, [activeTab, builds, id])
 
+    useEffect(() => {
+        if (egoData) document.title = `${sinnerMapping[egoData.sinnerId]} ${egoData.name} | Limbus Company Team Building Hub`;
+    }, [egoData])
+
     if (egosLoading || skillDataLoading) return null;
 
     const passives = skillData.passiveList;

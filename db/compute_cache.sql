@@ -6,12 +6,12 @@ BEGIN
 
   -- Insert top builds
   INSERT INTO public.popular_builds_cache (
-    build_id, username, title, score, like_count, comment_count,
+    build_id, user_id, title, score, like_count, comment_count,
     created_at, identity_ids, ego_ids, keyword_ids, tags, ranking_type, computed_at
   )
   SELECT
     b.id,
-    u.username,
+    b.user_id,
     b.title,
     b.score,
     b.like_count,
@@ -29,7 +29,6 @@ BEGIN
     'recent' AS ranking_type,
     NOW() AS computed_at
   FROM public.builds b
-  JOIN public.users u ON b.user_id = u.id
   WHERE b.is_published
   ORDER BY b.score DESC
   LIMIT 100;

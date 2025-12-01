@@ -110,7 +110,7 @@ export default function ProfilePage() {
                     {page === 1 ? `No ${activeTab === "published" ? "published builds" : activeTab === "drafts" ? "drafts" : "saved builds"} yet.` : "No more builds."}
                 </p> :
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 720px)", gap: "0.5rem", justifyContent: "center" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 640px)", gap: "0.5rem", justifyContent: "center" }}>
                         {builds.map(build => <BuildEntry key={build.id} build={build} />)}
                     </div>
 

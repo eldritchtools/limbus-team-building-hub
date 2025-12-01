@@ -92,7 +92,7 @@ CREATE TABLE public.notifications (
 CREATE TABLE public.popular_builds_cache (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   build_id UUID NOT NULL REFERENCES public.builds(id) ON DELETE CASCADE,
-  username TEXT NOT NULL,
+  user_id UUID NOT NULL,
   title TEXT NOT NULL,
   score NUMERIC NOT NULL,
   like_count INTEGER DEFAULT 0,

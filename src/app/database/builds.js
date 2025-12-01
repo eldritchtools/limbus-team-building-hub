@@ -5,12 +5,7 @@ import { getSupabase } from "./connection";
 async function getPopularBuilds(page = 1, pageSize = 20) {
     const start = (page - 1) * pageSize;
 
-    const { data, error } = await getSupabase()
-        .from('popular_builds_cache')
-        .select('*')
-        .eq('ranking_type', 'recent')
-        .order('score', { ascending: false })
-        .range(start, start + pageSize - 1);
+    const { data, error } = await getSupabase().rpc('get_popular_builds', { offset_count: start, limit_count: pageSize });
 
     if (error) throw error;
     return data.map(x => { return { ...x, id: x.build_id } });

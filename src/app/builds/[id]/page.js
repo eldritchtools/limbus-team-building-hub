@@ -5,8 +5,6 @@ import { deleteBuild, getBuild } from "@/app/database/builds";
 import { affinityColorMapping, useTimeAgo } from "@/app/utils";
 import { EgoImg, Icon, IdentityImg, KeywordIcon, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
 import React, { useEffect, useRef, useState } from "react";
-import { deleteLike, insertLike, isLiked } from "@/app/database/likes";
-import { deleteSave, insertSave, isSaved } from "@/app/database/saves";
 import { useAuth } from "@/app/database/authProvider";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/app/components/Modal";
@@ -18,6 +16,8 @@ import Link from "next/link";
 import "./builds.css";
 import MarkdownRenderer from "@/app/components/MarkdownRenderer";
 import ImageStitcher from "@/app/components/ImageStitcher";
+import { LikeButton } from "@/app/components/LikeButton";
+import SaveButton from "@/app/components/SaveButton";
 
 function SkillTypes({ skillType }) {
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.2rem" }}>
@@ -111,8 +111,6 @@ export default function BuildPage({ params }) {
     const modifiedTimeAgo = useTimeAgo(build && build.updated_at !== build.created_at ? build.updated_at : null);
     const teamCodeRef = useRef(null);
     const [copySuccess, setCopySuccess] = useState('');
-    const [liked, setLiked] = useState(false);
-    const [saved, setSaved] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
     const [commentCount, setCommentCount] = useState(0);
     const router = useRouter();
@@ -124,8 +122,8 @@ export default function BuildPage({ params }) {
     const [displayType, setDisplayType] = useState(null);
 
     useEffect(() => {
-        const saved = localStorage.getItem("buildDisplayType");
-        if (saved) setDisplayType(JSON.parse(saved));
+        const savedType = localStorage.getItem("buildDisplayType");
+        if (savedType) setDisplayType(JSON.parse(savedType));
         else setDisplayType(1);
     }, [])
     useEffect(() => {
@@ -143,13 +141,6 @@ export default function BuildPage({ params }) {
             });
     }, [id, loading]);
 
-    useEffect(() => {
-        if (user) {
-            isLiked(id, user.id).then(x => setLiked(x));
-            isSaved(id, user.id).then(x => setSaved(x));
-        }
-    }, [id, user])
-
     const handleTeamCodeCopy = async () => {
         if (teamCodeRef.current) {
             try {
@@ -161,28 +152,6 @@ export default function BuildPage({ params }) {
                 setTimeout(() => setCopySuccess(''), 2000);
                 console.error('Failed to copy text: ', err);
             }
-        }
-    };
-
-    const toggleLike = async () => {
-        if (liked) {
-            await deleteLike(id);
-            setLiked(false);
-            setLikeCount(p => p - 1);
-        } else {
-            await insertLike(id);
-            setLiked(true);
-            setLikeCount(p => p + 1);
-        }
-    };
-
-    const toggleSave = async () => {
-        if (saved) {
-            await deleteSave(id);
-            setSaved(false);
-        } else {
-            await insertSave(id);
-            setSaved(true);
         }
     };
 
@@ -287,15 +256,8 @@ export default function BuildPage({ params }) {
                     Tags: {build.tags.map((t, i) => <Tag key={i} tag={t.name} />)}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <button onClick={toggleLike} className={liked ? "toggle-button-active" : "toggle-button"} disabled={!user}>
-                        👍 {likeCount}
-                    </button>
-                    {
-                        user ?
-                            <button onClick={toggleSave} className={saved ? "toggle-button-active" : "toggle-button"}>
-                                ⭐ {saved ? "Saved" : "Save"}
-                            </button> : null
-                    }
+                    <LikeButton buildId={id} likeCount={likeCount} />
+                    <SaveButton buildId={id} />
                     <button onClick={() => setShareOpen(true)}>
                         🔗 Share
                     </button>

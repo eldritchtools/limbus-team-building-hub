@@ -10,7 +10,7 @@
     "sitemap": "next-sitemap"
   },
   "dependencies": {
-    "@eldritchtools/limbus-shared-library": "github:eldritchtools/limbus-shared-library#v0.5.1",
+    "@eldritchtools/limbus-shared-library": "github:eldritchtools/limbus-shared-library#v0.5.3",
     "@eldritchtools/shared-components": "github:eldritchtools/shared-components#v1.3.3",
     "@radix-ui/react-select": "^2.2.6",
     "@supabase/supabase-js": "^2.81.1",
@@ -31,6 +31,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "babel-plugin-react-compiler": "^1.0.0",
+    "baseline-browser-mapping": "^2.8.32",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
     "source-map-support": "^0.5.21",

@@ -11,6 +11,7 @@ import { affinityColorMapping } from "../utils";
 import { useAuth } from "../database/authProvider";
 import { useRouter } from "next/navigation";
 import MarkdownEditor from "./MarkdownEditor";
+import "./SinnerGrid.css";
 
 const egoRankMapping = {
     "ZAYIN": 0,
@@ -39,9 +40,9 @@ function IdentitySelector({ value, setValue, options, num }) {
 
     return (
         <Select.Root value={value ? value.id : null} onValueChange={v => setValue(v)} open={isOpen} onOpenChange={handleOpenChange}>
-            <Select.Trigger className="identity-select-trigger" ref={triggerRef}>
-                {value ? <div data-tooltip-id="identity-tooltip" data-tooltip-content={value.id} style={{ position: "relative" }}>
-                    <IdentityImg identity={value} uptie={4} displayName={false} scale={0.75} />
+            <Select.Trigger className="identity-select-trigger" ref={triggerRef} style={{ width: "100%", padding: 0, margin: 0, boxSizing: "border-box" }}>
+                {value ? <div data-tooltip-id="identity-tooltip" data-tooltip-content={value.id} style={{ width: "100%", position: "relative" }}>
+                    <IdentityImg identity={value} uptie={4} displayName={false} width={"100%"} />
                     <div style={{
                         position: "absolute",
                         bottom: "5px",
@@ -53,7 +54,7 @@ function IdentitySelector({ value, setValue, options, num }) {
                         {value.name}
                     </div>
                 </div> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <SinnerIcon num={num} style={{ height: "144px", width: "144px" }} />
+                    <SinnerIcon num={num} style={{ height: "75%", width: "75%" }} />
                 </div>}
             </Select.Trigger>
 
@@ -95,9 +96,9 @@ function EgoSelector({ value, setValue, options }) {
 
     return (
         <Select.Root value={value ? value.id : null} onValueChange={v => setValue(v)} open={isOpen} onOpenChange={setIsOpen}>
-            <Select.Trigger className="ego-select-trigger" ref={triggerRef} style={{ borderColor: value ? affinityColorMapping[value.affinity] : "#555", flex: 1 }}>
-                {value ? <div data-tooltip-id="ego-tooltip" data-tooltip-content={value.id} style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "158px", height: "42px" }}>
-                    <EgoImg ego={value} type={"awaken"} displayName={false} style={{ display: "block", height: "42px", width: "160px", objectFit: "cover" }} />
+            <Select.Trigger className="ego-select-trigger" ref={triggerRef} style={{ borderColor: value ? affinityColorMapping[value.affinity] : "#555", flex: 1, padding: 0, margin: 0, boxSizing: "border-box" }}>
+                {value ? <div data-tooltip-id="ego-tooltip" data-tooltip-content={value.id} style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }}>
+                    <EgoImg ego={value} type={"awaken"} displayName={false} style={{ display: "block", width: "100%", height: null, aspectRatio: "4/1", objectFit: "cover" }} />
                     <div style={{
                         position: "absolute",
                         fontSize: "0.75rem",
@@ -160,14 +161,25 @@ function ActiveSinnersInput({ value, setValue, min = 1, max = 12 }) {
     );
 }
 
+const deploymentComponentStyle = {
+    flex: 1,
+    fontSize: "1.5rem",
+    textAlign: "center",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 0,
+    margin: 0
+}
+
 function DeploymentComponent({ order, setOrder, activeSinners, sinnerId }) {
     const index = order.findIndex(x => x === sinnerId);
     if (index === -1) {
-        return <button onClick={() => setOrder(p => [...p, sinnerId])} style={{ flex: 1, fontSize: "1.5rem" }}>Deploy</button>
+        return <button onClick={() => setOrder(p => [...p, sinnerId])} style={deploymentComponentStyle}>Deploy</button>
     } else if (index < activeSinners) {
-        return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={{ flex: 1, fontSize: "1.5rem", color: "#fefe3d" }}>Active {index + 1}</button>
+        return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={{ ...deploymentComponentStyle, color: "#fefe3d" }}>Active {index + 1}</button>
     } else {
-        return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={{ flex: 1, fontSize: "1.5rem", color: "#29fee9" }}>Backup {index + 1 - activeSinners}</button>
+        return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={{ ...deploymentComponentStyle, color: "#29fee9" }}>Backup {index + 1 - activeSinners}</button>
     }
 }
 
@@ -256,31 +268,26 @@ export default function BuildEditor({ mode, buildId }) {
 
     return loading ? <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontSize: "1.5rem", fontWeight: "bold" }}>
         Loading...
-    </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+    </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", containerType: "inline-size" }}>
         <span style={{ fontSize: "1.2rem" }}>Title</span>
         <input type="text" value={title} style={{ width: "100ch" }} onChange={e => setTitle(e.target.value)} />
         <span style={{ fontSize: "1.2rem" }}>Team Build</span>
         {identitiesLoading || egosLoading ? null :
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 360px)", width: "100%", justifyContent: "center", gap: "0.5rem" }}>
+            <div className="sinner-grid">
                 {Array.from({ length: 12 }, (_, index) =>
-                    <div key={index} style={{ display: "flex", flexDirection: "row", width: "360px", height: "245px" }}>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
+                    <div key={index} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", aspectRatio: "8/5", boxSizing: "border-box" }}>
+                        <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
                             <IdentitySelector value={identities[identityIds[index]] || null} setValue={v => setIdentityId(v, index)} options={identityOptions[index + 1]} num={index + 1} />
                             <DeploymentComponent order={deploymentOrder} setOrder={setDeploymentOrder} activeSinners={activeSinners} sinnerId={index + 1} />
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+                        <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
                             {Array.from({ length: 5 }, (_, rank) => <EgoSelector key={rank} value={egos[egoIds[index][rank]] || null} setValue={v => setEgoId(v, index, rank)} options={egoOptions[index + 1][rank]} />)}
                         </div>
                     </div>
-
-                    // <div key={index} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "360px", height: "245px" }}>
-                    //     <div style={{gridColumn: "1", gridRow: "1 / span 4"}}><IdentitySelector value={identities[identityIds[index]] || null} setValue={v => setIdentityId(v, index)} options={identityOptions[index + 1]} /></div>
-                    //     <div style={{gridColumn: "1", gridRow: "5"}}><DeploymentComponent order={deploymentOrder} setOrder={setDeploymentOrder} activeSinners={activeSinners} sinnerId={index + 1} /></div>
-                    //     {Array.from({ length: 5 }, (_, rank) => <div key={rank} style={{gridColumn: "2"}}><EgoSelector value={egos[egoIds[index][rank]] || null} setValue={v => setEgoId(v, index, rank)} options={egoOptions[index + 1][rank]} /></div>)}
-                    // </div>
                 )}
             </div>
         }
+
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
             <span style={{ fontSize: "1.2rem" }}>Active Sinners</span>
             <ActiveSinnersInput value={activeSinners} setValue={setActiveSinners} />
@@ -301,14 +308,14 @@ export default function BuildEditor({ mode, buildId }) {
                 )}
             </div>
             <div style={{ display: "flex", gap: "0.2rem", alignItems: "center", minHeight: "50px", flexWrap: "wrap" }}>
-                <span style={{ paddingRight: "0.2rem" }}>Suggested:</span>
+                <span style={{ paddingRight: "0.2rem" }}>Recommended:</span>
                 {
                     Object.entries(keywordOptions)
                         .filter(([x, _]) => !keywordIds.includes(x))
                         .sort((a, b) => b[1] === a[1] ? keywordToIdMapping[a[0]] - keywordToIdMapping[b[0]] : b[1] - a[1])
                         .map(([x, n]) =>
                             <button key={x} onClick={() => setKeywordIds(p => [...p, x])} style={{ display: "flex", alignItems: "center", fontSize: "1rem" }}>
-                                <KeywordIcon id={x} />x{n}
+                                <KeywordIcon id={x} />
                             </button>
                         )
                 }

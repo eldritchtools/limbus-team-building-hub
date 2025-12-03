@@ -2,8 +2,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 192px;
-    height: 192px;
+    width: 100%;
+    aspect-ratio: 1/1;
     box-sizing: border-box;
     cursor: pointer;
     font-size: 1rem;
@@ -73,8 +73,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 160px;
-    height: 40px;
+    width: 100%;
+    aspect-ratio: 4/1;
     box-sizing: border-box;
     cursor: pointer;
     font-size: 1rem;

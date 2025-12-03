@@ -6,7 +6,7 @@ BEGIN
 
   -- Insert top builds
   INSERT INTO public.popular_builds_cache (
-    build_id, user_id, title, score, like_count, comment_count,
+    build_id, user_id, title, score, deployment_order, active_sinners, like_count, comment_count,
     created_at, identity_ids, ego_ids, keyword_ids, tags, ranking_type, computed_at
   )
   SELECT
@@ -14,6 +14,8 @@ BEGIN
     b.user_id,
     b.title,
     b.score,
+    b.deployment_order,
+    b.active_sinners,
     b.like_count,
     b.comment_count,
     b.created_at,

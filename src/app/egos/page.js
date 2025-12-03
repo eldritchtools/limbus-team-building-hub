@@ -56,14 +56,14 @@ function EgoDetails({ id, ego }) {
         </div>)}
         {wrapCell(<SkillTypeIcons skill={ego.awakeningType} />)}
         {wrapCell("corrosionType" in ego ? <SkillTypeIcons skill={ego.corrosionType} /> : null)}
-        {wrapCell(<div style={{ display: "grid", gridTemplateColumns: "repeat(7, 64px)" }}>
+        {wrapCell(<div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(32px, 1fr))", width: "100%" }}>
             {mainFilters.affinity.map(affinity => <div key={affinity} style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "0.25rem" }}>
                 <Icon path={affinity} style={{ height: "32px", width: "32px" }} />
                 <span>{affinity in ego.cost ? ego.cost[affinity] : <span style={{ color: "#777" }}>0</span>}</span>
                 <span>{<ColorResist resist={ego.resists[affinity]} />}</span>
             </div>)}
         </div>)}
-        {wrapCell(<div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", maxWidth: "75ch", padding: "0.5rem", gap: "0.5rem" }}>
+        {wrapCell(<div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", maxWidth: "75ch", padding: "0.5rem", gap: "0.5rem", textAlign: "center" }}>
             {ego.keywordTags.sort().map(keyword => <Status key={keyword} id={keyword} style={{ height: "32px" }} />)}
         </div>)}
     </tr>
@@ -178,34 +178,36 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
             return listToComponents(list);
         }
     } else if (displayType === "full") {
-        return <table style={{ borderCollapse: "collapse", width: "100%" }}>
-            <thead>
-                <tr style={{ height: "1.25rem" }}>
-                    <th>Rank</th>
-                    <th>Icon</th>
-                    <th>Name</th>
-                    <th>Awakening</th>
-                    <th>Corrosion</th>
-                    <th>Costs/Resists</th>
-                    <th>Statuses</th>
-                </tr>
-            </thead>
-            <tbody>
-                {
-                    separateSinners ?
-                        Object.entries(splitBySinner(list)).map(([sinnerId, list]) => [
-                            <tr key={sinnerId}><td colSpan={7} style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid" }}>
-                                <div style={{ display: "flex", flexDirection: "row", alignItems: "center", fontSize: "1.2rem", fontWeight: "bold", }}>
-                                    <SinnerIcon num={sinnerId} style={{ height: "48px" }} />
-                                    {sinnerMapping[sinnerId]}
-                                </div>
-                            </td></tr>,
+        return <div style={{ display: "flex", overflowX: "auto", width: "100%" }}>
+            <table style={{ borderCollapse: "collapse", width: "100%" }}>
+                <thead>
+                    <tr style={{ height: "1.25rem" }}>
+                        <th>Rank</th>
+                        <th>Icon</th>
+                        <th>Name</th>
+                        <th>Awakening</th>
+                        <th>Corrosion</th>
+                        <th>Costs/Resists</th>
+                        <th>Statuses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        separateSinners ?
+                            Object.entries(splitBySinner(list)).map(([sinnerId, list]) => [
+                                <tr key={sinnerId}><td colSpan={7} style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid" }}>
+                                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center", fontSize: "1.2rem", fontWeight: "bold", }}>
+                                        <SinnerIcon num={sinnerId} style={{ height: "48px" }} />
+                                        {sinnerMapping[sinnerId]}
+                                    </div>
+                                </td></tr>,
+                                list.map(([id, ego]) => <EgoDetails key={id} id={id} ego={ego} />)
+                            ]).flat() :
                             list.map(([id, ego]) => <EgoDetails key={id} id={id} ego={ego} />)
-                        ]).flat() :
-                        list.map(([id, ego]) => <EgoDetails key={id} id={id} ego={ego} />)
-                }
-            </tbody>
-        </table>
+                    }
+                </tbody>
+            </table>
+        </div>
     } else {
         return null;
     }

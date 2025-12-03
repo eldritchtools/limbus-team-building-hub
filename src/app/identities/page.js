@@ -183,33 +183,35 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
             return listToComponents(list);
         }
     } else if (displayType === "full") {
-        return <table style={{ borderCollapse: "collapse", width: "100%" }}>
-            <thead>
-                <tr style={{ height: "1.25rem" }}>
-                    <th>Rank</th>
-                    <th>Icon</th>
-                    <th>Name</th>
-                    <th>Skills</th>
-                    <th>Keywords</th>
-                    <th>Factions/Tags</th>
-                </tr>
-            </thead>
-            <tbody>
-                {
-                    separateSinners ?
-                        Object.entries(splitBySinner(list)).map(([sinnerId, list]) => [
-                            <tr key={sinnerId}><td colSpan={6} style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid" }}>
-                                <div style={{ display: "flex", flexDirection: "row", alignItems: "center", fontSize: "1.2rem", fontWeight: "bold", }}>
-                                    <SinnerIcon num={sinnerId} style={{ height: "48px" }} />
-                                    {sinnerMapping[sinnerId]}
-                                </div>
-                            </td></tr>,
+        return <div style={{ display: "flex", overflowX: "auto", width: "100%" }}>
+            <table style={{ borderCollapse: "collapse", width: "100%" }}>
+                <thead>
+                    <tr style={{ height: "1.25rem" }}>
+                        <th>Rank</th>
+                        <th>Icon</th>
+                        <th>Name</th>
+                        <th>Skills</th>
+                        <th>Keywords</th>
+                        <th>Factions/Tags</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        separateSinners ?
+                            Object.entries(splitBySinner(list)).map(([sinnerId, list]) => [
+                                <tr key={sinnerId}><td colSpan={6} style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid" }}>
+                                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center", fontSize: "1.2rem", fontWeight: "bold", }}>
+                                        <SinnerIcon num={sinnerId} style={{ height: "48px" }} />
+                                        {sinnerMapping[sinnerId]}
+                                    </div>
+                                </td></tr>,
+                                list.map(([id, identity]) => <IdentityDetails key={id} id={id} identity={identity} />)
+                            ]).flat() :
                             list.map(([id, identity]) => <IdentityDetails key={id} id={id} identity={identity} />)
-                        ]).flat() :
-                        list.map(([id, identity]) => <IdentityDetails key={id} id={id} identity={identity} />)
-                }
-            </tbody>
-        </table>
+                    }
+                </tbody>
+            </table>
+        </div>
     } else {
         return null;
     }

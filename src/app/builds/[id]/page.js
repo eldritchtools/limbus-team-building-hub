@@ -21,10 +21,10 @@ import LikeButton from "@/app/components/LikeButton";
 import SaveButton from "@/app/components/SaveButton";
 
 function SkillTypes({ skillType }) {
-    return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.2rem" }}>
-        <Icon path={skillType.affinity} style={{ height: "40px" }} />
-        <Icon path={keywordIconConvert(skillType.type)} style={{ height: "40px" }} />
-        {skillType.type === "counter" ? <Icon path={keywordIconConvert(skillType.atkType)} style={{ height: "40px" }} /> : null}
+    return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.2rem", width: "100%", height: "100%", justifyContent: "center" }}>
+        <Icon path={skillType.affinity} style={{ width: "25%" }} />
+        <Icon path={keywordIconConvert(skillType.type)} style={{ width: "25%" }} />
+        {skillType.type === "counter" ? <Icon path={keywordIconConvert(skillType.atkType)} style={{ width: "25%" }} /> : null}
     </div>
 }
 

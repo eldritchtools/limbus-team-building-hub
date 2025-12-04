@@ -38,7 +38,6 @@ export function RequestsCacheProvider({ children }) {
             const result = new Set(data.map(r => r.build_id));
             const update = {};
             for (const id of ids) update[id] = result.has(id);
-            console.log(update);
             setLikedMap(prev => ({ ...prev, ...update }));
         }
 
@@ -57,13 +56,11 @@ export function RequestsCacheProvider({ children }) {
             const result = new Set(data.map(r => r.build_id));
             const update = {};
             for (const id of ids) update[id] = result.has(id);
-            console.log(update);
             setSavedMap(prev => ({ ...prev, ...update }));
         }
 
         async function flushUserData(ids) {
             if (!ids.length) return;
-            console.log(ids);
 
             const init = Object.fromEntries(ids.map(id => [id, null]));
             setLikedMap(prev => ({ ...prev, ...init }));

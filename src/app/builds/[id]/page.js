@@ -205,7 +205,7 @@ export default function BuildPage({ params }) {
         </div>
 
         {identitiesLoading || egosLoading ? null :
-            <div className="sinner-grid">
+            <div className="sinner-grid" style={{alignSelf: "center"}}>
                 {Array.from({ length: 12 }, (_, index) =>
                     <div key={index} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", border: "1px #444 solid" }}>
                         <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
@@ -303,7 +303,7 @@ export default function BuildPage({ params }) {
                         }
                     </div>
                 </div>
-                <ImageStitcher identitiesList={build.identity_ids} outputFileName={`${build.id}.png`} />
+                <ImageStitcher build={build} outputFileName={`${build.id}.png`} />
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                     <button onClick={() => setShareOpen(false)}>Close</button>
                 </div>

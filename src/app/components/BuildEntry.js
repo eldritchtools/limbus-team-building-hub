@@ -40,7 +40,7 @@ export default function BuildEntry({ build, minified }) {
                 by <Username username={build.username} /> •{" "}{timeAgo}
             </div>
             <div style={{ display: "flex", flexDirection: "row", marginBottom: "0.5rem", alignSelf: "center" }}>
-                <IdentityImgSpread identityIds={build.identity_ids} scale={.375} />
+                <IdentityImgSpread identityIds={build.identity_ids} scale={.375} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} />
             </div>
             <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
                 Tags: {build.tags.map((t, i) => t ? <Tag key={i} tag={t} /> : null)}

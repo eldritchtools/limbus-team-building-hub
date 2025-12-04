@@ -268,12 +268,12 @@ export default function BuildEditor({ mode, buildId }) {
 
     return loading ? <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontSize: "1.5rem", fontWeight: "bold" }}>
         Loading...
-    </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", containerType: "inline-size" }}>
+    </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", containerType: "inline-size" }}>
         <span style={{ fontSize: "1.2rem" }}>Title</span>
         <input type="text" value={title} style={{ width: "100ch" }} onChange={e => setTitle(e.target.value)} />
         <span style={{ fontSize: "1.2rem" }}>Team Build</span>
         {identitiesLoading || egosLoading ? null :
-            <div className="sinner-grid">
+            <div className="sinner-grid" style={{ alignSelf: "center", width: "98%", paddingBottom: "1rem" }}>
                 {Array.from({ length: 12 }, (_, index) =>
                     <div key={index} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", aspectRatio: "8/5", boxSizing: "border-box" }}>
                         <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
@@ -303,7 +303,7 @@ export default function BuildEditor({ mode, buildId }) {
                 <span style={{ paddingRight: "0.2rem" }}>Selected:</span>
                 {keywordIds.map(x =>
                     <button key={x} onClick={() => setKeywordIds(p => p.filter(k => k !== x))} style={{ display: "flex", alignItems: "center", fontSize: "1rem" }}>
-                        <KeywordIcon id={x} />x{keywordOptions[x]}
+                        <KeywordIcon id={x} />
                     </button>
                 )}
             </div>

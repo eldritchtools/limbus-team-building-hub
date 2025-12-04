@@ -95,6 +95,8 @@ CREATE TABLE public.popular_builds_cache (
   user_id UUID NOT NULL,
   title TEXT NOT NULL,
   score NUMERIC NOT NULL,
+  deployment_order INTEGER[] DEFAULT '{}',
+  active_sinners INTEGER DEFAULT 0,
   like_count INTEGER DEFAULT 0,
   comment_count INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL,

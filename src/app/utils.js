@@ -25,7 +25,8 @@ const seasonMapping = {
     3: "3 - Bon Voyage",
     4: "4 - Clear All Cathy",
     5: "5 - Oblivion",
-    6: "6 - Zàng Huā Yín"
+    6: "6 - Zàng Huā Yín",
+    8000: "Pilgrimage of Compassion"
 }
 
 const affinityColorMapping = {

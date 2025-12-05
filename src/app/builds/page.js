@@ -46,7 +46,7 @@ export default function BuildsPage() {
                 {activeTab === "popular" ?
                     <p style={{ color: "#aaa", fontSize: "1rem", textAlign: "center", alignSelf: "center", marginBottom: "0.5rem" }}>Most popular builds are recomputed every few hours.</p> :
                     null}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 720px)", gap: "0.5rem", justifyContent: "center" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 640px)", gap: "0.5rem", justifyContent: "center" }}>
                     {builds.map(build => <BuildEntry key={build.id} build={build} />)}
                 </div>
             </div>}

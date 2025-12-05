@@ -9,6 +9,7 @@ import { TeamCodeTooltip } from "./components/TeamCodeTooltip";
 import UserStatus from "./components/UserStatus";
 import { AuthProvider } from "./database/authProvider";
 import { useEffect, useState } from "react";
+import { RequestsCacheProvider } from "./database/RequestsCacheProvider";
 
 const paths = [
     { path: "/builds", title: "Explore Team Builds" },
@@ -18,7 +19,7 @@ const paths = [
 ]
 
 const description = <span>
-    Limbus Company Team Building Hub is a free fan-made tool for players to create, share, and search for team builds. 
+    Limbus Company Team Building Hub is a free fan-made tool for players to create, share, and search for team builds.
     References are also available for players to look up information on identities and E.G.Os.
 </span>;
 
@@ -30,25 +31,27 @@ export default function LayoutComponent({ children }) {
     }, [])
 
     return <AuthProvider>
-        <Layout
-            title={"Limbus Company Team Building Hub"}
-            lastUpdated={lastUpdated}
-            linkSet={"limbus"}
-            description={description}
-            gameName={"Limbus Company"}
-            developerName={"Project Moon"}
-            githubLink={"https://github.com/eldritchtools/limbus-team-building-hub"}
-            paths={paths}
-            LinkComponent={Link}
-            topComponent={<UserStatus />}
-        >
-            <DataProvider>
-                {children}
-                <StatusTooltip />
-                <IdentityTooltip />
-                <EgoTooltip />
-                <TeamCodeTooltip />
-            </DataProvider>
-        </Layout>
+        <RequestsCacheProvider>
+            <Layout
+                title={"Limbus Company Team Building Hub"}
+                lastUpdated={lastUpdated}
+                linkSet={"limbus"}
+                description={description}
+                gameName={"Limbus Company"}
+                developerName={"Project Moon"}
+                githubLink={"https://github.com/eldritchtools/limbus-team-building-hub"}
+                paths={paths}
+                LinkComponent={Link}
+                topComponent={<UserStatus />}
+            >
+                <DataProvider>
+                    {children}
+                    <StatusTooltip />
+                    <IdentityTooltip />
+                    <EgoTooltip />
+                    <TeamCodeTooltip />
+                </DataProvider>
+            </Layout>
+        </RequestsCacheProvider>
     </AuthProvider>
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Icon, IdentityImg, RarityImg, SinnerIcon, Status, useData } from "@eldritchtools/limbus-shared-library";
-import { capitalizeFirstLetter, sinnerMapping } from "../utils";
+import { capitalizeFirstLetter, getSeasonString, sinnerMapping } from "../utils";
 import { selectStyle } from "../styles";
 import Link from "next/link";
 import "./identities.css";
@@ -12,10 +12,10 @@ const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const mainFilters = {
     "tier": ["0", "00", "000"],
-    "affinity": ["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"],
-    "skillType": ["Slash", "Pierce", "Blunt", "Guard", "Evade", "Counter"],
+    "sinner": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     "keyword": ["Burn", "Bleed", "Tremor", "Rupture", "Sinking", "Poise", "Charge"],
-    "sinner": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    "affinity": ["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"],
+    "skillType": ["Slash", "Pierce", "Blunt", "Guard", "Evade", "Counter"]
 }
 
 const mainFiltersMapping = Object.entries(mainFilters).reduce((acc, [type, list]) => list.reduce((acc2, filter) => { acc2[filter] = type; return acc2 }, acc), {});
@@ -103,7 +103,7 @@ function checkSearchMatch(searchString, identity) {
     return false;
 }
 
-function IdentityList({ identities, searchString, selectedMainFilters, displayType, separateSinners, selectedKeywords, selectedFactionTags }) {
+function IdentityList({ identities, searchString, selectedMainFilters, displayType, separateSinners, selectedKeywords, selectedFactionTags, selectedSeasons }) {
     const filters = useMemo(() => selectedMainFilters.reduce((acc, filter) => {
         if (mainFiltersMapping[filter] in acc) acc[mainFiltersMapping[filter]].push(filter);
         else acc[mainFiltersMapping[filter]] = [filter];
@@ -135,8 +135,12 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
             if (!selectedFactionTags.some(tagOption => identity.tags.includes(tagOption.value))) return false;
         }
 
+        if (selectedSeasons.length !== 0) {
+            if (!selectedSeasons.some(season => season.value === identity.season) && !(selectedSeasons.some(season => season.value === 9100) && identity.season > 9100)) return false;
+        }
+
         return true;
-    }), [searchString, filters, identities, selectedKeywords, selectedFactionTags]);
+    }), [searchString, filters, identities, selectedKeywords, selectedFactionTags, selectedSeasons]);
 
     const splitBySinner = list => list.reduce((acc, [id, identity]) => {
         if (identity.sinnerId in acc) acc[identity.sinnerId].push([id, identity]);
@@ -158,7 +162,9 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
                         <SinnerIcon num={sinnerId} style={{ height: "48px" }} />
                         {sinnerMapping[sinnerId]}
                     </div>,
-                    listToComponents(list)
+                    <div key={`${sinnerId}-list`}>
+                        {listToComponents(list)}
+                    </div>
                 ]).flat()}
             </div>
         } else {
@@ -176,40 +182,44 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
                         <SinnerIcon num={sinnerId} style={{ height: "48px" }} />
                         {sinnerMapping[sinnerId]}
                     </div>,
-                    listToComponents(list)
+                    <div key={`${sinnerId}-list`}>
+                        {listToComponents(list)}
+                    </div>
                 ]).flat()}
             </div>
         } else {
             return listToComponents(list);
         }
     } else if (displayType === "full") {
-        return <table style={{ borderCollapse: "collapse", width: "100%" }}>
-            <thead>
-                <tr style={{ height: "1.25rem" }}>
-                    <th>Rank</th>
-                    <th>Icon</th>
-                    <th>Name</th>
-                    <th>Skills</th>
-                    <th>Keywords</th>
-                    <th>Factions/Tags</th>
-                </tr>
-            </thead>
-            <tbody>
-                {
-                    separateSinners ?
-                        Object.entries(splitBySinner(list)).map(([sinnerId, list]) => [
-                            <tr key={sinnerId}><td colSpan={6} style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid" }}>
-                                <div style={{ display: "flex", flexDirection: "row", alignItems: "center", fontSize: "1.2rem", fontWeight: "bold", }}>
-                                    <SinnerIcon num={sinnerId} style={{ height: "48px" }} />
-                                    {sinnerMapping[sinnerId]}
-                                </div>
-                            </td></tr>,
+        return <div style={{ display: "flex", overflowX: "auto", width: "100%" }}>
+            <table style={{ borderCollapse: "collapse", width: "100%" }}>
+                <thead>
+                    <tr style={{ height: "1.25rem" }}>
+                        <th>Rank</th>
+                        <th>Icon</th>
+                        <th>Name</th>
+                        <th>Skills</th>
+                        <th>Keywords</th>
+                        <th>Factions/Tags</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        separateSinners ?
+                            Object.entries(splitBySinner(list)).map(([sinnerId, list]) => [
+                                <tr key={sinnerId}><td colSpan={6} style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid" }}>
+                                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center", fontSize: "1.2rem", fontWeight: "bold", }}>
+                                        <SinnerIcon num={sinnerId} style={{ height: "48px" }} />
+                                        {sinnerMapping[sinnerId]}
+                                    </div>
+                                </td></tr>,
+                                list.map(([id, identity]) => <IdentityDetails key={id} id={id} identity={identity} />)
+                            ]).flat() :
                             list.map(([id, identity]) => <IdentityDetails key={id} id={id} identity={identity} />)
-                        ]).flat() :
-                        list.map(([id, identity]) => <IdentityDetails key={id} id={id} identity={identity} />)
-                }
-            </tbody>
-        </table>
+                    }
+                </tbody>
+            </table>
+        </div>
     } else {
         return null;
     }
@@ -230,7 +240,8 @@ function MainFilterSelector({ selectedMainFilters, setSelectedMainFilters }) {
     const toggleComponent = (filter, selected) => {
         return <div key={filter} style={{
             backgroundColor: selected ? "#3f3f3f" : "#1f1f1f", height: "32px", display: "flex",
-            alignItems: "center", justifyContent: "center", padding: "0.1rem 0.2rem", cursor: "pointer"
+            alignItems: "center", justifyContent: "center", padding: "0.1rem 0.2rem", cursor: "pointer",
+            borderBottom: selected ? "2px #4caf50 solid" : "transparent"
         }}
             onClick={() => handleToggle(filter, selected)}
         >
@@ -238,9 +249,21 @@ function MainFilterSelector({ selectedMainFilters, setSelectedMainFilters }) {
         </div>
     }
 
-    return <div style={{ display: "flex", flexWrap: "wrap", border: "1px #777 dotted", borderRadius: "1rem", minWidth: "200px", padding: "0.5rem" }}>
-        {Object.entries(mainFilters).reduce((acc, [_, list]) => [...acc, list.map(filter => toggleComponent(filter, selectedMainFilters.includes(filter)))], [])}
-        {<div style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }} onClick={clearAll}>Clear All</div>}
+    return <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", borderRadius: "1rem", minWidth: "200px", padding: "0.5rem" }}>
+        {
+            Object.entries(mainFilters).map(([category, list]) => {
+                if (category === "sinner") {
+                    return <div key={category} style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", padding: "0.2rem", borderBottom: "1px #777 dotted" }}>
+                        {list.map(filter => toggleComponent(filter, selectedMainFilters.includes(filter)))}
+                    </div>
+                } else {
+                    return <div key={category} style={{ display: "flex", justifyContent: "center", padding: "0.2rem", borderBottom: "1px #777 dotted" }}>
+                        {list.map(filter => toggleComponent(filter, selectedMainFilters.includes(filter)))}
+                    </div>
+                }
+            })
+        }
+        {<div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: "0.5rem", cursor: "pointer" }} onClick={clearAll}>Clear All</div>}
     </div>
 }
 
@@ -277,15 +300,19 @@ export default function Identities() {
     const [separateSinners, setSeparateSinners] = useState(false);
     const [selectedKeywords, setSelectedKeywords] = useState([]);
     const [selectedFactionTags, setSelectedFactionTags] = useState([]);
+    const [selectedSeasons, setSelectedSeasons] = useState([]);
 
-    const [keywordOptions, tagOptions] = useMemo(() => {
+    const [keywordOptions, tagOptions, seasonOptions] = useMemo(() => {
         if (identitiesLoading || statusesLoading) return [];
         const keywordList = new Set();
         const tagList = new Set();
+        const seasonList = new Set();
+        seasonList.add(9100);
 
         Object.entries(identities).forEach(([_id, identity]) => {
-            identity.keywordTags.forEach(keyword => keywordList.add(keyword))
-            identity.tags.forEach(tag => tagList.add(tag))
+            identity.keywordTags.forEach(keyword => keywordList.add(keyword));
+            identity.tags.forEach(tag => tagList.add(tag));
+            seasonList.add(identity.season);
         });
 
         return [[...keywordList].map(id => ({
@@ -296,49 +323,46 @@ export default function Identities() {
             value: tag,
             label: processTag(tag),
             name: processTag(tag, true)
-        })).sort((a, b) => a.name.localeCompare(b.name))]
+        })).sort((a, b) => a.name.localeCompare(b.name)), [...seasonList].map(season => ({
+            value: season,
+            label: season === 9100 ? "Walpurgisnacht (any)" : getSeasonString(season),
+            name: season === 9100 ?  "Walpurgisnacht" : getSeasonString(season)
+        })).sort((a, b) => a.value - b.value)]
     }, [identities, identitiesLoading, statuses, statusesLoading]);
 
     return <div style={{ display: "flex", flexDirection: "column", maxHeight: "100%", width: "100%", gap: "1rem", alignItems: "center" }}>
-        <div style={{ display: "flex", flexDirection: "row", gap: "2rem", flexWrap: "wrap", justifyContent: "center" }}>
-            <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, auto)", alignItems: "center", justifyContent: "center", gap: "0.25rem" }}>
-                    <span style={{ textAlign: 'end' }}>Search:</span>
-                    <input value={searchString} onChange={e => setSearchString(e.target.value)} />
-                    <span style={{ textAlign: "end" }}>Display Type:</span>
-                    <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
-                        <label>
-                            <input type="radio" name="displayType" value={"icon"} checked={displayType === "icon"} onChange={e => setDisplayType(e.target.value)} />
-                            Icons Only
-                        </label>
-                        <label>
-                            <input type="radio" name="displayType" value={"card"} checked={displayType === "card"} onChange={e => setDisplayType(e.target.value)} />
-                            Cards
-                        </label>
-                        <label>
-                            <input type="radio" name="displayType" value={"full"} checked={displayType === "full"} onChange={e => setDisplayType(e.target.value)} />
-                            Full Details
-                        </label>
-                    </div>
-                    <div>
-                    </div>
+        <div style={{ display: "flex", gap: "2rem", alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, auto)", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+                <span style={{ textAlign: 'end' }}>Search:</span>
+                <input value={searchString} onChange={e => setSearchString(e.target.value)} />
+                <span style={{ textAlign: "end" }}>Filter Statuses:</span>
+                <MultiSelector options={keywordOptions} selected={selectedKeywords} setSelected={setSelectedKeywords} placeholder={"Select Statuses..."} />
+                <span style={{ textAlign: "end" }}>Filter Factions:</span>
+                <MultiSelector options={tagOptions} selected={selectedFactionTags} setSelected={setSelectedFactionTags} placeholder={"Select Factions/Tags..."} />
+                <span style={{ textAlign: "end" }}>Filter Season:</span>
+                <MultiSelector options={seasonOptions} selected={selectedSeasons} setSelected={setSelectedSeasons} placeholder={"Select Seasons..."} />
+                <span style={{ textAlign: "end" }}>Display Type:</span>
+                <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
+                    <label>
+                        <input type="radio" name="displayType" value={"icon"} checked={displayType === "icon"} onChange={e => setDisplayType(e.target.value)} />
+                        Icons Only
+                    </label>
+                    <label>
+                        <input type="radio" name="displayType" value={"card"} checked={displayType === "card"} onChange={e => setDisplayType(e.target.value)} />
+                        Cards
+                    </label>
+                    <label>
+                        <input type="radio" name="displayType" value={"full"} checked={displayType === "full"} onChange={e => setDisplayType(e.target.value)} />
+                        Full Details
+                    </label>
                 </div>
+                <div />
+                <label>
+                    <input type="checkbox" checked={separateSinners} onChange={e => setSeparateSinners(e.target.checked)} />
+                    Separate by Sinner
+                </label>
             </div>
             <MainFilterSelector selectedMainFilters={selectedMainFilters} setSelectedMainFilters={setSelectedMainFilters} />
-        </div>
-        <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: "1rem" }}>
-            <label>
-                <input type="checkbox" checked={separateSinners} onChange={e => setSeparateSinners(e.target.checked)} />
-                Separate Sinners
-            </label>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
-                Filter Statuses:
-                <MultiSelector options={keywordOptions} selected={selectedKeywords} setSelected={setSelectedKeywords} placeholder={"Select Statuses..."} />
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
-                Filter Factions:
-                <MultiSelector options={tagOptions} selected={selectedFactionTags} setSelected={setSelectedFactionTags} placeholder={"Select Factions/Tags..."} />
-            </div>
         </div>
         {identitiesLoading ? null :
             <IdentityList
@@ -349,6 +373,7 @@ export default function Identities() {
                 separateSinners={separateSinners}
                 selectedKeywords={selectedKeywords}
                 selectedFactionTags={selectedFactionTags}
+                selectedSeasons={selectedSeasons}
             />}
     </div>;
 }

@@ -9,6 +9,7 @@ CREATE OR REPLACE FUNCTION update_build_with_tags(
   p_deployment_order INT[],
   p_active_sinners INT,
   p_team_code TEXT,
+  p_youtube_video_id TEXT,
   p_tags TEXT[],
   p_published BOOLEAN
 )
@@ -42,6 +43,7 @@ BEGIN
     deployment_order = p_deployment_order,
     active_sinners = p_active_sinners,
     team_code = p_team_code,
+    youtube_video_id = p_youtube_video_id,
     is_published = p_published,
     updated_at = NOW()
   WHERE id = p_build_id;

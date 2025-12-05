@@ -5,8 +5,6 @@ import { deleteBuild, getBuild } from "@/app/database/builds";
 import { affinityColorMapping, useTimeAgo } from "@/app/utils";
 import { EgoImg, Icon, IdentityImg, KeywordIcon, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
 import React, { useEffect, useRef, useState } from "react";
-import { deleteLike, insertLike, isLiked } from "@/app/database/likes";
-import { deleteSave, insertSave, isSaved } from "@/app/database/saves";
 import { useAuth } from "@/app/database/authProvider";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/app/components/Modal";
@@ -16,22 +14,26 @@ import CommentSection from "./commentSection";
 import Link from "next/link";
 
 import "./builds.css";
+import "@/app/components/SinnerGrid.css"
 import MarkdownRenderer from "@/app/components/MarkdownRenderer";
 import ImageStitcher from "@/app/components/ImageStitcher";
+import LikeButton from "@/app/components/LikeButton";
+import SaveButton from "@/app/components/SaveButton";
+import { YouTubeThumbnailEmbed } from "@/app/YoutubeUtils";
 
 function SkillTypes({ skillType }) {
-    return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.2rem" }}>
-        <Icon path={skillType.affinity} style={{ height: "40px" }} />
-        <Icon path={keywordIconConvert(skillType.type)} style={{ height: "40px" }} />
-        {skillType.type === "counter" ? <Icon path={keywordIconConvert(skillType.atkType)} style={{ height: "40px" }} /> : null}
+    return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.2rem", width: "100%", height: "100%", justifyContent: "center" }}>
+        <Icon path={skillType.affinity} style={{ width: "25%" }} />
+        <Icon path={keywordIconConvert(skillType.type)} style={{ width: "25%" }} />
+        {skillType.type === "counter" ? <Icon path={keywordIconConvert(skillType.atkType)} style={{ width: "25%" }} /> : null}
     </div>
 }
 
 
 function IdentityProfile({ identity, displayType }) {
     return identity && displayType !== null ? <Link href={`/identities/${identity.id}`}>
-        <div style={{ position: "relative" }} data-tooltip-id="identity-tooltip" data-tooltip-content={identity.id}>
-            <IdentityImg identity={identity} uptie={4} displayName={false} scale={0.75} />
+        <div style={{ position: "relative", width: "100%" }} data-tooltip-id="identity-tooltip" data-tooltip-content={identity.id}>
+            <IdentityImg identity={identity} uptie={4} displayName={false} width={"100%"} />
             {displayType === 1 ? <div style={{
                 position: "absolute",
                 bottom: "5px",
@@ -43,7 +45,7 @@ function IdentityProfile({ identity, displayType }) {
             }}>
                 {identity.name}
             </div> : null}
-            {displayType === 2 ? <div style={{ position: "absolute", width: "192px", height: "192px", background: "rgba(0, 0, 0, 0.65)", top: 0, left: 0 }}>
+            {displayType === 2 ? <div style={{ position: "absolute", width: "100%", aspectRatio: "1/1", background: "rgba(0, 0, 0, 0.65)", top: 0, left: 0 }}>
                 <div style={{ display: "grid", gridTemplateRows: "repeat(4, 1fr)", width: "100%", height: "100%", justifyContent: "center" }}>
                     {[0, 1, 2].map(x => <div key={x} style={{ display: "flex", justifyContent: "center" }}><SkillTypes skillType={identity.skillTypes[x].type} /></div>)}
                     {<SkillTypes key={3} skillType={identity.defenseSkillTypes[0].type} />}
@@ -52,13 +54,13 @@ function IdentityProfile({ identity, displayType }) {
                 : null
             }
         </div>
-    </Link > : <div style={{ height: "192px", width: "192px", boxSizing: "border-box" }} />
+    </Link > : <div style={{ width: "100%", aspectRatio: "1/1", boxSizing: "border-box" }} />
 }
 
 function EgoProfile({ ego, displayType }) {
     return ego && displayType !== null ? <Link href={`/egos/${ego.id}`}>
-        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "158px", height: "46px" }} data-tooltip-id="ego-tooltip" data-tooltip-content={ego.id}>
-            <EgoImg ego={ego} type={"awaken"} displayName={false} style={{ display: "block", height: "46px", width: "154px", objectFit: "cover" }} />
+        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }} data-tooltip-id="ego-tooltip" data-tooltip-content={ego.id}>
+            <EgoImg ego={ego} type={"awaken"} displayName={false} style={{ display: "block", width: "100%", height: null, aspectRatio: "4/1", objectFit: "cover" }} />
             {displayType === 1 ? <div style={{
                 position: "absolute",
                 fontSize: "0.75rem",
@@ -71,7 +73,7 @@ function EgoProfile({ ego, displayType }) {
             }}>
                 {ego.name}
             </div> : null}
-            {displayType === 2 ? <div style={{ position: "absolute", width: "156px", height: "46px", background: "rgba(0, 0, 0, 0.65)", top: 0, left: 0 }}>
+            {displayType === 2 ? <div style={{ position: "absolute", width: "100%", aspectRatio: "4/1", background: "rgba(0, 0, 0, 0.65)", top: 0, left: 0 }}>
                 <div style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
                     <SkillTypes skillType={ego.awakeningType} />
                 </div>
@@ -79,14 +81,16 @@ function EgoProfile({ ego, displayType }) {
                 : null
             }
         </div>
-    </Link> : <div style={{ height: "46px", width: "158px", boxSizing: "border-box" }} />
+    </Link> : <div style={{ width: "100%", aspectRatio: "4/1", boxSizing: "border-box" }} />
 }
 
 const deploymentComponentStyle = {
     flex: 1,
     fontSize: "1.5rem",
     textAlign: "center",
-    height: "42px"
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center"
 }
 
 function DeploymentComponent({ order, activeSinners, sinnerId }) {
@@ -111,8 +115,6 @@ export default function BuildPage({ params }) {
     const modifiedTimeAgo = useTimeAgo(build && build.updated_at !== build.created_at ? build.updated_at : null);
     const teamCodeRef = useRef(null);
     const [copySuccess, setCopySuccess] = useState('');
-    const [liked, setLiked] = useState(false);
-    const [saved, setSaved] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
     const [commentCount, setCommentCount] = useState(0);
     const router = useRouter();
@@ -124,8 +126,8 @@ export default function BuildPage({ params }) {
     const [displayType, setDisplayType] = useState(null);
 
     useEffect(() => {
-        const saved = localStorage.getItem("buildDisplayType");
-        if (saved) setDisplayType(JSON.parse(saved));
+        const savedType = localStorage.getItem("buildDisplayType");
+        if (savedType) setDisplayType(JSON.parse(savedType));
         else setDisplayType(1);
     }, [])
     useEffect(() => {
@@ -143,13 +145,6 @@ export default function BuildPage({ params }) {
             });
     }, [id, loading]);
 
-    useEffect(() => {
-        if (user) {
-            isLiked(id, user.id).then(x => setLiked(x));
-            isSaved(id, user.id).then(x => setSaved(x));
-        }
-    }, [id, user])
-
     const handleTeamCodeCopy = async () => {
         if (teamCodeRef.current) {
             try {
@@ -161,28 +156,6 @@ export default function BuildPage({ params }) {
                 setTimeout(() => setCopySuccess(''), 2000);
                 console.error('Failed to copy text: ', err);
             }
-        }
-    };
-
-    const toggleLike = async () => {
-        if (liked) {
-            await deleteLike(id);
-            setLiked(false);
-            setLikeCount(p => p - 1);
-        } else {
-            await insertLike(id);
-            setLiked(true);
-            setLikeCount(p => p + 1);
-        }
-    };
-
-    const toggleSave = async () => {
-        if (saved) {
-            await deleteSave(id);
-            setSaved(false);
-        } else {
-            await insertSave(id);
-            setSaved(true);
         }
     };
 
@@ -213,7 +186,7 @@ export default function BuildPage({ params }) {
 
     return loading ? <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontSize: "1.5rem", fontWeight: "bold" }}>
         Loading...
-    </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+    </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", containerType: "inline-size" }}>
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "end" }}>
             <div style={{ display: "flex", flexDirection: "column" }}>
                 <h2 style={{ display: "flex", fontSize: "1.2rem", fontWeight: "bold", alignItems: "center" }}>
@@ -233,19 +206,19 @@ export default function BuildPage({ params }) {
         </div>
 
         {identitiesLoading || egosLoading ? null :
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 360px)", width: "100%", justifyContent: "center", gap: "0.5rem" }}>
+            <div className="sinner-grid" style={{ alignSelf: "center" }}>
                 {Array.from({ length: 12 }, (_, index) =>
-                    <div key={index} style={{ display: "flex", flexDirection: "row", width: "350px", height: "230px", border: "1px #444 solid" }}>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
+                    <div key={index} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", border: "1px #444 solid" }}>
+                        <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
                             {build.identity_ids[index] ?
                                 <IdentityProfile identity={identities[build.identity_ids[index]]} displayType={displayType} /> :
-                                <div style={{ height: "192px", width: "192px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                    <SinnerIcon num={index + 1} style={{ height: "144px" }} />
+                                <div style={{ width: "100%", aspectRatio: "1/1", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    <SinnerIcon num={index + 1} style={{ width: "75%" }} />
                                 </div>
                             }
                             <DeploymentComponent order={build.deployment_order} activeSinners={build.active_sinners} sinnerId={index + 1} />
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+                        <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
                             {Array.from({ length: 5 }, (_, rank) => <EgoProfile key={rank} ego={egos[build.ego_ids[index][rank]] || null} displayType={displayType} />)}
                         </div>
                     </div>
@@ -253,7 +226,7 @@ export default function BuildPage({ params }) {
             </div>
         }
         <div style={{ height: "0.5rem" }} />
-        <div style={{ display: "flex", flexDirection: "row", width: "90%", alignSelf: "center" }}>
+        <div style={{ display: "flex", flexDirection: "row", width: "90%", alignSelf: "center", marginBottom: "1rem" }}>
             <div style={{ display: "flex", flexDirection: "column", paddingRight: "0.5rem", gap: "0.5rem", width: "70%" }}>
                 <span style={{ fontSize: "1.2rem" }}>Description</span>
                 <div className={{ maxWidth: "48rem", marginLeft: "auto", marginRight: "auto" }}>
@@ -261,6 +234,9 @@ export default function BuildPage({ params }) {
                         <MarkdownRenderer content={build.body} />
                     </div>
                 </div>
+                {build.youtube_video_id ? <div style={{ display: "flex", paddingTop: "1rem", alignSelf: "center", width: "100%", justifyContent: "center" }}>
+                    <YouTubeThumbnailEmbed videoId={build.youtube_video_id} />
+                </div> : null}
             </div>
 
             <div style={{ border: "1px #777 solid" }} />
@@ -287,15 +263,8 @@ export default function BuildPage({ params }) {
                     Tags: {build.tags.map((t, i) => <Tag key={i} tag={t.name} />)}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <button onClick={toggleLike} className={liked ? "toggle-button-active" : "toggle-button"} disabled={!user}>
-                        👍 {likeCount}
-                    </button>
-                    {
-                        user ?
-                            <button onClick={toggleSave} className={saved ? "toggle-button-active" : "toggle-button"}>
-                                ⭐ {saved ? "Saved" : "Save"}
-                            </button> : null
-                    }
+                    <LikeButton buildId={id} likeCount={likeCount} />
+                    <SaveButton buildId={id} />
                     <button onClick={() => setShareOpen(true)}>
                         🔗 Share
                     </button>
@@ -338,7 +307,7 @@ export default function BuildPage({ params }) {
                         }
                     </div>
                 </div>
-                <ImageStitcher identitiesList={build.identity_ids} outputFileName={`${build.id}.png`} />
+                <ImageStitcher build={build} outputFileName={`${build.id}.png`} />
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                     <button onClick={() => setShareOpen(false)}>Close</button>
                 </div>

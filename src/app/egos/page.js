@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Icon, EgoImg, RarityImg, SinnerIcon, Status, statuses, useData } from "@eldritchtools/limbus-shared-library";
-import { capitalizeFirstLetter, ColorResist, sinnerMapping } from "../utils";
+import { capitalizeFirstLetter, ColorResist, getSeasonString, sinnerMapping } from "../utils";
 import { selectStyle } from "../styles";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -11,10 +11,10 @@ const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const mainFilters = {
     "tier": ["zayin", "teth", "he", "waw", "aleph"],
-    "affinity": ["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"],
-    "skillType": ["Slash", "Pierce", "Blunt"],
-    "keyword": ["Burn", "Bleed", "Tremor", "Rupture", "Sinking", "Poise", "Charge"],
     "sinner": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "keyword": ["Burn", "Bleed", "Tremor", "Rupture", "Sinking", "Poise", "Charge"],
+    "affinity": ["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"],
+    "skillType": ["Slash", "Pierce", "Blunt"]
 }
 
 const keywordMapping = {
@@ -56,14 +56,14 @@ function EgoDetails({ id, ego }) {
         </div>)}
         {wrapCell(<SkillTypeIcons skill={ego.awakeningType} />)}
         {wrapCell("corrosionType" in ego ? <SkillTypeIcons skill={ego.corrosionType} /> : null)}
-        {wrapCell(<div style={{ display: "grid", gridTemplateColumns: "repeat(7, 64px)" }}>
+        {wrapCell(<div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(32px, 1fr))", width: "100%" }}>
             {mainFilters.affinity.map(affinity => <div key={affinity} style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "0.25rem" }}>
                 <Icon path={affinity} style={{ height: "32px", width: "32px" }} />
                 <span>{affinity in ego.cost ? ego.cost[affinity] : <span style={{ color: "#777" }}>0</span>}</span>
                 <span>{<ColorResist resist={ego.resists[affinity]} />}</span>
             </div>)}
         </div>)}
-        {wrapCell(<div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", maxWidth: "75ch", padding: "0.5rem", gap: "0.5rem" }}>
+        {wrapCell(<div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", maxWidth: "75ch", padding: "0.5rem", gap: "0.5rem", textAlign: "center" }}>
             {ego.keywordTags.sort().map(keyword => <Status key={keyword} id={keyword} style={{ height: "32px" }} />)}
         </div>)}
     </tr>
@@ -102,7 +102,7 @@ function checkSearchMatch(searchString, ego) {
     return false;
 }
 
-function EgoList({ egos, searchString, selectedMainFilters, displayType, separateSinners, selectedKeywords }) {
+function EgoList({ egos, searchString, selectedMainFilters, displayType, separateSinners, selectedKeywords, selectedSeasons }) {
     const filters = useMemo(() => selectedMainFilters.reduce((acc, filter) => {
         if (mainFiltersMapping[filter] in acc) acc[mainFiltersMapping[filter]].push(filter);
         else acc[mainFiltersMapping[filter]] = [filter];
@@ -130,8 +130,12 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
             if (!selectedKeywords.some(keywordOption => ego.keywordTags.includes(keywordOption.value))) return false;
         }
 
+        if (selectedSeasons.length !== 0) {
+            if (!selectedSeasons.some(season => season.value === ego.season) && !(selectedSeasons.some(season => season.value === 9100) && ego.season > 9100)) return false;
+        }
+
         return true;
-    }), [searchString, filters, egos, selectedKeywords]);
+    }), [searchString, filters, egos, selectedKeywords, selectedSeasons]);
 
     const splitBySinner = list => list.reduce((acc, [id, ego]) => {
         if (ego.sinnerId in acc) acc[ego.sinnerId].push([id, ego]);
@@ -153,7 +157,9 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
                         <SinnerIcon num={sinnerId} style={{ height: "48px" }} />
                         {sinnerMapping[sinnerId]}
                     </div>,
-                    listToComponents(list)
+                    <div key={`${sinnerId}-list`}>
+                        {listToComponents(list)}
+                    </div>
                 ]).flat()}
             </div>
         } else {
@@ -171,41 +177,45 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
                         <SinnerIcon num={sinnerId} style={{ height: "48px" }} />
                         {sinnerMapping[sinnerId]}
                     </div>,
-                    listToComponents(list)
+                    <div key={`${sinnerId}-list`}>
+                        {listToComponents(list)}
+                    </div>
                 ]).flat()}
             </div>
         } else {
             return listToComponents(list);
         }
     } else if (displayType === "full") {
-        return <table style={{ borderCollapse: "collapse", width: "100%" }}>
-            <thead>
-                <tr style={{ height: "1.25rem" }}>
-                    <th>Rank</th>
-                    <th>Icon</th>
-                    <th>Name</th>
-                    <th>Awakening</th>
-                    <th>Corrosion</th>
-                    <th>Costs/Resists</th>
-                    <th>Statuses</th>
-                </tr>
-            </thead>
-            <tbody>
-                {
-                    separateSinners ?
-                        Object.entries(splitBySinner(list)).map(([sinnerId, list]) => [
-                            <tr key={sinnerId}><td colSpan={7} style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid" }}>
-                                <div style={{ display: "flex", flexDirection: "row", alignItems: "center", fontSize: "1.2rem", fontWeight: "bold", }}>
-                                    <SinnerIcon num={sinnerId} style={{ height: "48px" }} />
-                                    {sinnerMapping[sinnerId]}
-                                </div>
-                            </td></tr>,
+        return <div style={{ display: "flex", overflowX: "auto", width: "100%" }}>
+            <table style={{ borderCollapse: "collapse", width: "100%" }}>
+                <thead>
+                    <tr style={{ height: "1.25rem" }}>
+                        <th>Rank</th>
+                        <th>Icon</th>
+                        <th>Name</th>
+                        <th>Awakening</th>
+                        <th>Corrosion</th>
+                        <th>Costs/Resists</th>
+                        <th>Statuses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        separateSinners ?
+                            Object.entries(splitBySinner(list)).map(([sinnerId, list]) => [
+                                <tr key={sinnerId}><td colSpan={7} style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid" }}>
+                                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center", fontSize: "1.2rem", fontWeight: "bold", }}>
+                                        <SinnerIcon num={sinnerId} style={{ height: "48px" }} />
+                                        {sinnerMapping[sinnerId]}
+                                    </div>
+                                </td></tr>,
+                                list.map(([id, ego]) => <EgoDetails key={id} id={id} ego={ego} />)
+                            ]).flat() :
                             list.map(([id, ego]) => <EgoDetails key={id} id={id} ego={ego} />)
-                        ]).flat() :
-                        list.map(([id, ego]) => <EgoDetails key={id} id={id} ego={ego} />)
-                }
-            </tbody>
-        </table>
+                    }
+                </tbody>
+            </table>
+        </div>
     } else {
         return null;
     }
@@ -226,7 +236,8 @@ function MainFilterSelector({ selectedMainFilters, setSelectedMainFilters }) {
     const toggleComponent = (filter, selected) => {
         return <div key={filter} style={{
             backgroundColor: selected ? "#3f3f3f" : "#1f1f1f", height: "32px", display: "flex",
-            alignItems: "center", justifyContent: "center", padding: "0.1rem 0.2rem", cursor: "pointer"
+            alignItems: "center", justifyContent: "center", padding: "0.1rem 0.2rem", cursor: "pointer",
+            borderBottom: selected ? "2px #4caf50 solid" : "transparent"
         }}
             onClick={() => handleToggle(filter, selected)}
         >
@@ -234,9 +245,30 @@ function MainFilterSelector({ selectedMainFilters, setSelectedMainFilters }) {
         </div>
     }
 
-    return <div style={{ display: "flex", flexWrap: "wrap", border: "1px #777 dotted", borderRadius: "1rem", minWidth: "200px", padding: "0.5rem" }}>
-        {Object.entries(mainFilters).reduce((acc, [_, list]) => [...acc, list.map(filter => toggleComponent(filter, selectedMainFilters.includes(filter)))], [])}
-        {<div style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }} onClick={clearAll}>Clear All</div>}
+    return <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", borderRadius: "1rem", minWidth: "200px", padding: "0.5rem" }}>
+        {
+            Object.entries(mainFilters).map(([category, list]) => {
+                if (category === "tier") {
+                    return <div key={category} style={{ display: "flex", flexDirection: "column", borderBottom: "1px #777 dotted" }}>
+                        <div style={{ display: "flex", justifyContent: "center", padding: "0.2rem" }}>
+                            {list.slice(0, 3).map(filter => toggleComponent(filter, selectedMainFilters.includes(filter)))}
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "center", padding: "0.2rem" }}>
+                            {list.slice(3, 5).map(filter => toggleComponent(filter, selectedMainFilters.includes(filter)))}
+                        </div>
+                    </div>
+                } else if (category === "sinner") {
+                    return <div key={category} style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", padding: "0.2rem", borderBottom: "1px #777 dotted" }}>
+                        {list.map(filter => toggleComponent(filter, selectedMainFilters.includes(filter)))}
+                    </div>
+                } else {
+                    return <div key={category} style={{ display: "flex", justifyContent: "center", padding: "0.2rem", borderBottom: "1px #777 dotted" }}>
+                        {list.map(filter => toggleComponent(filter, selectedMainFilters.includes(filter)))}
+                    </div>
+                }
+            })
+        }
+        {<div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: "0.5rem", cursor: "pointer" }} onClick={clearAll}>Clear All</div>}
     </div>
 }
 
@@ -271,58 +303,61 @@ export default function EgosPage() {
 
     const [separateSinners, setSeparateSinners] = useState(false);
     const [selectedKeywords, setSelectedKeywords] = useState([]);
+    const [selectedSeasons, setSelectedSeasons] = useState([]);
 
-    const keywordOptions = useMemo(() => {
+    const [keywordOptions, seasonOptions] = useMemo(() => {
         if (egosLoading) return [];
         const keywordList = new Set();
+        const seasonList = new Set();
+        seasonList.add(9100);
 
         Object.entries(egos).forEach(([_id, ego]) => {
             ego.keywordTags.forEach(keyword => keywordList.add(keyword))
+            seasonList.add(ego.season);
         })
 
-        return [...keywordList].map(id => ({
+        return [[...keywordList].map(id => ({
             value: id,
             label: <Status id={id} includeTooltip={false} />,
             name: statuses[id].name
-        })).sort((a, b) => a.name.localeCompare(b.name))
+        })).sort((a, b) => a.name.localeCompare(b.name)), [...seasonList].map(season => ({
+            value: season,
+            label: season === 9100 ? "Walpurgisnacht (any)" : getSeasonString(season),
+            name: season === 9100 ? "Walpurgisnacht" : getSeasonString(season)
+        })).sort((a, b) => a.value - b.value)]
     }, [egos, egosLoading]);
 
     return <div style={{ display: "flex", flexDirection: "column", maxHeight: "100%", width: "100%", gap: "1rem", alignItems: "center" }}>
-        <div style={{ display: "flex", flexDirection: "row", gap: "2rem", flexWrap: "wrap", justifyContent: "center" }}>
-            <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, auto)", alignItems: "center", justifyContent: "center", gap: "0.25rem" }}>
-                    <span style={{ textAlign: 'end' }}>Search:</span>
-                    <input value={searchString} onChange={e => setSearchString(e.target.value)} />
-                    <span style={{ textAlign: "end" }}>Display Type:</span>
-                    <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
-                        <label>
-                            <input type="radio" name="displayType" value={"icon"} checked={displayType === "icon"} onChange={e => setDisplayType(e.target.value)} />
-                            Icons Only
-                        </label>
-                        <label>
-                            <input type="radio" name="displayType" value={"card"} checked={displayType === "card"} onChange={e => setDisplayType(e.target.value)} />
-                            Cards
-                        </label>
-                        <label>
-                            <input type="radio" name="displayType" value={"full"} checked={displayType === "full"} onChange={e => setDisplayType(e.target.value)} />
-                            Full Details
-                        </label>
-                    </div>
-                    <div>
-                    </div>
+        <div style={{ display: "flex", gap: "2rem", alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, auto)", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+                <span style={{ textAlign: 'end' }}>Search:</span>
+                <input value={searchString} onChange={e => setSearchString(e.target.value)} />
+                <span style={{ textAlign: "end" }}>Filter Statuses:</span>
+                <MultiSelector options={keywordOptions} selected={selectedKeywords} setSelected={setSelectedKeywords} placeholder={"Select Statuses..."} />
+                <span style={{ textAlign: "end" }}>Filter Season:</span>
+                <MultiSelector options={seasonOptions} selected={selectedSeasons} setSelected={setSelectedSeasons} placeholder={"Select Seasons..."} />
+                <span style={{ textAlign: "end" }}>Display Type:</span>
+                <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
+                    <label>
+                        <input type="radio" name="displayType" value={"icon"} checked={displayType === "icon"} onChange={e => setDisplayType(e.target.value)} />
+                        Icons Only
+                    </label>
+                    <label>
+                        <input type="radio" name="displayType" value={"card"} checked={displayType === "card"} onChange={e => setDisplayType(e.target.value)} />
+                        Cards
+                    </label>
+                    <label>
+                        <input type="radio" name="displayType" value={"full"} checked={displayType === "full"} onChange={e => setDisplayType(e.target.value)} />
+                        Full Details
+                    </label>
                 </div>
+                <div />
+                <label>
+                    <input type="checkbox" checked={separateSinners} onChange={e => setSeparateSinners(e.target.checked)} />
+                    Separate by Sinner
+                </label>
             </div>
             <MainFilterSelector selectedMainFilters={selectedMainFilters} setSelectedMainFilters={setSelectedMainFilters} />
-        </div>
-        <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: "1rem" }}>
-            <label>
-                <input type="checkbox" checked={separateSinners} onChange={e => setSeparateSinners(e.target.checked)} />
-                Separate Sinners
-            </label>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
-                Filter Statuses:
-                <MultiSelector options={keywordOptions} selected={selectedKeywords} setSelected={setSelectedKeywords} placeholder={"Select Statuses..."} />
-            </div>
         </div>
         {egosLoading ? null :
             <EgoList
@@ -332,6 +367,7 @@ export default function EgosPage() {
                 displayType={displayType}
                 separateSinners={separateSinners}
                 selectedKeywords={selectedKeywords}
+                selectedSeasons={selectedSeasons}
             />}
     </div>;
 }

@@ -12,8 +12,8 @@ function TooltipContent({ id }) {
 
     return <div style={tooltipStyle}>
         <div style={{ display: "flex", flexDirection: "row", padding: "0.5rem", gap: "0.5rem" }}>
-            <IdentityImg identity={identity} uptie={4} displayName={false} scale={0.5} />
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <IdentityImg identity={identity} uptie={4} displayName={false} width={128} />
+            <div style={{ display: "flex", flexDirection: "column", width: "192px" }}>
                 <div style={{ flex: 1 }}>{identity.name}</div>
                 <div style={{ flex: 1, display: "flex" }}>
                     {identity.skillKeywordList.map(x => <KeywordIcon key={x} id={x} />)}

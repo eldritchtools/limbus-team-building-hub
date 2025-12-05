@@ -21,9 +21,9 @@ function TooltipContent({ id }) {
 
     return <div style={tooltipStyle}>
         <div style={{ display: "flex", flexDirection: "row", padding: "0.5rem", gap: "0.5rem" }}>
-            <EgoImg ego={ego} type={"awaken"} displayName={false} scale={0.5} />
-            <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ flex: 1 }}>{ego.name}</div>
+            <EgoImg ego={ego} type={"awaken"} displayName={false} width={128} />
+            <div style={{ display: "flex", flexDirection: "column", width: "192px" }}>
+                <div style={{ flex: 1, wordWrap: "normal" }}>{ego.name}</div>
                 <div style={{ flex: 1, display: "flex" }}>
                     {types.map(x => <KeywordIcon key={x} id={x} />)}
                 </div>

@@ -11,6 +11,8 @@ import { affinityColorMapping } from "../utils";
 import { useAuth } from "../database/authProvider";
 import { useRouter } from "next/navigation";
 import MarkdownEditor from "./MarkdownEditor";
+import "./SinnerGrid.css";
+import { extractYouTubeId } from "../YoutubeUtils";
 
 const egoRankMapping = {
     "ZAYIN": 0,
@@ -39,9 +41,9 @@ function IdentitySelector({ value, setValue, options, num }) {
 
     return (
         <Select.Root value={value ? value.id : null} onValueChange={v => setValue(v)} open={isOpen} onOpenChange={handleOpenChange}>
-            <Select.Trigger className="identity-select-trigger" ref={triggerRef}>
-                {value ? <div data-tooltip-id="identity-tooltip" data-tooltip-content={value.id} style={{ position: "relative" }}>
-                    <IdentityImg identity={value} uptie={4} displayName={false} scale={0.75} />
+            <Select.Trigger className="identity-select-trigger" ref={triggerRef} style={{ width: "100%", padding: 0, margin: 0, boxSizing: "border-box" }}>
+                {value ? <div data-tooltip-id="identity-tooltip" data-tooltip-content={value.id} style={{ width: "100%", position: "relative" }}>
+                    <IdentityImg identity={value} uptie={4} displayName={false} width={"100%"} />
                     <div style={{
                         position: "absolute",
                         bottom: "5px",
@@ -53,7 +55,7 @@ function IdentitySelector({ value, setValue, options, num }) {
                         {value.name}
                     </div>
                 </div> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <SinnerIcon num={num} style={{ height: "144px", width: "144px" }} />
+                    <SinnerIcon num={num} style={{ height: "75%", width: "75%" }} />
                 </div>}
             </Select.Trigger>
 
@@ -95,9 +97,9 @@ function EgoSelector({ value, setValue, options }) {
 
     return (
         <Select.Root value={value ? value.id : null} onValueChange={v => setValue(v)} open={isOpen} onOpenChange={setIsOpen}>
-            <Select.Trigger className="ego-select-trigger" ref={triggerRef} style={{ borderColor: value ? affinityColorMapping[value.affinity] : "#555", flex: 1 }}>
-                {value ? <div data-tooltip-id="ego-tooltip" data-tooltip-content={value.id} style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "158px", height: "42px" }}>
-                    <EgoImg ego={value} type={"awaken"} displayName={false} style={{ display: "block", height: "42px", width: "160px", objectFit: "cover" }} />
+            <Select.Trigger className="ego-select-trigger" ref={triggerRef} style={{ borderColor: value ? affinityColorMapping[value.affinity] : "#555", flex: 1, padding: 0, margin: 0, boxSizing: "border-box" }}>
+                {value ? <div data-tooltip-id="ego-tooltip" data-tooltip-content={value.id} style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }}>
+                    <EgoImg ego={value} type={"awaken"} displayName={false} style={{ display: "block", width: "100%", height: null, aspectRatio: "4/1", objectFit: "cover" }} />
                     <div style={{
                         position: "absolute",
                         fontSize: "0.75rem",
@@ -160,14 +162,25 @@ function ActiveSinnersInput({ value, setValue, min = 1, max = 12 }) {
     );
 }
 
+const deploymentComponentStyle = {
+    flex: 1,
+    fontSize: "1.5rem",
+    textAlign: "center",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 0,
+    margin: 0
+}
+
 function DeploymentComponent({ order, setOrder, activeSinners, sinnerId }) {
     const index = order.findIndex(x => x === sinnerId);
     if (index === -1) {
-        return <button onClick={() => setOrder(p => [...p, sinnerId])} style={{ flex: 1, fontSize: "1.5rem" }}>Deploy</button>
+        return <button onClick={() => setOrder(p => [...p, sinnerId])} style={deploymentComponentStyle}>Deploy</button>
     } else if (index < activeSinners) {
-        return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={{ flex: 1, fontSize: "1.5rem", color: "#fefe3d" }}>Active {index + 1}</button>
+        return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={{ ...deploymentComponentStyle, color: "#fefe3d" }}>Active {index + 1}</button>
     } else {
-        return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={{ flex: 1, fontSize: "1.5rem", color: "#29fee9" }}>Backup {index + 1 - activeSinners}</button>
+        return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={{ ...deploymentComponentStyle, color: "#29fee9" }}>Backup {index + 1 - activeSinners}</button>
     }
 }
 
@@ -180,6 +193,7 @@ export default function BuildEditor({ mode, buildId }) {
     const [deploymentOrder, setDeploymentOrder] = useState([]);
     const [activeSinners, setActiveSinners] = useState(7);
     const [teamCode, setTeamCode] = useState('');
+    const [youtubeVideo, setYoutubeVideo] = useState('');
     const [tags, setTags] = useState([]);
     const [isPublished, setIsPublished] = useState(false);
     const [loading, setLoading] = useState(mode === "edit");
@@ -204,6 +218,7 @@ export default function BuildEditor({ mode, buildId }) {
                     setDeploymentOrder(build.deployment_order);
                     setActiveSinners(build.active_sinners);
                     setTeamCode(build.team_code);
+                    setYoutubeVideo(build.youtube_video_id ?? '');
                     setTags(build.tags.map(t => tagToTagSelectorOption(t)));
                     setIsPublished(build.is_published);
                     setLoading(false);
@@ -243,44 +258,45 @@ export default function BuildEditor({ mode, buildId }) {
         }
         const keywordsConverted = keywordIds.map(kw => keywordToIdMapping[kw]);
         const tagsConverted = tags.map(t => t.value);
+        const youtubeVideoId = extractYouTubeId(youtubeVideo.trim());
+
+        if (youtubeVideo.trim().length > 0 && youtubeVideoId === null) {
+            setMessage("Invalid YouTube video id.");
+            return;
+        }
 
         setSaving(true);
         if (mode === "edit") {
-            const data = await updateBuild(buildId, user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, tagsConverted, isPublished);
+            const data = await updateBuild(buildId, user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, isPublished);
             router.push(`/builds/${data}`);
         } else {
-            const data = await insertBuild(user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, tagsConverted, isPublished);
+            const data = await insertBuild(user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, isPublished);
             router.push(`/builds/${data}`);
         }
     }
 
     return loading ? <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontSize: "1.5rem", fontWeight: "bold" }}>
         Loading...
-    </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+    </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", containerType: "inline-size" }}>
         <span style={{ fontSize: "1.2rem" }}>Title</span>
         <input type="text" value={title} style={{ width: "100ch" }} onChange={e => setTitle(e.target.value)} />
         <span style={{ fontSize: "1.2rem" }}>Team Build</span>
         {identitiesLoading || egosLoading ? null :
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 360px)", width: "100%", justifyContent: "center", gap: "0.5rem" }}>
+            <div className="sinner-grid" style={{ alignSelf: "center", width: "98%", paddingBottom: "1rem" }}>
                 {Array.from({ length: 12 }, (_, index) =>
-                    <div key={index} style={{ display: "flex", flexDirection: "row", width: "360px", height: "245px" }}>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
+                    <div key={index} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", aspectRatio: "8/5", boxSizing: "border-box" }}>
+                        <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
                             <IdentitySelector value={identities[identityIds[index]] || null} setValue={v => setIdentityId(v, index)} options={identityOptions[index + 1]} num={index + 1} />
                             <DeploymentComponent order={deploymentOrder} setOrder={setDeploymentOrder} activeSinners={activeSinners} sinnerId={index + 1} />
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+                        <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
                             {Array.from({ length: 5 }, (_, rank) => <EgoSelector key={rank} value={egos[egoIds[index][rank]] || null} setValue={v => setEgoId(v, index, rank)} options={egoOptions[index + 1][rank]} />)}
                         </div>
                     </div>
-
-                    // <div key={index} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "360px", height: "245px" }}>
-                    //     <div style={{gridColumn: "1", gridRow: "1 / span 4"}}><IdentitySelector value={identities[identityIds[index]] || null} setValue={v => setIdentityId(v, index)} options={identityOptions[index + 1]} /></div>
-                    //     <div style={{gridColumn: "1", gridRow: "5"}}><DeploymentComponent order={deploymentOrder} setOrder={setDeploymentOrder} activeSinners={activeSinners} sinnerId={index + 1} /></div>
-                    //     {Array.from({ length: 5 }, (_, rank) => <div key={rank} style={{gridColumn: "2"}}><EgoSelector value={egos[egoIds[index][rank]] || null} setValue={v => setEgoId(v, index, rank)} options={egoOptions[index + 1][rank]} /></div>)}
-                    // </div>
                 )}
             </div>
         }
+
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
             <span style={{ fontSize: "1.2rem" }}>Active Sinners</span>
             <ActiveSinnersInput value={activeSinners} setValue={setActiveSinners} />
@@ -296,19 +312,19 @@ export default function BuildEditor({ mode, buildId }) {
                 <span style={{ paddingRight: "0.2rem" }}>Selected:</span>
                 {keywordIds.map(x =>
                     <button key={x} onClick={() => setKeywordIds(p => p.filter(k => k !== x))} style={{ display: "flex", alignItems: "center", fontSize: "1rem" }}>
-                        <KeywordIcon id={x} />x{keywordOptions[x]}
+                        <KeywordIcon id={x} />
                     </button>
                 )}
             </div>
             <div style={{ display: "flex", gap: "0.2rem", alignItems: "center", minHeight: "50px", flexWrap: "wrap" }}>
-                <span style={{ paddingRight: "0.2rem" }}>Suggested:</span>
+                <span style={{ paddingRight: "0.2rem" }}>Recommended:</span>
                 {
                     Object.entries(keywordOptions)
                         .filter(([x, _]) => !keywordIds.includes(x))
                         .sort((a, b) => b[1] === a[1] ? keywordToIdMapping[a[0]] - keywordToIdMapping[b[0]] : b[1] - a[1])
                         .map(([x, n]) =>
                             <button key={x} onClick={() => setKeywordIds(p => [...p, x])} style={{ display: "flex", alignItems: "center", fontSize: "1rem" }}>
-                                <KeywordIcon id={x} />x{n}
+                                <KeywordIcon id={x} />
                             </button>
                         )
                 }
@@ -320,6 +336,15 @@ export default function BuildEditor({ mode, buildId }) {
         <div>
             <textarea value={teamCode} onChange={e => setTeamCode(e.target.value)} rows={3} cols={100} />
         </div>
+        <div>
+            <span style={{ fontSize: "1.2rem" }} >Video</span>
+        </div>
+        <div>
+            <input type="text" value={youtubeVideo} onChange={(e) => setYoutubeVideo(e.target.value)} size={50} placeholder="Paste a YouTube Video link or id (optional)" />
+        </div>
+        {youtubeVideo.length > 0 ?
+            <span style={{ fontSize: "0.8rem" }}>Youtube Video Id: {extractYouTubeId(youtubeVideo.trim()) ?? "Not found"}</span> :
+            null}
         <span style={{ fontSize: "1.2rem" }}>Tags</span>
         <TagSelector selected={tags} onChange={setTags} creatable={true} />
         {isPublished ?

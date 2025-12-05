@@ -15,6 +15,7 @@ export default function ProfilePage() {
     const [builds, setBuilds] = useState([]);
     const [buildsLoading, setBuildsLoading] = useState(false);
     const [page, setPage] = useState(1);
+    const [updating, setUpdating] = useState(false);
 
     useEffect(() => {
         if (profile) setUsername(profile.username);
@@ -57,8 +58,7 @@ export default function ProfilePage() {
             <h2>Login to see your profile.</h2>
         </div>
 
-    const handleUpdate = async (e) => {
-        e.preventDefault();
+    const handleUpdate = async () => {
         setError('');
 
         if (!username.trim()) {
@@ -66,9 +66,11 @@ export default function ProfilePage() {
             return;
         }
 
+        setUpdating(true);
         const { error: insertError } = await updateUsername(user.id, username);
 
         if (insertError) {
+            setUpdating(false);
             if (insertError.code === '23505') {
                 // unique constraint violation
                 setError('That username is already taken.');
@@ -88,7 +90,7 @@ export default function ProfilePage() {
             Username: <input value={username} onChange={e => setUsername(e.target.value)} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <button onClick={() => handleUpdate()}>Update Profile</button>
+            <button onClick={handleUpdate} disabled={updating}>Update Profile</button>
             {error}
         </div>
         <h2>Builds</h2>
@@ -108,7 +110,7 @@ export default function ProfilePage() {
                     {page === 1 ? `No ${activeTab === "published" ? "published builds" : activeTab === "drafts" ? "drafts" : "saved builds"} yet.` : "No more builds."}
                 </p> :
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 720px)", gap: "0.5rem", justifyContent: "center" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 640px)", gap: "0.5rem", justifyContent: "center" }}>
                         {builds.map(build => <BuildEntry key={build.id} build={build} />)}
                     </div>
 

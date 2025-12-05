@@ -8,6 +8,7 @@ CREATE OR REPLACE FUNCTION create_build_with_tags(
   p_deployment_order INT[],
   p_active_sinners INT,
   p_team_code TEXT,
+  p_youtube_video_id TEXT,
   p_tags TEXT[],
   p_published BOOLEAN
 )
@@ -18,8 +19,8 @@ DECLARE
   tag_name TEXT;
   tag_id INT;
 BEGIN
-  INSERT INTO builds (user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, is_published)
-  VALUES (p_user_id, p_title, p_body, p_identity_ids, p_ego_ids, p_keyword_ids, p_deployment_order, p_active_sinners, p_team_code, p_published)
+  INSERT INTO builds (user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, is_published)
+  VALUES (p_user_id, p_title, p_body, p_identity_ids, p_ego_ids, p_keyword_ids, p_deployment_order, p_active_sinners, p_team_code, p_youtube_video_id, p_published)
   RETURNING id INTO new_build_id;
 
   FOREACH tag_name IN ARRAY p_tags LOOP

@@ -25,12 +25,19 @@ CREATE TABLE public.builds (
   deployment_order INTEGER[] DEFAULT '{}',
   active_sinners INTEGER NOT NULL,
   team_code TEXT,
+  youtube_video_id TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   like_count INTEGER DEFAULT 0,
   comment_count INTEGER DEFAULT 0,
   score NUMERIC DEFAULT 0,
   is_published BOOLEAN DEFAULT TRUE
+);
+
+ALTER TABLE public.builds
+ADD CONSTRAINT youtube_id_format CHECK (
+  youtube_video_id IS NULL OR
+  youtube_video_id ~ '^[a-zA-Z0-9_-]{6,}$'
 );
 
 -- ========================
@@ -92,9 +99,11 @@ CREATE TABLE public.notifications (
 CREATE TABLE public.popular_builds_cache (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   build_id UUID NOT NULL REFERENCES public.builds(id) ON DELETE CASCADE,
-  username TEXT NOT NULL,
+  user_id UUID NOT NULL,
   title TEXT NOT NULL,
   score NUMERIC NOT NULL,
+  deployment_order INTEGER[] DEFAULT '{}',
+  active_sinners INTEGER DEFAULT 0,
   like_count INTEGER DEFAULT 0,
   comment_count INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL,

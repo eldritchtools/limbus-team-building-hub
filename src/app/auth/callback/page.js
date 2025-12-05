@@ -21,7 +21,7 @@ export default function AuthCallback() {
         if (!profile) {
             (async () => {
                 await refreshProfile(); // make sure we didn’t just miss it
-                router.replace('/setup/username');
+                router.replace('/login/setup');
             })();
             return;
         }

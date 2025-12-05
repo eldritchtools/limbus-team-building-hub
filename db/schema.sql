@@ -25,12 +25,19 @@ CREATE TABLE public.builds (
   deployment_order INTEGER[] DEFAULT '{}',
   active_sinners INTEGER NOT NULL,
   team_code TEXT,
+  youtube_video_id TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   like_count INTEGER DEFAULT 0,
   comment_count INTEGER DEFAULT 0,
   score NUMERIC DEFAULT 0,
   is_published BOOLEAN DEFAULT TRUE
+);
+
+ALTER TABLE public.builds
+ADD CONSTRAINT youtube_id_format CHECK (
+  youtube_video_id IS NULL OR
+  youtube_video_id ~ '^[a-zA-Z0-9_-]{6,}$'
 );
 
 -- ========================

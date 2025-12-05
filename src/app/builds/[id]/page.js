@@ -19,6 +19,7 @@ import MarkdownRenderer from "@/app/components/MarkdownRenderer";
 import ImageStitcher from "@/app/components/ImageStitcher";
 import LikeButton from "@/app/components/LikeButton";
 import SaveButton from "@/app/components/SaveButton";
+import { YouTubeThumbnailEmbed } from "@/app/YoutubeUtils";
 
 function SkillTypes({ skillType }) {
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.2rem", width: "100%", height: "100%", justifyContent: "center" }}>
@@ -205,7 +206,7 @@ export default function BuildPage({ params }) {
         </div>
 
         {identitiesLoading || egosLoading ? null :
-            <div className="sinner-grid" style={{alignSelf: "center"}}>
+            <div className="sinner-grid" style={{ alignSelf: "center" }}>
                 {Array.from({ length: 12 }, (_, index) =>
                     <div key={index} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", border: "1px #444 solid" }}>
                         <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
@@ -225,7 +226,7 @@ export default function BuildPage({ params }) {
             </div>
         }
         <div style={{ height: "0.5rem" }} />
-        <div style={{ display: "flex", flexDirection: "row", width: "90%", alignSelf: "center" }}>
+        <div style={{ display: "flex", flexDirection: "row", width: "90%", alignSelf: "center", marginBottom: "1rem" }}>
             <div style={{ display: "flex", flexDirection: "column", paddingRight: "0.5rem", gap: "0.5rem", width: "70%" }}>
                 <span style={{ fontSize: "1.2rem" }}>Description</span>
                 <div className={{ maxWidth: "48rem", marginLeft: "auto", marginRight: "auto" }}>
@@ -233,6 +234,9 @@ export default function BuildPage({ params }) {
                         <MarkdownRenderer content={build.body} />
                     </div>
                 </div>
+                {build.youtube_video_id ? <div style={{ display: "flex", paddingTop: "1rem", alignSelf: "center", width: "100%", justifyContent: "center" }}>
+                    <YouTubeThumbnailEmbed videoId={build.youtube_video_id} />
+                </div> : null}
             </div>
 
             <div style={{ border: "1px #777 solid" }} />

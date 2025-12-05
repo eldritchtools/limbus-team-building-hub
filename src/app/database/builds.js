@@ -45,7 +45,7 @@ async function getBuild(id, forEdit = false) {
     return data;
 }
 
-async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, tags, is_published) {
+async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, is_published) {
     const { data, error } = await getSupabase().rpc('create_build_with_tags', {
         p_user_id: user_id,
         p_title: title,
@@ -56,6 +56,7 @@ async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_
         p_deployment_order: deployment_order,
         p_active_sinners: active_sinners,
         p_team_code: team_code,
+        p_youtube_video_id: youtube_video_id,
         p_tags: tags,
         p_published: is_published
     });
@@ -64,7 +65,7 @@ async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_
     return data;
 }
 
-async function updateBuild(build_id, user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, tags, is_published) {
+async function updateBuild(build_id, user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, is_published) {
     const { error } = await getSupabase().rpc('update_build_with_tags', {
         p_build_id: build_id,
         p_user_id: user_id,
@@ -76,6 +77,7 @@ async function updateBuild(build_id, user_id, title, body, identity_ids, ego_ids
         p_deployment_order: deployment_order,
         p_active_sinners: active_sinners,
         p_team_code: team_code,
+        p_youtube_video_id: youtube_video_id,
         p_tags: tags,
         p_published: is_published
     });

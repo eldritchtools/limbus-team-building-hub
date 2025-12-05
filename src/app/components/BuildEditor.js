@@ -12,6 +12,7 @@ import { useAuth } from "../database/authProvider";
 import { useRouter } from "next/navigation";
 import MarkdownEditor from "./MarkdownEditor";
 import "./SinnerGrid.css";
+import { extractYouTubeId } from "../YoutubeUtils";
 
 const egoRankMapping = {
     "ZAYIN": 0,
@@ -192,6 +193,7 @@ export default function BuildEditor({ mode, buildId }) {
     const [deploymentOrder, setDeploymentOrder] = useState([]);
     const [activeSinners, setActiveSinners] = useState(7);
     const [teamCode, setTeamCode] = useState('');
+    const [youtubeVideo, setYoutubeVideo] = useState('');
     const [tags, setTags] = useState([]);
     const [isPublished, setIsPublished] = useState(false);
     const [loading, setLoading] = useState(mode === "edit");
@@ -216,6 +218,7 @@ export default function BuildEditor({ mode, buildId }) {
                     setDeploymentOrder(build.deployment_order);
                     setActiveSinners(build.active_sinners);
                     setTeamCode(build.team_code);
+                    setYoutubeVideo(build.youtube_video_id ?? '');
                     setTags(build.tags.map(t => tagToTagSelectorOption(t)));
                     setIsPublished(build.is_published);
                     setLoading(false);
@@ -255,13 +258,19 @@ export default function BuildEditor({ mode, buildId }) {
         }
         const keywordsConverted = keywordIds.map(kw => keywordToIdMapping[kw]);
         const tagsConverted = tags.map(t => t.value);
+        const youtubeVideoId = extractYouTubeId(youtubeVideo.trim());
+
+        if (youtubeVideo.trim().length > 0 && youtubeVideoId === null) {
+            setMessage("Invalid YouTube video id.");
+            return;
+        }
 
         setSaving(true);
         if (mode === "edit") {
-            const data = await updateBuild(buildId, user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, tagsConverted, isPublished);
+            const data = await updateBuild(buildId, user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, isPublished);
             router.push(`/builds/${data}`);
         } else {
-            const data = await insertBuild(user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, tagsConverted, isPublished);
+            const data = await insertBuild(user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, isPublished);
             router.push(`/builds/${data}`);
         }
     }
@@ -327,6 +336,15 @@ export default function BuildEditor({ mode, buildId }) {
         <div>
             <textarea value={teamCode} onChange={e => setTeamCode(e.target.value)} rows={3} cols={100} />
         </div>
+        <div>
+            <span style={{ fontSize: "1.2rem" }} >Video</span>
+        </div>
+        <div>
+            <input type="text" value={youtubeVideo} onChange={(e) => setYoutubeVideo(e.target.value)} size={50} placeholder="Paste a YouTube Video link or id (optional)" />
+        </div>
+        {youtubeVideo.length > 0 ?
+            <span style={{ fontSize: "0.8rem" }}>Youtube Video Id: {extractYouTubeId(youtubeVideo.trim()) ?? "Not found"}</span> :
+            null}
         <span style={{ fontSize: "1.2rem" }}>Tags</span>
         <TagSelector selected={tags} onChange={setTags} creatable={true} />
         {isPublished ?

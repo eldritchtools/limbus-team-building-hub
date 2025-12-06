@@ -8,12 +8,12 @@ export default function LikeButton({ buildId, likeCount }) {
     const [count, setCount] = useState(likeCount);
 
     useEffect(() => { if (user) fetchUserData([buildId]) }, [fetchUserData, buildId, user]);
+    const liked = likedMap[buildId];
+
     if (!user)
-        return <button className={liked ? "toggle-button-active" : "toggle-button"} disabled={true}>
+        return <button className={liked ? "toggle-button-active" : "toggle-button"} disabled={true} title="Login required">
             👍 {count}
         </button>
-
-    const liked = likedMap[buildId];
 
     if (liked === undefined || liked === null) return null;
 

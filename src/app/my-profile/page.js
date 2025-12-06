@@ -28,13 +28,13 @@ export default function ProfilePage() {
             case "published":
                 if (user) {
                     setBuildsLoading(true);
-                    getFilteredBuilds({ "user_id": user.id }, true, "recency", page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
+                    getFilteredBuilds({ "user_id": user.id }, true, "recency", false, page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
                 }
                 break;
             case "drafts":
                 if (user) {
                     setBuildsLoading(true);
-                    getFilteredBuilds({ "user_id": user.id }, false, "recency", page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
+                    getFilteredBuilds({ "user_id": user.id }, false, "recency", false, page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
                 }
                 break;
             case "saved":

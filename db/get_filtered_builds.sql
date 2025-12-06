@@ -11,7 +11,8 @@ CREATE OR REPLACE FUNCTION public.get_filtered_builds(
   p_published BOOLEAN DEFAULT TRUE,
   sort_by TEXT DEFAULT 'score',
   limit_count INTEGER DEFAULT 20,
-  offset_count INTEGER DEFAULT 0
+  offset_count INTEGER DEFAULT 0,
+  strict_filter BOOLEAN DEFAULT FALSE
 )
 RETURNS TABLE (
   id UUID,
@@ -57,23 +58,41 @@ BEGIN
     AND b.is_published = p_published
     AND (
       tag_filter IS NULL
-      OR EXISTS (
-        SELECT 1 FROM public.build_tags AS bt2
-        JOIN public.tags AS t2 ON bt2.tag_id = t2.id
-        WHERE bt2.build_id = b.id AND t2.name = ANY(tag_filter)
+      OR (
+        (strict_filter = FALSE AND EXISTS (
+            SELECT 1 FROM public.build_tags AS bt2
+            JOIN public.tags AS t2 ON bt2.tag_id = t2.id
+            WHERE bt2.build_id = b.id AND t2.name = ANY(tag_filter)
+        ))
+        OR
+        (strict_filter = TRUE AND (
+            SELECT COUNT(*) 
+            FROM public.build_tags AS bt2
+            JOIN public.tags AS t2 ON bt2.tag_id = t2.id
+            WHERE bt2.build_id = b.id AND t2.name = ANY(tag_filter)
+        ) = array_length(tag_filter, 1))
       )
     )
     AND (
       identity_filter IS NULL
-      OR b.identity_ids && identity_filter
+      OR (
+        (strict_filter = FALSE AND b.identity_ids && identity_filter)
+        OR (strict_filter = TRUE AND b.identity_ids @> identity_filter)
+      )
     )
     AND (
       ego_filter IS NULL
-      OR b.ego_ids && ego_filter
+      OR (
+        (strict_filter = FALSE AND b.ego_ids && ego_filter)
+        OR (strict_filter = TRUE AND b.ego_ids @> ego_filter)
+      )
     )
     AND (
       keyword_filter IS NULL
-      OR b.keyword_ids && keyword_filter
+      OR (
+        (strict_filter = FALSE AND b.keyword_ids && keyword_filter)
+        OR (strict_filter = TRUE AND b.keyword_ids @> keyword_filter)
+      )
     )
   GROUP BY 
     b.id, u.username

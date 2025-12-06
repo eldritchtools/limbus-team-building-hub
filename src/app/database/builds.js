@@ -11,7 +11,7 @@ async function getPopularBuilds(page = 1, pageSize = 20) {
     return data.map(x => { return { ...x, id: x.build_id } });
 }
 
-async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", page = 1, pageSize = 20) {
+async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", strictFiltering = false, page = 1, pageSize = 20) {
     const start = (page - 1) * pageSize;
 
     const options = {};
@@ -26,6 +26,7 @@ async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", 
     if ("keywords" in filters) options["keyword_filter"] = filters["keywords"];
     options.p_published = isPublished;
     options.sort_by = sortBy;
+    options.strict_filter = strictFiltering;
     options.limit_count = pageSize;
     options.offset_count = start;
 

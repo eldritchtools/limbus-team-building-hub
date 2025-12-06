@@ -6,7 +6,7 @@ function DeploymentPosition({ sinnerId, deploymentOrder, activeSinners }) {
     if (index === -1) return null;
 
     const color = index < activeSinners ? "#fefe3d" : "#29fee9";
-    const num = index < activeSinners ? index + 1 : index - activeSinners + 1;
+    const num = index + 1;
 
     return <div style={{
         position: "absolute",

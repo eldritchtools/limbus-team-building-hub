@@ -103,7 +103,7 @@ function checkSearchMatch(searchString, identity) {
     return false;
 }
 
-function IdentityList({ identities, searchString, selectedMainFilters, displayType, separateSinners, selectedKeywords, selectedFactionTags, selectedSeasons }) {
+function IdentityList({ identities, searchString, selectedMainFilters, displayType, separateSinners, strictFiltering, selectedKeywords, selectedFactionTags, selectedSeasons }) {
     const filters = useMemo(() => selectedMainFilters.reduce((acc, filter) => {
         if (mainFiltersMapping[filter] in acc) acc[mainFiltersMapping[filter]].push(filter);
         else acc[mainFiltersMapping[filter]] = [filter];
@@ -115,32 +115,64 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
 
         for (const type in filters) {
             if (type === "tier") {
-                if (!filters[type].some(x => x.length === identity.rank)) return false;
+                if (strictFiltering) {
+                    if (!filters[type].every(x => x.length === identity.rank)) return false;
+                } else {
+                    if (!filters[type].some(x => x.length === identity.rank)) return false;
+                }
             } else if (type === "affinity") {
-                if (!filters[type].some(x => identity.skillTypes.some(s => s.type.affinity === x) || identity.defenseSkillTypes.some(s => s.type.affinity === x))) return false;
+                if (strictFiltering) {
+                    if (!filters[type].every(x => identity.skillTypes.some(s => s.type.affinity === x) || identity.defenseSkillTypes.some(s => s.type.affinity === x))) return false;
+                } else {
+                    if (!filters[type].some(x => identity.skillTypes.some(s => s.type.affinity === x) || identity.defenseSkillTypes.some(s => s.type.affinity === x))) return false;
+                }
             } else if (type === "skillType") {
-                if (!filters[type].some(x => identity.skillTypes.some(s => s.type.type === x.toLowerCase()) || identity.defenseSkillTypes.some(s => s.type.type === x.toLowerCase()))) return false;
+                if (strictFiltering) {
+                    if (!filters[type].every(x => identity.skillTypes.some(s => s.type.type === x.toLowerCase()) || identity.defenseSkillTypes.some(s => s.type.type === x.toLowerCase()))) return false;
+                } else {
+                    if (!filters[type].some(x => identity.skillTypes.some(s => s.type.type === x.toLowerCase()) || identity.defenseSkillTypes.some(s => s.type.type === x.toLowerCase()))) return false;
+                }
             } else if (type === "keyword") {
-                if (!filters[type].some(x => identity.skillKeywordList.includes(x))) return false;
+                if (strictFiltering) {
+                    if (!filters[type].every(x => identity.skillKeywordList.includes(x))) return false;
+                } else {
+                    if (!filters[type].some(x => identity.skillKeywordList.includes(x))) return false;
+                }
             } else if (type === "sinner") {
-                if (!filters[type].some(x => x === identity.sinnerId)) return false;
+                if (strictFiltering) {
+                    if (!filters[type].every(x => x === identity.sinnerId)) return false;
+                } else {
+                    if (!filters[type].some(x => x === identity.sinnerId)) return false;
+                }
             }
         }
 
         if (selectedKeywords.length !== 0) {
-            if (!selectedKeywords.some(keywordOption => identity.keywordTags.includes(keywordOption.value))) return false;
+            if (strictFiltering) {
+                if (!selectedKeywords.every(keywordOption => identity.keywordTags.includes(keywordOption.value))) return false;
+            } else {
+                if (!selectedKeywords.some(keywordOption => identity.keywordTags.includes(keywordOption.value))) return false;
+            }
         }
 
         if (selectedFactionTags.length !== 0) {
-            if (!selectedFactionTags.some(tagOption => identity.tags.includes(tagOption.value))) return false;
+            if (strictFiltering) {
+                if (!selectedFactionTags.every(tagOption => identity.tags.includes(tagOption.value))) return false;
+            } else {
+                if (!selectedFactionTags.some(tagOption => identity.tags.includes(tagOption.value))) return false;
+            }
         }
 
         if (selectedSeasons.length !== 0) {
-            if (!selectedSeasons.some(season => season.value === identity.season) && !(selectedSeasons.some(season => season.value === 9100) && identity.season > 9100)) return false;
+            if (strictFiltering) {
+                if (!selectedSeasons.every(season => season.value === identity.season || (season.value === 9100 && identity.season > 9100))) return false;
+            } else {
+                if (!selectedSeasons.some(season => season.value === identity.season || (season.value === 9100 && identity.season > 9100))) return false;
+            }
         }
 
         return true;
-    }), [searchString, filters, identities, selectedKeywords, selectedFactionTags, selectedSeasons]);
+    }), [searchString, filters, identities, selectedKeywords, selectedFactionTags, selectedSeasons, strictFiltering]);
 
     const splitBySinner = list => list.reduce((acc, [id, identity]) => {
         if (identity.sinnerId in acc) acc[identity.sinnerId].push([id, identity]);
@@ -286,18 +318,31 @@ export default function Identities() {
 
     const [searchString, setSearchString] = useState("");
     const [selectedMainFilters, setSelectedMainFilters] = useState([]);
-    const [displayType, setDisplayType] = useState(null);
-
-    useEffect(() => {
+    const [displayType, setDisplayType] = useState(() => {
         const saved = localStorage.getItem("idEgoDisplayType");
-        if (saved) setDisplayType(saved);
-        else setDisplayType("full");
-    }, [])
+        return saved ?? "full";
+    });
+    const [strictFiltering, setStrictFiltering] = useState(() => {
+        const saved = localStorage.getItem("idEgoStrictFiltering");
+        return saved ? JSON.parse(saved) : false;
+    });
+    const [separateSinners, setSeparateSinners] = useState(() => {
+        const saved = localStorage.getItem("idEgoSeparateSinners");
+        return saved ? JSON.parse(saved) : false;
+    });
+
     useEffect(() => {
         if (displayType) localStorage.setItem("idEgoDisplayType", displayType);
     }, [displayType]);
 
-    const [separateSinners, setSeparateSinners] = useState(false);
+    useEffect(() => {
+        localStorage.setItem("idEgoStrictFiltering", JSON.stringify(strictFiltering));
+    }, [strictFiltering]);
+
+    useEffect(() => {
+        localStorage.setItem("idEgoSeparateSinners", JSON.stringify(separateSinners));
+    }, [separateSinners]);
+
     const [selectedKeywords, setSelectedKeywords] = useState([]);
     const [selectedFactionTags, setSelectedFactionTags] = useState([]);
     const [selectedSeasons, setSelectedSeasons] = useState([]);
@@ -326,7 +371,7 @@ export default function Identities() {
         })).sort((a, b) => a.name.localeCompare(b.name)), [...seasonList].map(season => ({
             value: season,
             label: season === 9100 ? "Walpurgisnacht (any)" : getSeasonString(season),
-            name: season === 9100 ?  "Walpurgisnacht" : getSeasonString(season)
+            name: season === 9100 ? "Walpurgisnacht" : getSeasonString(season)
         })).sort((a, b) => a.value - b.value)]
     }, [identities, identitiesLoading, statuses, statusesLoading]);
 
@@ -358,6 +403,11 @@ export default function Identities() {
                 </div>
                 <div />
                 <label>
+                    <input type="checkbox" checked={strictFiltering} onChange={e => setStrictFiltering(e.target.checked)} />
+                    Strict Filtering (require all selected filters)
+                </label>
+                <div />
+                <label>
                     <input type="checkbox" checked={separateSinners} onChange={e => setSeparateSinners(e.target.checked)} />
                     Separate by Sinner
                 </label>
@@ -371,6 +421,7 @@ export default function Identities() {
                 selectedMainFilters={selectedMainFilters}
                 displayType={displayType}
                 separateSinners={separateSinners}
+                strictFiltering={strictFiltering}
                 selectedKeywords={selectedKeywords}
                 selectedFactionTags={selectedFactionTags}
                 selectedSeasons={selectedSeasons}

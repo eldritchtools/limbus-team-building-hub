@@ -1,10 +1,10 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import BuildEntry from "../../components/BuildEntry";
 import { getFilteredBuilds } from "../../database/builds";
 import SearchComponent from "../SearchComponent";
 import { keywordToIdMapping } from "../../keywordIds";
+import BuildsGrid from "../BuildsGrid";
 
 export default function SearchBuildsContent() {
     const searchParams = useSearchParams();
@@ -19,7 +19,8 @@ export default function SearchBuildsContent() {
     }, {}), [searchParams]);
 
     const sortBy = useMemo(() => searchParams.get("sortBy") || "score", [searchParams]);
-    const options = useMemo(() => { return { ...filters, sortBy: sortBy } }, [filters, sortBy]);
+    const strictFiltering = useMemo(() => searchParams.get("strictFiltering") === "true" || false, [searchParams])
+    const options = useMemo(() => { return { ...filters, sortBy: sortBy, strictFiltering: strictFiltering } }, [filters, sortBy, strictFiltering]);
 
     const [builds, setBuilds] = useState([]);
     const [page, setPage] = useState(1);
@@ -29,7 +30,7 @@ export default function SearchBuildsContent() {
         const fetchBuilds = async () => {
             try {
                 setLoading(true);
-                const data = await getFilteredBuilds(filters, true, sortBy, page, 24);
+                const data = await getFilteredBuilds(filters, true, sortBy, strictFiltering, page, 24);
 
                 setBuilds(data || []);
                 setLoading(false);
@@ -39,7 +40,7 @@ export default function SearchBuildsContent() {
         };
 
         fetchBuilds();
-    }, [searchParams, filters, page, sortBy]);
+    }, [searchParams, filters, page, sortBy, strictFiltering]);
 
     return <div style={{ display: "flex", flexDirection: "column", textAlign: "center", gap: "1rem" }}>
         <SearchComponent options={options} />
@@ -52,9 +53,7 @@ export default function SearchBuildsContent() {
                     {page === 1 ? "No published builds yet." : "No more builds."}
                 </p> :
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 640px)", gap: "0.5rem", justifyContent: "center" }}>
-                        {builds.map(build => <BuildEntry key={build.id} build={build} />)}
-                    </div>
+                    <BuildsGrid builds={builds} />
 
                     <div style={{ display: "flex", gap: "0.5rem", alignSelf: "end" }}>
                         <button className="page-button" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>

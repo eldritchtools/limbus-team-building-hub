@@ -180,7 +180,7 @@ function DeploymentComponent({ order, setOrder, activeSinners, sinnerId }) {
     } else if (index < activeSinners) {
         return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={{ ...deploymentComponentStyle, color: "#fefe3d" }}>Active {index + 1}</button>
     } else {
-        return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={{ ...deploymentComponentStyle, color: "#29fee9" }}>Backup {index + 1 - activeSinners}</button>
+        return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={{ ...deploymentComponentStyle, color: "#29fee9" }}>Backup {index + 1}</button>
     }
 }
 

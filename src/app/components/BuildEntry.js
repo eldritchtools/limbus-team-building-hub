@@ -22,7 +22,7 @@ export default function BuildEntry({ build, minified }) {
                 by <Username username={build.username} /> •{" "}{timeAgo}
             </div>
             <div style={{ display: "flex", flexDirection: "row", alignSelf: "center" }}>
-                <IdentityImgSpread identityIds={build.identity_ids} scale={.275} />
+                <IdentityImgSpread identityIds={build.identity_ids} scale={.275} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} />
             </div>
         </div>
 

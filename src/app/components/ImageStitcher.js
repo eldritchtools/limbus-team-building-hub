@@ -54,7 +54,7 @@ const ImageStitcher = ({ build, outputFileName = "stitched_image.png" }) => {
                 if (index === -1) return;
 
                 const color = index < build.active_sinners ? "rgba(254, 254, 61, 1)" : "rgba(41, 254, 233, 1)";
-                const num = index < build.active_sinners ? index + 1 : index - build.active_sinners + 1;
+                const num = index + 1;
                 const textWidth = ctx.measureText(num).width;
 
                 ctx.fillStyle = "rgba(0, 0, 0, 0.5)";

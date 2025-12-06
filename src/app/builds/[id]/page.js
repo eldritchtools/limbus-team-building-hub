@@ -100,7 +100,7 @@ function DeploymentComponent({ order, activeSinners, sinnerId }) {
     } else if (index < activeSinners) {
         return <div style={{ ...deploymentComponentStyle, color: "#fefe3d" }}>Active {index + 1}</div>
     } else {
-        return <div style={{ ...deploymentComponentStyle, color: "#29fee9" }}>Backup {index + 1 - activeSinners}</div>
+        return <div style={{ ...deploymentComponentStyle, color: "#29fee9" }}>Backup {index + 1}</div>
     }
 }
 

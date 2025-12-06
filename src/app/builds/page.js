@@ -17,8 +17,8 @@ export default function BuildsPage() {
                 const data = activeTab === "popular" ?
                     await getPopularBuilds() :
                     activeTab === "recent" ?
-                        await getFilteredBuilds({}, true, "recency", 1, 24) :
-                        await getFilteredBuilds({}, true, "random", 1, 24);
+                        await getFilteredBuilds({}, true, "recency", false, 1, 24) :
+                        await getFilteredBuilds({}, true, "random", false, 1, 24);
 
                 setBuilds(data || []);
                 setLoading(false);

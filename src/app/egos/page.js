@@ -102,7 +102,7 @@ function checkSearchMatch(searchString, ego) {
     return false;
 }
 
-function EgoList({ egos, searchString, selectedMainFilters, displayType, separateSinners, selectedKeywords, selectedSeasons }) {
+function EgoList({ egos, searchString, selectedMainFilters, displayType, separateSinners, strictFiltering, selectedKeywords, selectedSeasons }) {
     const filters = useMemo(() => selectedMainFilters.reduce((acc, filter) => {
         if (mainFiltersMapping[filter] in acc) acc[mainFiltersMapping[filter]].push(filter);
         else acc[mainFiltersMapping[filter]] = [filter];
@@ -114,28 +114,56 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
 
         for (const type in filters) {
             if (type === "tier") {
-                if (!filters[type].some(x => x === ego.rank.toLowerCase())) return false;
+                if (strictFiltering) {
+                    if (!filters[type].every(x => x === ego.rank.toLowerCase())) return false;
+                } else {
+                    if (!filters[type].some(x => x === ego.rank.toLowerCase())) return false;
+                }
             } else if (type === "affinity") {
-                if (!filters[type].some(x => ego.awakeningType.affinity === x || ("corrosionType" in ego && ego.corrosionType.affinity === x))) return false;
+                if (strictFiltering) {
+                    if (!filters[type].every(x => ego.awakeningType.affinity === x || ("corrosionType" in ego && ego.corrosionType.affinity === x))) return false;
+                } else {
+                    if (!filters[type].some(x => ego.awakeningType.affinity === x || ("corrosionType" in ego && ego.corrosionType.affinity === x))) return false;
+                }
             } else if (type === "skillType") {
-                if (!filters[type].some(x => ego.awakeningType.type === x.toLowerCase() || ("corrosionType" in ego && ego.corrosionType.type === x.toLowerCase()))) return false;
+                if (strictFiltering) {
+                    if (!filters[type].every(x => ego.awakeningType.type === x.toLowerCase() || ("corrosionType" in ego && ego.corrosionType.type === x.toLowerCase()))) return false;
+                } else {
+                    if (!filters[type].some(x => ego.awakeningType.type === x.toLowerCase() || ("corrosionType" in ego && ego.corrosionType.type === x.toLowerCase()))) return false;
+                }
             } else if (type === "keyword") {
-                if (!filters[type].some(x => ego.keywordTags.includes(keywordMapping[x]))) return false;
+                if (strictFiltering) {
+                    if (!filters[type].every(x => ego.keywordTags.includes(keywordMapping[x]))) return false;
+                } else {
+                    if (!filters[type].some(x => ego.keywordTags.includes(keywordMapping[x]))) return false;
+                }
             } else if (type === "sinner") {
-                if (!filters[type].some(x => x === ego.sinnerId)) return false;
+                if (strictFiltering) {
+                    if (!filters[type].every(x => x === ego.sinnerId)) return false;
+                } else {
+                    if (!filters[type].some(x => x === ego.sinnerId)) return false;
+                }
             }
         }
 
         if (selectedKeywords.length !== 0) {
-            if (!selectedKeywords.some(keywordOption => ego.keywordTags.includes(keywordOption.value))) return false;
+            if (strictFiltering) {
+                if (!selectedKeywords.every(keywordOption => ego.keywordTags.includes(keywordOption.value))) return false;
+            } else {
+                if (!selectedKeywords.some(keywordOption => ego.keywordTags.includes(keywordOption.value))) return false;
+            }
         }
 
         if (selectedSeasons.length !== 0) {
-            if (!selectedSeasons.some(season => season.value === ego.season) && !(selectedSeasons.some(season => season.value === 9100) && ego.season > 9100)) return false;
+            if (strictFiltering) {
+                if (!selectedSeasons.every(season => season.value === ego.season || (season.value === 9100 && ego.season > 9100))) return false;
+            } else {
+                if (!selectedSeasons.some(season => season.value === ego.season || (season.value === 9100 && ego.season > 9100))) return false;
+            }
         }
 
         return true;
-    }), [searchString, filters, egos, selectedKeywords, selectedSeasons]);
+    }), [searchString, filters, egos, selectedKeywords, selectedSeasons, strictFiltering]);
 
     const splitBySinner = list => list.reduce((acc, [id, ego]) => {
         if (ego.sinnerId in acc) acc[ego.sinnerId].push([id, ego]);
@@ -290,18 +318,31 @@ export default function EgosPage() {
 
     const [searchString, setSearchString] = useState("");
     const [selectedMainFilters, setSelectedMainFilters] = useState([]);
-    const [displayType, setDisplayType] = useState(null);
-
-    useEffect(() => {
+    const [displayType, setDisplayType] = useState(() => {
         const saved = localStorage.getItem("idEgoDisplayType");
-        if (saved) setDisplayType(saved);
-        else setDisplayType("full");
-    }, [])
+        return saved ?? "full";
+    });
+    const [strictFiltering, setStrictFiltering] = useState(() => {
+        const saved = localStorage.getItem("idEgoStrictFiltering");
+        return saved ? JSON.parse(saved) : false;
+    });
+    const [separateSinners, setSeparateSinners] = useState(() => {
+        const saved = localStorage.getItem("idEgoSeparateSinners");
+        return saved ? JSON.parse(saved) : false;
+    });
+
     useEffect(() => {
         if (displayType) localStorage.setItem("idEgoDisplayType", displayType);
     }, [displayType]);
 
-    const [separateSinners, setSeparateSinners] = useState(false);
+    useEffect(() => {
+        localStorage.setItem("idEgoStrictFiltering", JSON.stringify(strictFiltering));
+    }, [strictFiltering]);
+
+    useEffect(() => {
+        localStorage.setItem("idEgoSeparateSinners", JSON.stringify(separateSinners));
+    }, [separateSinners]);
+
     const [selectedKeywords, setSelectedKeywords] = useState([]);
     const [selectedSeasons, setSelectedSeasons] = useState([]);
 
@@ -353,6 +394,11 @@ export default function EgosPage() {
                 </div>
                 <div />
                 <label>
+                    <input type="checkbox" checked={strictFiltering} onChange={e => setStrictFiltering(e.target.checked)} />
+                    Strict Filtering (require all selected filters)
+                </label>
+                <div />
+                <label>
                     <input type="checkbox" checked={separateSinners} onChange={e => setSeparateSinners(e.target.checked)} />
                     Separate by Sinner
                 </label>
@@ -366,6 +412,7 @@ export default function EgosPage() {
                 selectedMainFilters={selectedMainFilters}
                 displayType={displayType}
                 separateSinners={separateSinners}
+                strictFiltering={strictFiltering}
                 selectedKeywords={selectedKeywords}
                 selectedSeasons={selectedSeasons}
             />}

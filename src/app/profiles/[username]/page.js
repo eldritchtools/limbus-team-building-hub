@@ -24,7 +24,7 @@ export default function ProfilePage({params}) {
 
     useEffect(() => {
         setBuildsLoading(true);
-        getFilteredBuilds({ "username_exact": username }, true, "recency", page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
+        getFilteredBuilds({ "username_exact": username }, true, "recency", false, page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
     }, [username, page]);
 
     if (checkingUser) {

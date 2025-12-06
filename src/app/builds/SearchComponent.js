@@ -46,6 +46,7 @@ export default function SearchComponent({ options = {} }) {
     const [egos, setEgos] = useState(options.egos || []);
     const [keywords, setKeywords] = useState((options.keywords || []).map(kw => keywordIdMapping[kw]) || []);
     const [sortBy, setSortBy] = useState(options.sortBy || "score");
+    const [strictFiltering, setStrictFiltering] = useState(options.strictFiltering || false);
 
     const applyFilters = () => {
         const searchFilters = {};
@@ -56,6 +57,7 @@ export default function SearchComponent({ options = {} }) {
         if (egos.length > 0) searchFilters.egos = egos;
         if (keywords.length > 0) searchFilters.keywords = keywords;
         if (sortBy !== "score") searchFilters.sortBy = sortBy;
+        if (strictFiltering) searchFilters.strictFiltering = true;
 
         const params = new URLSearchParams(searchFilters);
         window.location.href = `/builds/search?${params.toString()}`;
@@ -64,9 +66,9 @@ export default function SearchComponent({ options = {} }) {
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
         <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "0.5rem" }}>
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Title</span>
-            <div style={{ display: "flex" }}><input value={title} onChange={e => setTitle(e.target.value)} style={{width: "25rem"}} /></div>
+            <div style={{ display: "flex" }}><input value={title} onChange={e => setTitle(e.target.value)} style={{ width: "25rem" }} /></div>
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>User</span>
-            <div style={{ display: "flex" }}><input value={username} onChange={e => setUsername(e.target.value)} style={{width: "25rem"}} /></div>
+            <div style={{ display: "flex" }}><input value={username} onChange={e => setUsername(e.target.value)} style={{ width: "25rem" }} /></div>
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Tags</span>
             <TagSelector selected={tags} onChange={setTags} creatable={false} wide={true} />
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Identities</span>
@@ -84,6 +86,13 @@ export default function SearchComponent({ options = {} }) {
                 <label>
                     <input type="radio" name="sortBy" value={"recency"} checked={sortBy === "recency"} onChange={e => setSortBy(e.target.value)} />
                     Newest
+                </label>
+            </div>
+            <div />
+            <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
+                <label>
+                    <input type="checkbox" checked={strictFiltering} onChange={e => setStrictFiltering(e.target.checked)} />
+                    Strict Filtering (require all selected filters)
                 </label>
             </div>
         </div>

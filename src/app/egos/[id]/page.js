@@ -55,7 +55,7 @@ export default function EgoPage({ params }) {
 
     useEffect(() => {
         const fetchBuilds = async () => {
-            setBuilds(await getFilteredBuilds({ "egos": [id] }, true, "score", 1, 6) || []);
+            setBuilds(await getFilteredBuilds({ "egos": [id] }, true, "score", false, 1, 6) || []);
         }
 
         if (activeTab === "builds" && !builds) fetchBuilds();

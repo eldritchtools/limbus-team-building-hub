@@ -19,7 +19,8 @@ export default function SearchBuildsContent() {
     }, {}), [searchParams]);
 
     const sortBy = useMemo(() => searchParams.get("sortBy") || "score", [searchParams]);
-    const options = useMemo(() => { return { ...filters, sortBy: sortBy } }, [filters, sortBy]);
+    const strictFiltering = useMemo(() => searchParams.get("strictFiltering") === "true" || false, [searchParams])
+    const options = useMemo(() => { return { ...filters, sortBy: sortBy, strictFiltering: strictFiltering } }, [filters, sortBy, strictFiltering]);
 
     const [builds, setBuilds] = useState([]);
     const [page, setPage] = useState(1);
@@ -29,7 +30,7 @@ export default function SearchBuildsContent() {
         const fetchBuilds = async () => {
             try {
                 setLoading(true);
-                const data = await getFilteredBuilds(filters, true, sortBy, page, 24);
+                const data = await getFilteredBuilds(filters, true, sortBy, strictFiltering, page, 24);
 
                 setBuilds(data || []);
                 setLoading(false);
@@ -39,7 +40,7 @@ export default function SearchBuildsContent() {
         };
 
         fetchBuilds();
-    }, [searchParams, filters, page, sortBy]);
+    }, [searchParams, filters, page, sortBy, strictFiltering]);
 
     return <div style={{ display: "flex", flexDirection: "column", textAlign: "center", gap: "1rem" }}>
         <SearchComponent options={options} />

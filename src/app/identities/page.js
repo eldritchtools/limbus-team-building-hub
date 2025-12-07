@@ -318,30 +318,32 @@ export default function Identities() {
 
     const [searchString, setSearchString] = useState("");
     const [selectedMainFilters, setSelectedMainFilters] = useState([]);
-    const [displayType, setDisplayType] = useState(() => {
-        const saved = localStorage.getItem("idEgoDisplayType");
-        return saved ?? "full";
-    });
-    const [strictFiltering, setStrictFiltering] = useState(() => {
-        const saved = localStorage.getItem("idEgoStrictFiltering");
-        return saved ? JSON.parse(saved) : false;
-    });
-    const [separateSinners, setSeparateSinners] = useState(() => {
-        const saved = localStorage.getItem("idEgoSeparateSinners");
-        return saved ? JSON.parse(saved) : false;
-    });
+    const [displayType, setDisplayType] = useState(null);
+    const [strictFiltering, setStrictFiltering] = useState(false);
+    const [separateSinners, setSeparateSinners] = useState(false);
+
+    useEffect(() => {
+        const savedDisplayType = localStorage.getItem("idEgoDisplayType");
+        setDisplayType(savedDisplayType ?? "full");
+        const savedStrictFiltering = localStorage.getItem("idEgoStrictFiltering");
+        setStrictFiltering(savedStrictFiltering ? JSON.parse(savedStrictFiltering) : false);
+        const savedSeparateSinners = localStorage.getItem("idEgoSeparateSinners");
+        setSeparateSinners(savedSeparateSinners ? JSON.parse(savedSeparateSinners) : false);
+    }, []);
 
     useEffect(() => {
         if (displayType) localStorage.setItem("idEgoDisplayType", displayType);
     }, [displayType]);
 
-    useEffect(() => {
-        localStorage.setItem("idEgoStrictFiltering", JSON.stringify(strictFiltering));
-    }, [strictFiltering]);
+    const handleStrictFilteringToggle = (checked) => {
+        localStorage.setItem("idEgoStrictFiltering", JSON.stringify(checked));
+        setStrictFiltering(checked);
+    }
 
-    useEffect(() => {
-        localStorage.setItem("idEgoSeparateSinners", JSON.stringify(separateSinners));
-    }, [separateSinners]);
+    const handleSeparateSinnersToggle = (checked) => {
+        localStorage.setItem("idEgoSeparateSinners", JSON.stringify(checked));
+        setSeparateSinners(checked);
+    }
 
     const [selectedKeywords, setSelectedKeywords] = useState([]);
     const [selectedFactionTags, setSelectedFactionTags] = useState([]);
@@ -403,12 +405,12 @@ export default function Identities() {
                 </div>
                 <div />
                 <label>
-                    <input type="checkbox" checked={strictFiltering} onChange={e => setStrictFiltering(e.target.checked)} />
+                    <input type="checkbox" checked={strictFiltering} onChange={e => handleStrictFilteringToggle(e.target.checked)} />
                     Strict Filtering (require all selected filters)
                 </label>
                 <div />
                 <label>
-                    <input type="checkbox" checked={separateSinners} onChange={e => setSeparateSinners(e.target.checked)} />
+                    <input type="checkbox" checked={separateSinners} onChange={e => handleSeparateSinnersToggle(e.target.checked)} />
                     Separate by Sinner
                 </label>
             </div>

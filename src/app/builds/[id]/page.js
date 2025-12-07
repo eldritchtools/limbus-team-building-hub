@@ -130,6 +130,7 @@ export default function BuildPage({ params }) {
         if (savedType) setDisplayType(JSON.parse(savedType));
         else setDisplayType(1);
     }, [])
+    
     useEffect(() => {
         if (displayType !== null) localStorage.setItem("buildDisplayType", JSON.stringify(displayType));
     }, [displayType]);

@@ -8,6 +8,7 @@ import Link from "next/link";
 import "./identities.css";
 
 import dynamic from "next/dynamic";
+import IdentityImgOverlay from "../components/IdentityImgOverlay";
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const mainFilters = {
@@ -83,9 +84,9 @@ function IdentityDetails({ id, identity }) {
 
 function IdentityCard({ identity }) {
     return <div className="clickable-id-card" style={{ display: "flex", flexDirection: "row", padding: "0.5rem", width: "420px", height: "280px", border: "1px #777 solid", borderRadius: "0.25rem", boxSizing: "border-box" }}>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-            <IdentityImg identity={identity} uptie={2} scale={0.5} />
-            {identity.tags.includes("Base Identity") ? null : <IdentityImg identity={identity} uptie={4} scale={0.5} />}
+        <div style={{ display: "flex", flexDirection: "column", width: "128px" }}>
+            <IdentityImgOverlay identity={identity} uptie={2} includeName={false} includeRarity={true} />
+            {identity.tags.includes("Base Identity") ? null : <IdentityImgOverlay identity={identity} uptie={4} includeName={false} includeRarity={false} />}
         </div>
         <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "0.5rem", alignItems: "center", textAlign: "center" }}>
             {identity.name}
@@ -181,9 +182,11 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
     }, {})
 
     if (displayType === "icon") {
-        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(128px, 1fr))", width: "100%", overflowY: "auto", gap: "0.5rem" }}>
+        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(128px, 1fr))", width: "100%", gap: "0.5rem" }}>
             {list.map(([id, identity]) => <div key={id}><Link href={`/identities/${id}`} style={{ color: "#ddd", textDecoration: "none" }}>
-                <div className="clickable-id"><IdentityImg key={id} identity={identity} uptie={4} displayName={true} scale={0.5} /></div>
+                <div className="clickable-id">
+                    <IdentityImgOverlay identity={identity} uptie={4} includeName={true} includeRarity={true} />
+                </div>
             </Link></div>)}
         </div>
 
@@ -203,7 +206,7 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
             return listToComponents(list);
         }
     } else if (displayType === "card") {
-        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 420px)", width: "100%", overflowY: "auto", gap: "0.5rem", justifyContent: "center" }}>
+        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 420px)", width: "100%", gap: "0.5rem", justifyContent: "center" }}>
             {list.map(([id, identity]) => <div key={id}><Link href={`/identities/${id}`} style={{ color: "#ddd", textDecoration: "none" }}><IdentityCard key={id} identity={identity} /></Link></div>)}
         </div>
 

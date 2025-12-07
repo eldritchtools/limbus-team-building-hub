@@ -2,8 +2,8 @@
 
 import Tag from "@/app/components/Tag";
 import { deleteBuild, getBuild } from "@/app/database/builds";
-import { affinityColorMapping, useTimeAgo } from "@/app/utils";
-import { EgoImg, Icon, IdentityImg, KeywordIcon, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
+import { useTimeAgo } from "@/app/utils";
+import { Icon, KeywordIcon, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/app/database/authProvider";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,8 @@ import ImageStitcher from "@/app/components/ImageStitcher";
 import LikeButton from "@/app/components/LikeButton";
 import SaveButton from "@/app/components/SaveButton";
 import { YouTubeThumbnailEmbed } from "@/app/YoutubeUtils";
+import IdentityImgOverlay from "@/app/components/IdentityImgOverlay";
+import EgoImgOverlay from "@/app/components/EgoImgOverlay";
 
 function SkillTypes({ skillType }) {
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.2rem", width: "100%", height: "100%", justifyContent: "center" }}>
@@ -33,18 +35,7 @@ function SkillTypes({ skillType }) {
 function IdentityProfile({ identity, displayType }) {
     return identity && displayType !== null ? <Link href={`/identities/${identity.id}`}>
         <div style={{ position: "relative", width: "100%" }} data-tooltip-id="identity-tooltip" data-tooltip-content={identity.id}>
-            <IdentityImg identity={identity} uptie={4} displayName={false} width={"100%"} />
-            {displayType === 1 ? <div style={{
-                position: "absolute",
-                bottom: "5px",
-                right: "5px",
-                textAlign: "right",
-                textWrap: "balance",
-                textShadow: "1px 1px 4px #000, -1px 1px 4px #000, 1px -1px 4px #000, -1px -1px 4px #000, 0px 0px 8px rgba(0, 0, 0, 0.5), 0px 0px 12px rgba(0, 0, 0, 0.25)",
-                color: "#ddd"
-            }}>
-                {identity.name}
-            </div> : null}
+            <IdentityImgOverlay identity={identity} uptie={4} includeName={displayType === 1} includeRarity={false} />
             {displayType === 2 ? <div style={{ position: "absolute", width: "100%", aspectRatio: "1/1", background: "rgba(0, 0, 0, 0.65)", top: 0, left: 0 }}>
                 <div style={{ display: "grid", gridTemplateRows: "repeat(4, 1fr)", width: "100%", height: "100%", justifyContent: "center" }}>
                     {[0, 1, 2].map(x => <div key={x} style={{ display: "flex", justifyContent: "center" }}><SkillTypes skillType={identity.skillTypes[x].type} /></div>)}
@@ -60,19 +51,7 @@ function IdentityProfile({ identity, displayType }) {
 function EgoProfile({ ego, displayType }) {
     return ego && displayType !== null ? <Link href={`/egos/${ego.id}`}>
         <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }} data-tooltip-id="ego-tooltip" data-tooltip-content={ego.id}>
-            <EgoImg ego={ego} type={"awaken"} displayName={false} style={{ display: "block", width: "100%", height: null, aspectRatio: "4/1", objectFit: "cover" }} />
-            {displayType === 1 ? <div style={{
-                position: "absolute",
-                fontSize: "0.75rem",
-                color: affinityColorMapping[ego.awakeningType.affinity],
-                maxHeight: "100%",
-                overflow: "hidden",
-                textWrap: "balance",
-                textAlign: "center",
-                textShadow: "1px 1px 4px #000, -1px 1px 4px #000, 1px -1px 4px #000, -1px -1px 4px #000, 0px 0px 8px rgba(0, 0, 0, 0.5), 0px 0px 12px rgba(0, 0, 0, 0.25)"
-            }}>
-                {ego.name}
-            </div> : null}
+            <EgoImgOverlay ego={ego} banner={true} type={"awaken"} includeName={displayType === 1} includeRarity={false} />
             {displayType === 2 ? <div style={{ position: "absolute", width: "100%", aspectRatio: "4/1", background: "rgba(0, 0, 0, 0.65)", top: 0, left: 0 }}>
                 <div style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
                     <SkillTypes skillType={ego.awakeningType} />
@@ -130,7 +109,7 @@ export default function BuildPage({ params }) {
         if (savedType) setDisplayType(JSON.parse(savedType));
         else setDisplayType(1);
     }, [])
-    
+
     useEffect(() => {
         if (displayType !== null) localStorage.setItem("buildDisplayType", JSON.stringify(displayType));
     }, [displayType]);

@@ -1,23 +1,25 @@
 .clickable-ego {
-    background: #1f1f1f;
+    transition: all 0.2s ease;
 }
 
 .clickable-ego:hover {
-    background: #2f2f2f;
+    filter: brightness(1.3);
 }
 
 .clickable-ego-card {
     background: #1f1f1f;
+    transition: all 0.2s ease;
 }
 
 .clickable-ego-card:hover {
-    background: #2f2f2f;
+    filter: brightness(1.3);
 }
 
 .clickable-table-row {
     background: #1f1f1f;
+    transition: all 0.2s ease;
 }
 
 .clickable-table-row:hover {
-    background: #2f2f2f;
+    filter: brightness(1.3);
 }

@@ -4,7 +4,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import * as Select from "@radix-ui/react-select";
 import { getBuild, insertBuild, updateBuild } from "../database/builds";
 import "./buildSelector.css";
-import { EgoImg, IdentityImg, KeywordIcon, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
+import { KeywordIcon, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
 import { keywordIdMapping, keywordToIdMapping } from "../keywordIds";
 import TagSelector, { tagToTagSelectorOption } from "./TagSelector";
 import { affinityColorMapping } from "../utils";
@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
 import MarkdownEditor from "./MarkdownEditor";
 import "./SinnerGrid.css";
 import { extractYouTubeId } from "../YoutubeUtils";
+import IdentityImgOverlay from "./IdentityImgOverlay";
+import EgoImgOverlay from "./EgoImgOverlay";
 
 const egoRankMapping = {
     "ZAYIN": 0,
@@ -43,17 +45,7 @@ function IdentitySelector({ value, setValue, options, num }) {
         <Select.Root value={value ? value.id : null} onValueChange={v => setValue(v)} open={isOpen} onOpenChange={handleOpenChange}>
             <Select.Trigger className="identity-select-trigger" ref={triggerRef} style={{ width: "100%", padding: 0, margin: 0, boxSizing: "border-box" }}>
                 {value ? <div data-tooltip-id="identity-tooltip" data-tooltip-content={value.id} style={{ width: "100%", position: "relative" }}>
-                    <IdentityImg identity={value} uptie={4} displayName={false} width={"100%"} />
-                    <div style={{
-                        position: "absolute",
-                        bottom: "5px",
-                        right: "5px",
-                        textAlign: "right",
-                        textWrap: "balance",
-                        textShadow: "1px 1px 4px #000, -1px 1px 4px #000, 1px -1px 4px #000, -1px -1px 4px #000, 0px 0px 8px rgba(0, 0, 0, 0.5), 0px 0px 12px rgba(0, 0, 0, 0.25)"
-                    }}>
-                        {value.name}
-                    </div>
+                    <IdentityImgOverlay identity={value} uptie={4} includeName={true} includeRarity={false} />
                 </div> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <SinnerIcon num={num} style={{ height: "75%", width: "75%" }} />
                 </div>}
@@ -74,7 +66,7 @@ function IdentitySelector({ value, setValue, options, num }) {
                         {filtered.map((option) =>
                             <Select.Item key={option.id} value={option.id} className="identity-select-item">
                                 <div className="identity-item-inner" data-tooltip-id="identity-tooltip" data-tooltip-content={option.id}>
-                                    <IdentityImg identity={option} uptie={4} displayName={true} scale={0.5} />
+                                    <IdentityImgOverlay identity={option} uptie={4} includeName={true} includeRarity={false} />
                                 </div>
                             </Select.Item>
                         )}
@@ -99,18 +91,7 @@ function EgoSelector({ value, setValue, options }) {
         <Select.Root value={value ? value.id : null} onValueChange={v => setValue(v)} open={isOpen} onOpenChange={setIsOpen}>
             <Select.Trigger className="ego-select-trigger" ref={triggerRef} style={{ borderColor: value ? affinityColorMapping[value.affinity] : "#555", flex: 1, padding: 0, margin: 0, boxSizing: "border-box" }}>
                 {value ? <div data-tooltip-id="ego-tooltip" data-tooltip-content={value.id} style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }}>
-                    <EgoImg ego={value} type={"awaken"} displayName={false} style={{ display: "block", width: "100%", height: null, aspectRatio: "4/1", objectFit: "cover" }} />
-                    <div style={{
-                        position: "absolute",
-                        fontSize: "0.75rem",
-                        color: affinityColorMapping[value.affinity],
-                        maxHeight: "100%",
-                        overflow: "hidden",
-                        textWrap: "balance",
-                        textShadow: "1px 1px 4px #000, -1px 1px 4px #000, 1px -1px 4px #000, -1px -1px 4px #000, 0px 0px 8px rgba(0, 0, 0, 0.5), 0px 0px 12px rgba(0, 0, 0, 0.25)"
-                    }}>
-                        {value.name}
-                    </div>
+                    <EgoImgOverlay ego={value} banner={true} type={"awaken"} includeName={true} includeRarity={false} />
                 </div> : null}
             </Select.Trigger>
 
@@ -121,7 +102,7 @@ function EgoSelector({ value, setValue, options }) {
                         {options.map((option) =>
                             <Select.Item key={option.id} value={option.id} className="ego-select-item">
                                 <div className="ego-item-inner" data-tooltip-id="ego-tooltip" data-tooltip-content={option.id}>
-                                    <EgoImg ego={option} type={"awaken"} displayName={true} scale={0.5} />
+                                    <EgoImgOverlay ego={option} type={"awaken"} includeName={true} includeRarity={false} />
                                 </div>
                             </Select.Item>
                         )}

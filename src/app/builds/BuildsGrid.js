@@ -2,18 +2,21 @@ import { useEffect, useState } from "react";
 import BuildEntry from "../components/BuildEntry";
 
 export default function BuildsGrid({ builds }) {
-    const [compressed, setCompressed] = useState(() => {
-        const saved = localStorage.getItem("buildsCompressed");
-        return saved ? JSON.parse(saved) : false;
-    });
+    const [compressed, setCompressed] = useState(false);
 
     useEffect(() => {
-        localStorage.setItem("buildsCompressed", JSON.stringify(compressed));
-    }, [compressed]);
+        const saved = localStorage.getItem("buildsCompressed");
+        setCompressed(saved ? JSON.parse(saved) : false);
+    }, []);
+
+    const handleCompressedToggle = (checked) => {
+        localStorage.setItem("buildsCompressed", JSON.stringify(checked));
+        setCompressed(checked);
+    }
 
     return <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         <label>
-            <input type="checkbox" checked={compressed} onChange={e => setCompressed(e.target.checked)} />
+            <input type="checkbox" checked={compressed} onChange={e => handleCompressedToggle(e.target.checked)} />
             Compressed View
         </label>
 

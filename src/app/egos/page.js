@@ -7,6 +7,7 @@ import { selectStyle } from "../styles";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import "./egos.css";
+import EgoImgOverlay from "../components/EgoImgOverlay";
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const mainFilters = {
@@ -71,13 +72,15 @@ function EgoDetails({ id, ego }) {
 
 function EgoCard({ ego }) {
     return <div className="clickable-ego-card" style={{ display: "flex", flexDirection: "row", padding: "0.5rem", width: "420px", height: "280px", border: "1px #777 solid", borderRadius: "0.25rem", boxSizing: "border-box" }}>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-            <EgoImg ego={ego} type={"awaken"} scale={0.5} />
-            {"corrosionType" in ego ? <EgoImg ego={ego} type={"erosion"} scale={0.5} /> : null}
+        <div style={{ display: "flex", flexDirection: "column", width: "128px" }}>
+            <EgoImgOverlay ego={ego} type={"awaken"} includeName={false} includeRarity={true} />
+            {"corrosionType" in ego ? <EgoImgOverlay ego={ego} type={"erosion"} includeName={false} includeRarity={false} /> : null}
         </div>
         <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "0.5rem", alignItems: "center", textAlign: "center" }}>
-            <RarityImg rarity={ego.rank.toLowerCase()} style={{ height: "32px" }} />
-            {ego.name}
+            <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                {/* <RarityImg rarity={ego.rank.toLowerCase()} style={{ height: "32px" }} /> */}
+                <span style={{flex: 1}}>{ego.name}</span>
+            </div>
             <div style={{ display: "flex", gap: "2rem" }}>
                 <SkillTypeIcons skill={ego.awakeningType} />
                 {"corrosionType" in ego ? <SkillTypeIcons skill={ego.corrosionType} /> : null}
@@ -172,9 +175,11 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
     }, {})
 
     if (displayType === "icon") {
-        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(128px, 1fr))", width: "100%", overflowY: "auto", gap: "0.5rem" }}>
+        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(128px, 1fr))", width: "100%", gap: "0.5rem" }}>
             {list.map(([id, ego]) => <div key={id}><Link href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }}>
-                <div className="clickable-ego"><EgoImg key={id} ego={ego} type={"awaken"} displayName={true} scale={0.5} /></div>
+                <div className="clickable-ego">
+                    <EgoImgOverlay ego={ego} type={"awaken"} includeName={true} includeRarity={true} />
+                </div>
             </Link></div>)}
         </div>
 
@@ -194,7 +199,7 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
             return listToComponents(list);
         }
     } else if (displayType === "card") {
-        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 420px)", width: "100%", overflowY: "auto", gap: "0.5rem", justifyContent: "center" }}>
+        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 420px)", width: "100%", gap: "0.5rem", justifyContent: "center" }}>
             {list.map(([id, ego]) => <div key={id}><Link href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }}><EgoCard key={id} ego={ego} /></Link></div>)}
         </div>
 
@@ -318,30 +323,32 @@ export default function EgosPage() {
 
     const [searchString, setSearchString] = useState("");
     const [selectedMainFilters, setSelectedMainFilters] = useState([]);
-    const [displayType, setDisplayType] = useState(() => {
-        const saved = localStorage.getItem("idEgoDisplayType");
-        return saved ?? "full";
-    });
-    const [strictFiltering, setStrictFiltering] = useState(() => {
-        const saved = localStorage.getItem("idEgoStrictFiltering");
-        return saved ? JSON.parse(saved) : false;
-    });
-    const [separateSinners, setSeparateSinners] = useState(() => {
-        const saved = localStorage.getItem("idEgoSeparateSinners");
-        return saved ? JSON.parse(saved) : false;
-    });
+    const [displayType, setDisplayType] = useState(null);
+    const [strictFiltering, setStrictFiltering] = useState(false);
+    const [separateSinners, setSeparateSinners] = useState(false);
+
+    useEffect(() => {
+        const savedDisplayType = localStorage.getItem("idEgoDisplayType");
+        setDisplayType(savedDisplayType ?? "full");
+        const savedStrictFiltering = localStorage.getItem("idEgoStrictFiltering");
+        setStrictFiltering(savedStrictFiltering ? JSON.parse(savedStrictFiltering) : false);
+        const savedSeparateSinners = localStorage.getItem("idEgoSeparateSinners");
+        setSeparateSinners(savedSeparateSinners ? JSON.parse(savedSeparateSinners) : false);
+    }, []);
 
     useEffect(() => {
         if (displayType) localStorage.setItem("idEgoDisplayType", displayType);
     }, [displayType]);
 
-    useEffect(() => {
-        localStorage.setItem("idEgoStrictFiltering", JSON.stringify(strictFiltering));
-    }, [strictFiltering]);
+    const handleStrictFilteringToggle = (checked) => {
+        localStorage.setItem("idEgoStrictFiltering", JSON.stringify(checked));
+        setStrictFiltering(checked);
+    }
 
-    useEffect(() => {
-        localStorage.setItem("idEgoSeparateSinners", JSON.stringify(separateSinners));
-    }, [separateSinners]);
+    const handleSeparateSinnersToggle = (checked) => {
+        localStorage.setItem("idEgoSeparateSinners", JSON.stringify(checked));
+        setSeparateSinners(checked);
+    }
 
     const [selectedKeywords, setSelectedKeywords] = useState([]);
     const [selectedSeasons, setSelectedSeasons] = useState([]);
@@ -394,12 +401,12 @@ export default function EgosPage() {
                 </div>
                 <div />
                 <label>
-                    <input type="checkbox" checked={strictFiltering} onChange={e => setStrictFiltering(e.target.checked)} />
+                    <input type="checkbox" checked={strictFiltering} onChange={e => handleStrictFilteringToggle(e.target.checked)} />
                     Strict Filtering (require all selected filters)
                 </label>
                 <div />
                 <label>
-                    <input type="checkbox" checked={separateSinners} onChange={e => setSeparateSinners(e.target.checked)} />
+                    <input type="checkbox" checked={separateSinners} onChange={e => handleSeparateSinnersToggle(e.target.checked)} />
                     Separate by Sinner
                 </label>
             </div>

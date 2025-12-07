@@ -1,23 +1,25 @@
 .clickable-id {
-    background: #1f1f1f;
+    transition: all 0.2s ease;
 }
 
 .clickable-id:hover {
-    background: #2f2f2f;
+    filter: brightness(1.3);
 }
 
 .clickable-id-card {
     background: #1f1f1f;
+    transition: all 0.2s ease;
 }
 
 .clickable-id-card:hover {
-    background: #2f2f2f;
+    filter: brightness(1.3);
 }
 
 .clickable-table-row {
     background: #1f1f1f;
+    transition: all 0.2s ease;
 }
 
 .clickable-table-row:hover {
-    background: #2f2f2f;
+    filter: brightness(1.3);
 }

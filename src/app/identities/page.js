@@ -8,6 +8,7 @@ import Link from "next/link";
 import "./identities.css";
 
 import dynamic from "next/dynamic";
+import IdentityImgOverlay from "../components/IdentityImgOverlay";
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const mainFilters = {
@@ -83,9 +84,9 @@ function IdentityDetails({ id, identity }) {
 
 function IdentityCard({ identity }) {
     return <div className="clickable-id-card" style={{ display: "flex", flexDirection: "row", padding: "0.5rem", width: "420px", height: "280px", border: "1px #777 solid", borderRadius: "0.25rem", boxSizing: "border-box" }}>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-            <IdentityImg identity={identity} uptie={2} scale={0.5} />
-            {identity.tags.includes("Base Identity") ? null : <IdentityImg identity={identity} uptie={4} scale={0.5} />}
+        <div style={{ display: "flex", flexDirection: "column", width: "128px" }}>
+            <IdentityImgOverlay identity={identity} uptie={2} includeName={false} includeRarity={true} />
+            {identity.tags.includes("Base Identity") ? null : <IdentityImgOverlay identity={identity} uptie={4} includeName={false} includeRarity={false} />}
         </div>
         <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "0.5rem", alignItems: "center", textAlign: "center" }}>
             {identity.name}
@@ -181,9 +182,11 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
     }, {})
 
     if (displayType === "icon") {
-        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(128px, 1fr))", width: "100%", overflowY: "auto", gap: "0.5rem" }}>
+        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(128px, 1fr))", width: "100%", gap: "0.5rem" }}>
             {list.map(([id, identity]) => <div key={id}><Link href={`/identities/${id}`} style={{ color: "#ddd", textDecoration: "none" }}>
-                <div className="clickable-id"><IdentityImg key={id} identity={identity} uptie={4} displayName={true} scale={0.5} /></div>
+                <div className="clickable-id">
+                    <IdentityImgOverlay identity={identity} uptie={4} includeName={true} includeRarity={true} />
+                </div>
             </Link></div>)}
         </div>
 
@@ -203,7 +206,7 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
             return listToComponents(list);
         }
     } else if (displayType === "card") {
-        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 420px)", width: "100%", overflowY: "auto", gap: "0.5rem", justifyContent: "center" }}>
+        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 420px)", width: "100%", gap: "0.5rem", justifyContent: "center" }}>
             {list.map(([id, identity]) => <div key={id}><Link href={`/identities/${id}`} style={{ color: "#ddd", textDecoration: "none" }}><IdentityCard key={id} identity={identity} /></Link></div>)}
         </div>
 
@@ -318,30 +321,32 @@ export default function Identities() {
 
     const [searchString, setSearchString] = useState("");
     const [selectedMainFilters, setSelectedMainFilters] = useState([]);
-    const [displayType, setDisplayType] = useState(() => {
-        const saved = localStorage.getItem("idEgoDisplayType");
-        return saved ?? "full";
-    });
-    const [strictFiltering, setStrictFiltering] = useState(() => {
-        const saved = localStorage.getItem("idEgoStrictFiltering");
-        return saved ? JSON.parse(saved) : false;
-    });
-    const [separateSinners, setSeparateSinners] = useState(() => {
-        const saved = localStorage.getItem("idEgoSeparateSinners");
-        return saved ? JSON.parse(saved) : false;
-    });
+    const [displayType, setDisplayType] = useState(null);
+    const [strictFiltering, setStrictFiltering] = useState(false);
+    const [separateSinners, setSeparateSinners] = useState(false);
+
+    useEffect(() => {
+        const savedDisplayType = localStorage.getItem("idEgoDisplayType");
+        setDisplayType(savedDisplayType ?? "full");
+        const savedStrictFiltering = localStorage.getItem("idEgoStrictFiltering");
+        setStrictFiltering(savedStrictFiltering ? JSON.parse(savedStrictFiltering) : false);
+        const savedSeparateSinners = localStorage.getItem("idEgoSeparateSinners");
+        setSeparateSinners(savedSeparateSinners ? JSON.parse(savedSeparateSinners) : false);
+    }, []);
 
     useEffect(() => {
         if (displayType) localStorage.setItem("idEgoDisplayType", displayType);
     }, [displayType]);
 
-    useEffect(() => {
-        localStorage.setItem("idEgoStrictFiltering", JSON.stringify(strictFiltering));
-    }, [strictFiltering]);
+    const handleStrictFilteringToggle = (checked) => {
+        localStorage.setItem("idEgoStrictFiltering", JSON.stringify(checked));
+        setStrictFiltering(checked);
+    }
 
-    useEffect(() => {
-        localStorage.setItem("idEgoSeparateSinners", JSON.stringify(separateSinners));
-    }, [separateSinners]);
+    const handleSeparateSinnersToggle = (checked) => {
+        localStorage.setItem("idEgoSeparateSinners", JSON.stringify(checked));
+        setSeparateSinners(checked);
+    }
 
     const [selectedKeywords, setSelectedKeywords] = useState([]);
     const [selectedFactionTags, setSelectedFactionTags] = useState([]);
@@ -403,12 +408,12 @@ export default function Identities() {
                 </div>
                 <div />
                 <label>
-                    <input type="checkbox" checked={strictFiltering} onChange={e => setStrictFiltering(e.target.checked)} />
+                    <input type="checkbox" checked={strictFiltering} onChange={e => handleStrictFilteringToggle(e.target.checked)} />
                     Strict Filtering (require all selected filters)
                 </label>
                 <div />
                 <label>
-                    <input type="checkbox" checked={separateSinners} onChange={e => setSeparateSinners(e.target.checked)} />
+                    <input type="checkbox" checked={separateSinners} onChange={e => handleSeparateSinnersToggle(e.target.checked)} />
                     Separate by Sinner
                 </label>
             </div>

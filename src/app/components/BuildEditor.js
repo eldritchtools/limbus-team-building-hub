@@ -45,7 +45,7 @@ function IdentitySelector({ value, setValue, options, num }) {
         <Select.Root value={value ? value.id : null} onValueChange={v => setValue(v)} open={isOpen} onOpenChange={handleOpenChange}>
             <Select.Trigger className="identity-select-trigger" ref={triggerRef} style={{ width: "100%", padding: 0, margin: 0, boxSizing: "border-box" }}>
                 {value ? <div data-tooltip-id="identity-tooltip" data-tooltip-content={value.id} style={{ width: "100%", position: "relative" }}>
-                    <IdentityImgOverlay identity={value} uptie={4} includeName={true} includeRarity={false} />
+                    <IdentityImgOverlay identity={value} uptie={4} includeName={true} includeRarity={true} />
                 </div> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <SinnerIcon num={num} style={{ height: "75%", width: "75%" }} />
                 </div>}
@@ -66,7 +66,7 @@ function IdentitySelector({ value, setValue, options, num }) {
                         {filtered.map((option) =>
                             <Select.Item key={option.id} value={option.id} className="identity-select-item">
                                 <div className="identity-item-inner" data-tooltip-id="identity-tooltip" data-tooltip-content={option.id}>
-                                    <IdentityImgOverlay identity={option} uptie={4} includeName={true} includeRarity={false} />
+                                    <IdentityImgOverlay identity={option} uptie={4} includeName={true} includeRarity={true} />
                                 </div>
                             </Select.Item>
                         )}

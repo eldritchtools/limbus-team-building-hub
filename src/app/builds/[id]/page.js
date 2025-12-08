@@ -35,7 +35,7 @@ function SkillTypes({ skillType }) {
 function IdentityProfile({ identity, displayType }) {
     return identity && displayType !== null ? <Link href={`/identities/${identity.id}`}>
         <div style={{ position: "relative", width: "100%" }} data-tooltip-id="identity-tooltip" data-tooltip-content={identity.id}>
-            <IdentityImgOverlay identity={identity} uptie={4} includeName={displayType === 1} includeRarity={false} />
+            <IdentityImgOverlay identity={identity} uptie={4} includeName={displayType === 1} includeRarity={true} />
             {displayType === 2 ? <div style={{ position: "absolute", width: "100%", aspectRatio: "1/1", background: "rgba(0, 0, 0, 0.65)", top: 0, left: 0 }}>
                 <div style={{ display: "grid", gridTemplateRows: "repeat(4, 1fr)", width: "100%", height: "100%", justifyContent: "center" }}>
                     {[0, 1, 2].map(x => <div key={x} style={{ display: "flex", justifyContent: "center" }}><SkillTypes skillType={identity.skillTypes[x].type} /></div>)}

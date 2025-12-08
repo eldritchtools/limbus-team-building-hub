@@ -7,7 +7,6 @@ import { selectStyle } from "../styles";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import "./egos.css";
-import EgoImgOverlay from "../components/EgoImgOverlay";
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const mainFilters = {
@@ -73,8 +72,8 @@ function EgoDetails({ id, ego }) {
 function EgoCard({ ego }) {
     return <div className="clickable-ego-card" style={{ display: "flex", flexDirection: "row", padding: "0.5rem", width: "420px", height: "280px", border: "1px #777 solid", borderRadius: "0.25rem", boxSizing: "border-box" }}>
         <div style={{ display: "flex", flexDirection: "column", width: "128px" }}>
-            <EgoImgOverlay ego={ego} type={"awaken"} includeName={false} includeRarity={true} />
-            {"corrosionType" in ego ? <EgoImgOverlay ego={ego} type={"erosion"} includeName={false} includeRarity={false} /> : null}
+            <EgoImg ego={ego} type={"awaken"} displayName={false} displayRarity={true} />
+            {"corrosionType" in ego ? <EgoImg ego={ego} type={"erosion"} displayName={false} displayRarity={false} /> : null}
         </div>
         <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "0.5rem", alignItems: "center", textAlign: "center" }}>
             <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
@@ -178,7 +177,7 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
         const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(128px, 1fr))", width: "100%", gap: "0.5rem" }}>
             {list.map(([id, ego]) => <div key={id}><Link href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }}>
                 <div className="clickable-ego">
-                    <EgoImgOverlay ego={ego} type={"awaken"} includeName={true} includeRarity={true} />
+                    <EgoImg ego={ego} type={"awaken"} displayName={true} displayRarity={true} />
                 </div>
             </Link></div>)}
         </div>

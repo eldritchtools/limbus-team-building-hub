@@ -10,7 +10,7 @@
     "sitemap": "next-sitemap"
   },
   "dependencies": {
-    "@eldritchtools/limbus-shared-library": "github:eldritchtools/limbus-shared-library#v0.5.3",
+    "@eldritchtools/limbus-shared-library": "github:eldritchtools/limbus-shared-library#v0.6.0",
     "@eldritchtools/shared-components": "github:eldritchtools/shared-components#v1.3.4",
     "@radix-ui/react-select": "^2.2.6",
     "@supabase/supabase-js": "^2.81.1",

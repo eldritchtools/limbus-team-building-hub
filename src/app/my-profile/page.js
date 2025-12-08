@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import BuildEntry from "../components/BuildEntry";
 import { getFilteredBuilds } from "../database/builds";
 import { useAuth } from "../database/authProvider";
 import { getSaves } from "../database/saves";
 import { tabStyle } from "../styles";
+import BuildsGrid from "../components/BuildsGrid";
 
 export default function ProfilePage() {
     const { user, profile, loading, updateUsername, refreshProfile } = useAuth();
@@ -110,9 +110,7 @@ export default function ProfilePage() {
                     {page === 1 ? `No ${activeTab === "published" ? "published builds" : activeTab === "drafts" ? "drafts" : "saved builds"} yet.` : "No more builds."}
                 </p> :
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 640px)", gap: "0.5rem", justifyContent: "center" }}>
-                        {builds.map(build => <BuildEntry key={build.id} build={build} />)}
-                    </div>
+                    <BuildsGrid builds={builds} />
 
                     <div style={{ display: "flex", gap: "0.5rem", alignSelf: "end" }}>
                         <button className="page-button" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>

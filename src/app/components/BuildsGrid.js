@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import BuildEntry from "../components/BuildEntry";
+import BuildEntry from "./BuildEntry";
 
 export default function BuildsGrid({ builds }) {
     const [compressed, setCompressed] = useState(false);
@@ -15,7 +15,7 @@ export default function BuildsGrid({ builds }) {
     }
 
     return <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <div>
+        <div style={{ alignSelf: "center" }}>
             <label>
                 <input type="checkbox" checked={compressed} onChange={e => handleCompressedToggle(e.target.checked)} />
                 Compressed View

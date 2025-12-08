@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { checkUsername } from "@/app/database/users";
-import BuildEntry from "@/app/components/BuildEntry";
 import { getFilteredBuilds } from "@/app/database/builds";
 import React from "react";
+import BuildsGrid from "@/app/components/BuildsGrid";
 
 export default function ProfilePage({params}) {
     const { username } = React.use(params);
@@ -49,9 +49,7 @@ export default function ProfilePage({params}) {
                     {page === 1 ? "No published builds yet." : "No more builds."}
                 </p> :
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 640px)", gap: "0.5rem", justifyContent: "center" }}>
-                        {builds.map(build => <BuildEntry key={build.id} build={build} />)}
-                    </div>
+                    <BuildsGrid builds={builds} />
 
                     <div style={{ display: "flex", gap: "0.5rem", alignSelf: "end" }}>
                         <button className="page-button" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>

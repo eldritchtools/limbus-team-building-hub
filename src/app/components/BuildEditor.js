@@ -4,17 +4,14 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import * as Select from "@radix-ui/react-select";
 import { getBuild, insertBuild, updateBuild } from "../database/builds";
 import "./buildSelector.css";
-import { KeywordIcon, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
+import { affinityColorMapping, EgoImg, IdentityImg, KeywordIcon, RarityImg, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
 import { keywordIdMapping, keywordToIdMapping } from "../keywordIds";
 import TagSelector, { tagToTagSelectorOption } from "./TagSelector";
-import { affinityColorMapping } from "../utils";
 import { useAuth } from "../database/authProvider";
 import { useRouter } from "next/navigation";
 import MarkdownEditor from "./MarkdownEditor";
 import "./SinnerGrid.css";
 import { extractYouTubeId } from "../YoutubeUtils";
-import IdentityImgOverlay from "./IdentityImgOverlay";
-import EgoImgOverlay from "./EgoImgOverlay";
 
 const egoRankMapping = {
     "ZAYIN": 0,
@@ -22,6 +19,14 @@ const egoRankMapping = {
     "HE": 2,
     "WAW": 3,
     "ALEPH": 4
+}
+
+const egoRankReverseMapping = {
+    0: "zayin",
+    1: "teth",
+    2: "he",
+    3: "waw",
+    4: "aleph"
 }
 
 function IdentitySelector({ value, setValue, options, num }) {
@@ -45,7 +50,7 @@ function IdentitySelector({ value, setValue, options, num }) {
         <Select.Root value={value ? value.id : null} onValueChange={v => setValue(v)} open={isOpen} onOpenChange={handleOpenChange}>
             <Select.Trigger className="identity-select-trigger" ref={triggerRef} style={{ width: "100%", padding: 0, margin: 0, boxSizing: "border-box" }}>
                 {value ? <div data-tooltip-id="identity-tooltip" data-tooltip-content={value.id} style={{ width: "100%", position: "relative" }}>
-                    <IdentityImgOverlay identity={value} uptie={4} includeName={true} includeRarity={true} />
+                    <IdentityImg identity={value} uptie={4} displayName={true} displayRarity={true} />
                 </div> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <SinnerIcon num={num} style={{ height: "75%", width: "75%" }} />
                 </div>}
@@ -66,7 +71,7 @@ function IdentitySelector({ value, setValue, options, num }) {
                         {filtered.map((option) =>
                             <Select.Item key={option.id} value={option.id} className="identity-select-item">
                                 <div className="identity-item-inner" data-tooltip-id="identity-tooltip" data-tooltip-content={option.id}>
-                                    <IdentityImgOverlay identity={option} uptie={4} includeName={true} includeRarity={true} />
+                                    <IdentityImg identity={option} uptie={4} displayName={true} displayRarity={true} />
                                 </div>
                             </Select.Item>
                         )}
@@ -83,7 +88,7 @@ function IdentitySelector({ value, setValue, options, num }) {
     );
 }
 
-function EgoSelector({ value, setValue, options }) {
+function EgoSelector({ value, setValue, options, rank }) {
     const [isOpen, setIsOpen] = useState(false);
     const triggerRef = useRef(null);
 
@@ -91,8 +96,10 @@ function EgoSelector({ value, setValue, options }) {
         <Select.Root value={value ? value.id : null} onValueChange={v => setValue(v)} open={isOpen} onOpenChange={setIsOpen}>
             <Select.Trigger className="ego-select-trigger" ref={triggerRef} style={{ borderColor: value ? affinityColorMapping[value.affinity] : "#555", flex: 1, padding: 0, margin: 0, boxSizing: "border-box" }}>
                 {value ? <div data-tooltip-id="ego-tooltip" data-tooltip-content={value.id} style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }}>
-                    <EgoImgOverlay ego={value} banner={true} type={"awaken"} includeName={true} includeRarity={false} />
-                </div> : null}
+                    <EgoImg ego={value} banner={true} type={"awaken"} displayName={true} displayRarity={false} />
+                </div> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <RarityImg rarity={egoRankReverseMapping[rank]} alt={true} />
+                </div>}
             </Select.Trigger>
 
             <Select.Content className="ego-select-content" position="popper">
@@ -102,7 +109,7 @@ function EgoSelector({ value, setValue, options }) {
                         {options.map((option) =>
                             <Select.Item key={option.id} value={option.id} className="ego-select-item">
                                 <div className="ego-item-inner" data-tooltip-id="ego-tooltip" data-tooltip-content={option.id}>
-                                    <EgoImgOverlay ego={option} type={"awaken"} includeName={true} includeRarity={false} />
+                                    <EgoImg ego={option} type={"awaken"} displayName={true} displayRarity={false} />
                                 </div>
                             </Select.Item>
                         )}
@@ -204,6 +211,8 @@ export default function BuildEditor({ mode, buildId }) {
                     setIsPublished(build.is_published);
                     setLoading(false);
                 }
+            }).catch(_err => {
+                router.push(`/builds/${buildId}`);
             });
         }
     }, [mode, buildId, router]);
@@ -271,7 +280,7 @@ export default function BuildEditor({ mode, buildId }) {
                             <DeploymentComponent order={deploymentOrder} setOrder={setDeploymentOrder} activeSinners={activeSinners} sinnerId={index + 1} />
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
-                            {Array.from({ length: 5 }, (_, rank) => <EgoSelector key={rank} value={egos[egoIds[index][rank]] || null} setValue={v => setEgoId(v, index, rank)} options={egoOptions[index + 1][rank]} />)}
+                            {Array.from({ length: 5 }, (_, rank) => <EgoSelector key={rank} value={egos[egoIds[index][rank]] || null} setValue={v => setEgoId(v, index, rank)} options={egoOptions[index + 1][rank]} rank={rank} />)}
                         </div>
                     </div>
                 )}

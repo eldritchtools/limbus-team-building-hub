@@ -63,8 +63,8 @@ function AuthForm() {
         const { error } = await getSupabase().auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: `${window.location.origin}/auth/callback`,
-                queryParams: { state: redirectTo }
+                redirectTo: `${window.location.origin}/auth/callback`
+                // queryParams: { state: redirectTo }
             },
         });
 

@@ -20,6 +20,7 @@ export function AuthProvider({ children }) {
             .maybeSingle();
 
         promise.then(({ error, data }) => {
+            setLoading(false);
             if (error) throw error;
             setProfile(data);
         }).catch(err => console.error(err));
@@ -43,7 +44,7 @@ export function AuthProvider({ children }) {
 
             setUser(currentUser);
             if (currentUser) await loadProfile(currentUser.id);
-            setLoading(false);
+            else setLoading(false);
         };
         init();
 
@@ -93,6 +94,8 @@ export function AuthProvider({ children }) {
 
     const logout = async () => {
         await getSupabase().auth.signOut();
+        setUser(null);
+        setProfile(null);
         router.refresh();
     };
 

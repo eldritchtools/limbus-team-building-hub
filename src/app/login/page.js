@@ -52,7 +52,7 @@ function AuthForm() {
             alert('Signed up! Check your inbox for a verification email.');
             window.location.reload();
         } else {
-            router.push(`/auth/callback?redirectTo=${redirectTo}`);
+            router.push(`/auth/callback?state=${redirectTo}`);
         }
     };
 

@@ -10,7 +10,7 @@ export default function ProtectedRoute({ children }) {
 
     useEffect(() => {
         if (!loading && !user) {
-            const redirectTo = encodeURIComponent(window.location.pathname);
+            const redirectTo = encodeURIComponent(window.location.pathname + window.location.search);
             router.push(`/login?redirectTo=${redirectTo}`);
         }
     }, [loading, user, router]);

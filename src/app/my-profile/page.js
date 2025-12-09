@@ -7,6 +7,7 @@ import { useAuth } from "../database/authProvider";
 import { getSaves } from "../database/saves";
 import { tabStyle } from "../styles";
 import BuildsGrid from "../components/BuildsGrid";
+import { useSearchParams } from "next/navigation";
 
 export default function ProfilePage() {
     const { user, profile, loading, updateUsername, refreshProfile } = useAuth();
@@ -16,12 +17,23 @@ export default function ProfilePage() {
     const [buildsLoading, setBuildsLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [updating, setUpdating] = useState(false);
+    const searchParams = useSearchParams();
 
     useEffect(() => {
         if (profile) setUsername(profile.username);
     }, [profile]);
 
     const [activeTab, setActiveTab] = useState("published");
+
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        switch(tab) {
+            case "builds": setActiveTab("published"); return;
+            case "drafts": setActiveTab("drafts"); return;
+            case "saved": setActiveTab("saved"); return;
+            default: return;
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         switch (activeTab) {

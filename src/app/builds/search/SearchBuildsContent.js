@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getFilteredBuilds } from "../../database/builds";
 import SearchComponent from "../SearchComponent";
 import { keywordToIdMapping } from "../../keywordIds";
-import BuildsGrid from "../BuildsGrid";
+import BuildsGrid from "../../components/BuildsGrid";
 
 export default function SearchBuildsContent() {
     const searchParams = useSearchParams();

@@ -1,5 +1,5 @@
-import { Icon } from "@eldritchtools/limbus-shared-library";
-import { affinityColorMapping, capitalizeFirstLetter, ProcessedText, romanMapping } from "../utils";
+import { affinityColorMapping, Icon } from "@eldritchtools/limbus-shared-library";
+import { capitalizeFirstLetter, ProcessedText, romanMapping } from "../utils";
 
 function Coin({ num }) {
     return <div style={{ position: "relative", height: "1.5rem", width: "1.5rem", verticalAlign: "center" }}>

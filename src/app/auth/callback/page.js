@@ -27,7 +27,9 @@ export default function AuthCallback() {
         }
 
         // Otherwise, existing user → go home
-        router.replace('/');
+        const searchParams = new URLSearchParams(window.location.search);
+        const state = searchParams.get('state');
+        router.replace(state || '/');
     }, [loading, user, profile, router, refreshProfile]);
 
     return <p style={{ textAlign: 'center', marginTop: '2rem' }}>Authenticating...</p>;

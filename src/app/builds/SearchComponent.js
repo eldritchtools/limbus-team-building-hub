@@ -6,6 +6,7 @@ import TagSelector, { tagToTagSelectorOption } from "../components/TagSelector";
 import { useState } from "react";
 import { keywordIconConvert, keywordIdMapping, keywordToIdMapping } from "../keywordIds";
 import { EgoSelector, IdentitySelector } from "../components/Selectors";
+import Link from "next/link";
 
 function KeywordSelector({ selectedKeywords, setSelectedKeywords }) {
     const handleToggle = (filter, selected) => {
@@ -96,6 +97,9 @@ export default function SearchComponent({ options = {} }) {
                 </label>
             </div>
         </div>
-        <button style={{ fontSize: "1.2rem" }} onClick={applyFilters}>Search Builds</button>
+        <div style={{display: "flex", gap: "0.5rem", alignItems: "center", marginTop: "0.2rem"}}>
+            <button style={{ fontSize: "1.2rem", cursor: "pointer" }} onClick={applyFilters}>Search Builds</button>
+            or <Link href={"/builds/new"}>create a build</Link>
+        </div>
     </div>
 }

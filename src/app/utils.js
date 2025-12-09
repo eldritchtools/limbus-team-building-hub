@@ -29,17 +29,6 @@ const seasonMapping = {
     8000: "Pilgrimage of Compassion"
 }
 
-const affinityColorMapping = {
-    "wrath": "#fe0000",
-    "lust": "#fb6500",
-    "sloth": "#f7c729",
-    "gluttony": "#9dfe00",
-    "gloom": "#0dc1eb",
-    "pride": "#1a64f0",
-    "envy": "#9300db",
-    "none": "#aaa"
-}
-
 function getSeasonString(season) {
     if (season > 9100) return `Walpurgisnacht ${season - 9100}`;
     else return seasonMapping[season];
@@ -108,4 +97,4 @@ function useTimeAgo(timestamp, refreshMs = 60000) {
 }
 
 
-export { romanMapping, sinnerMapping, affinityColorMapping, getSeasonString, capitalizeFirstLetter, ProcessedText, ColorResist, getTimeAgo, useTimeAgo };
+export { romanMapping, sinnerMapping, getSeasonString, capitalizeFirstLetter, ProcessedText, ColorResist, getTimeAgo, useTimeAgo };

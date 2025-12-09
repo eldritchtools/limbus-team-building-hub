@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getFilteredBuilds, getPopularBuilds } from "../database/builds";
 import SearchComponent from "./SearchComponent";
 import { tabStyle } from "../styles";
-import BuildsGrid from "./BuildsGrid";
+import BuildsGrid from "../components/BuildsGrid";
 
 export default function BuildsPage() {
     const [builds, setBuilds] = useState([]);

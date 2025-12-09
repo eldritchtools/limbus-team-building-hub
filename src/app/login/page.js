@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import './LoginPage.css';
 import { getSupabase } from '../database/connection';
@@ -14,6 +14,13 @@ function AuthForm() {
     const [isLogin, setIsLogin] = useState(true);
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
+    const [redirectTo, setRedirectTo] = useState('/');
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        const redirect = searchParams.get('redirectTo');
+        if (redirect) setRedirectTo(redirect);
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -45,7 +52,7 @@ function AuthForm() {
             alert('Signed up! Check your inbox for a verification email.');
             window.location.reload();
         } else {
-            router.push('/auth/callback');
+            router.push(`/auth/callback?state=${redirectTo}`);
         }
     };
 
@@ -57,6 +64,7 @@ function AuthForm() {
             provider: 'google',
             options: {
                 redirectTo: `${window.location.origin}/auth/callback`,
+                queryParams: { state: redirectTo }
             },
         });
 
@@ -65,7 +73,6 @@ function AuthForm() {
         document.body.style.pointerEvents = "auto";
         if (error) console.error('Google sign-in error:', error.message);
     };
-
 
     return (
         <div

@@ -3,7 +3,7 @@
 import Tag from "@/app/components/Tag";
 import { deleteBuild, getBuild } from "@/app/database/builds";
 import { useTimeAgo } from "@/app/utils";
-import { Icon, KeywordIcon, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
+import { EgoImg, Icon, IdentityImg, KeywordIcon, RarityImg, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/app/database/authProvider";
 import { useRouter } from "next/navigation";
@@ -20,8 +20,6 @@ import ImageStitcher from "@/app/components/ImageStitcher";
 import LikeButton from "@/app/components/LikeButton";
 import SaveButton from "@/app/components/SaveButton";
 import { YouTubeThumbnailEmbed } from "@/app/YoutubeUtils";
-import IdentityImgOverlay from "@/app/components/IdentityImgOverlay";
-import EgoImgOverlay from "@/app/components/EgoImgOverlay";
 
 function SkillTypes({ skillType }) {
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.2rem", width: "100%", height: "100%", justifyContent: "center" }}>
@@ -31,11 +29,10 @@ function SkillTypes({ skillType }) {
     </div>
 }
 
-
 function IdentityProfile({ identity, displayType }) {
     return identity && displayType !== null ? <Link href={`/identities/${identity.id}`}>
         <div style={{ position: "relative", width: "100%" }} data-tooltip-id="identity-tooltip" data-tooltip-content={identity.id}>
-            <IdentityImgOverlay identity={identity} uptie={4} includeName={displayType === 1} includeRarity={false} />
+            <IdentityImg identity={identity} uptie={4} displayName={displayType === 1} displayRarity={true} />
             {displayType === 2 ? <div style={{ position: "absolute", width: "100%", aspectRatio: "1/1", background: "rgba(0, 0, 0, 0.65)", top: 0, left: 0 }}>
                 <div style={{ display: "grid", gridTemplateRows: "repeat(4, 1fr)", width: "100%", height: "100%", justifyContent: "center" }}>
                     {[0, 1, 2].map(x => <div key={x} style={{ display: "flex", justifyContent: "center" }}><SkillTypes skillType={identity.skillTypes[x].type} /></div>)}
@@ -48,10 +45,22 @@ function IdentityProfile({ identity, displayType }) {
     </Link > : <div style={{ width: "100%", aspectRatio: "1/1", boxSizing: "border-box" }} />
 }
 
-function EgoProfile({ ego, displayType }) {
+const egoRankReverseMapping = {
+    0: "zayin",
+    1: "teth",
+    2: "he",
+    3: "waw",
+    4: "aleph"
+}
+
+function EgoProfile({ ego, displayType, rank }) {
+    if (!ego) return <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }}>
+        <RarityImg rarity={egoRankReverseMapping[rank]} alt={true} />
+    </div>
+
     return ego && displayType !== null ? <Link href={`/egos/${ego.id}`}>
         <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }} data-tooltip-id="ego-tooltip" data-tooltip-content={ego.id}>
-            <EgoImgOverlay ego={ego} banner={true} type={"awaken"} includeName={displayType === 1} includeRarity={false} />
+            <EgoImg ego={ego} banner={true} type={"awaken"} displayName={displayType === 1} displayRarity={false} />
             {displayType === 2 ? <div style={{ position: "absolute", width: "100%", aspectRatio: "4/1", background: "rgba(0, 0, 0, 0.65)", top: 0, left: 0 }}>
                 <div style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
                     <SkillTypes skillType={ego.awakeningType} />
@@ -199,7 +208,7 @@ export default function BuildPage({ params }) {
                             <DeploymentComponent order={build.deployment_order} activeSinners={build.active_sinners} sinnerId={index + 1} />
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
-                            {Array.from({ length: 5 }, (_, rank) => <EgoProfile key={rank} ego={egos[build.ego_ids[index][rank]] || null} displayType={displayType} />)}
+                            {Array.from({ length: 5 }, (_, rank) => <EgoProfile key={rank} ego={egos[build.ego_ids[index][rank]] || null} displayType={displayType} rank={rank} />)}
                         </div>
                     </div>
                 )}

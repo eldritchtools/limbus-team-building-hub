@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState } from "react";
 import debounce from "lodash.debounce";
 import { fetchTags, handleCreateTag } from "../database/tags";
 import { selectStyle, selectStyleWide } from "../styles";
@@ -22,13 +22,31 @@ async function loadOptions(inputValue) {
 
 const debouncedLoadOptions = debounce((inputValue, resolve) => loadOptions(inputValue).then(resolve), 300);
 
+function validateTag(name) {
+    const cleaned = name.trim().toLowerCase();
+
+    if (cleaned.length < 1 || cleaned.length > 50) {
+        return { valid: false, reason: "Tags must be 1–50 characters long." };
+    }
+
+    if (!/^[A-Za-z0-9 -]+$/.test(cleaned)) {
+        return {
+            valid: false,
+            reason: "Tags may only contain letters, numbers, spaces, and hyphens."
+        };
+    }
+
+    return { valid: true, value: cleaned };
+}
+
 export default function TagSelector({ selected, onChange, creatable = false, wide = false }) {
     const loadOptionsFinal = (inputValue) => new Promise((resolve) => debouncedLoadOptions(inputValue, resolve));
 
     const SelectComponent = creatable ? AsyncCreatableSelect : AsyncSelect;
+    const [error, setError] = useState("");
 
     return (
-        <div style={{ width: "40rem" }}>
+        <div style={{ display: "flex", flexDirection: "column", width: "40rem" }}>
             <SelectComponent
                 isMulti
                 cacheOptions={false}
@@ -40,7 +58,14 @@ export default function TagSelector({ selected, onChange, creatable = false, wid
                 onCreateOption={
                     creatable
                         ? async (name) => {
-                            const newTag = await handleCreateTag(name);
+                            const validated = validateTag(name);
+                            if (!validated.valid) {
+                                setError(validated.reason);
+                                return;
+                            }
+                            setError("");
+
+                            const newTag = await handleCreateTag(validated.value);
                             if (newTag) onChange([...selected, tagToTagSelectorOption(newTag)]);
                         }
                         : undefined
@@ -48,6 +73,11 @@ export default function TagSelector({ selected, onChange, creatable = false, wid
                 styles={wide ? selectStyleWide : selectStyle}
                 noOptionsMessage={() => "No matching tags"}
             />
+            {error && (
+                <div style={{ color: "red", fontSize: "0.85rem", marginTop: "4px" }}>
+                    {error}
+                </div>
+            )}
         </div>
     );
 }

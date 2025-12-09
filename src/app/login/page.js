@@ -74,7 +74,6 @@ function AuthForm() {
         if (error) console.error('Google sign-in error:', error.message);
     };
 
-
     return (
         <div
             style={{

@@ -47,6 +47,20 @@ function tokenExtractionPlugin() {
     };
 }
 
+function sanitizeUrl(url) {
+    try {
+        const parsed = new URL(url, "https://limbus-teams.eldritchtools.com/");
+
+        if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+            return parsed.href;
+        }
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+
 function BuildItem({ id }) {
     const [build, setBuild] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -81,6 +95,7 @@ export default function MarkdownRenderer({ content }) {
         if (identitiesLoading || egosLoading || statusesLoading) return null;
         return <ReactMarkdown
             remarkPlugins={[remarkGfm, remarkBreaks, tokenExtractionPlugin]}
+            skipHtml={true}
             components={{
                 tokenNode: ({ node }) => {
                     const { tokenType, tokenValue } = node.properties;
@@ -127,7 +142,16 @@ export default function MarkdownRenderer({ content }) {
                 },
                 p: ({ node, ...props }) => (
                     <p className="markdown-p" {...props} />
-                )
+                ),
+                a: ({ node, ...props }) => {
+                    const safe = sanitizeUrl(props.href);
+                    if (!safe) return <span>[invalid link]</span>;
+                    return (
+                        <a href={safe} target="_blank" rel="nofollow ugc">
+                            {props.children}
+                        </a>
+                    );
+                }
             }}
         >
             {content}

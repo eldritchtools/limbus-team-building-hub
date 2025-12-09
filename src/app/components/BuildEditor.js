@@ -246,6 +246,12 @@ export default function BuildEditor({ mode, buildId }) {
             setMessage("Title is required.")
             return;
         }
+
+        if (title.length < 3 || title.length > 100) {
+            setMessage("Title must be between 3-100 characters.");
+            return;
+        }
+
         const keywordsConverted = keywordIds.map(kw => keywordToIdMapping[kw]);
         const tagsConverted = tags.map(t => t.value);
         const youtubeVideoId = extractYouTubeId(youtubeVideo.trim());

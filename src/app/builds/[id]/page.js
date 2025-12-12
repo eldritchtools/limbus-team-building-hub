@@ -2,7 +2,6 @@
 
 import Tag from "@/app/components/Tag";
 import { deleteBuild, getBuild } from "@/app/database/builds";
-import { useTimeAgo } from "@/app/utils";
 import { EgoImg, Icon, IdentityImg, KeywordIcon, RarityImg, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/app/database/authProvider";
@@ -20,6 +19,7 @@ import ImageStitcher from "@/app/components/ImageStitcher";
 import LikeButton from "@/app/components/LikeButton";
 import SaveButton from "@/app/components/SaveButton";
 import { YouTubeThumbnailEmbed } from "@/app/YoutubeUtils";
+import ReactTimeAgo from "react-time-ago";
 
 function SkillTypes({ skillType }) {
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.2rem", width: "100%", height: "100%", justifyContent: "center" }}>
@@ -99,8 +99,6 @@ export default function BuildPage({ params }) {
     const [loading, setLoading] = useState(true);
     const [identities, identitiesLoading] = useData("identities");
     const [egos, egosLoading] = useData("egos");
-    const createdTimeAgo = useTimeAgo(build ? build.created_at : null);
-    const modifiedTimeAgo = useTimeAgo(build && build.updated_at !== build.created_at ? build.updated_at : null);
     const teamCodeRef = useRef(null);
     const [copySuccess, setCopySuccess] = useState('');
     const [likeCount, setLikeCount] = useState(0);
@@ -185,7 +183,7 @@ export default function BuildPage({ params }) {
                     {build.title}
                 </h2>
                 <div style={{ fontSize: "0.9rem", marginBottom: "0.5rem", color: "#ddd" }}>
-                    by <Username username={build.username} /> • {createdTimeAgo} {modifiedTimeAgo ? ` • Last edited ${modifiedTimeAgo}` : null}
+                    by <Username username={build.username} /> • <ReactTimeAgo date={build.created_at} locale="en-US" timeStyle="mini" /> {build.updated_at !== build.created_at ? <span> • Last edited <ReactTimeAgo date={build.updated_at} locale="en-US" timeStyle="mini" /></span> : null}
                 </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "10rem", gap: "0.2rem" }}>

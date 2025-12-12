@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { addComment, deleteComment, getComments, updateComment } from "@/app/database/comments";
-import { useTimeAgo } from "@/app/utils";
 import { Modal } from "@/app/components/Modal";
 import { useAuth } from "@/app/database/authProvider";
 import MarkdownEditor from "@/app/components/MarkdownEditor";
@@ -13,6 +12,7 @@ import "./builds.css";
 import "../../pageButton.css";
 import MarkdownRenderer from "@/app/components/MarkdownRenderer";
 import Username from "@/app/components/Username";
+import ReactTimeAgo from "react-time-ago";
 
 function CommentInput({ buildId, parentId = null, editId = null, initialValue = "", onEdit, onPost, onCancel }) {
     const [body, setBody] = useState(initialValue);
@@ -50,7 +50,6 @@ function Comment({ comment, buildId, onPost, onEdit, onDelete }) {
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const { user } = useAuth();
-    const timeAgo = useTimeAgo(comment.created_at);
 
     async function handleDelete() {
         setDeleteLoading(true);
@@ -88,7 +87,7 @@ function Comment({ comment, buildId, onPost, onEdit, onDelete }) {
                 <CommentInput buildId={buildId} initialValue={comment.body} parentId={comment.parent_id}
                     editId={comment.id} onEdit={(body) => { setEditing(false); onEdit(comment.id, body); }} onCancel={() => setEditing(false)} /> :
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                    <div style={{ fontSize: "0.8rem" }}>by <Username username={comment.username}/> • {timeAgo} {comment.edited ? `(edited)` : null}</div>
+                    <div style={{ fontSize: "0.8rem" }}>by <Username username={comment.username}/> • <ReactTimeAgo date={comment.created_at} locale="en-US" timeStyle="mini" /> {comment.edited ? `(edited)` : null}</div>
                     <MarkdownRenderer content={comment.body} />
 
                     <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>

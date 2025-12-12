@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { setNotificationRead } from "../database/notifications";
-import { getTimeAgo } from "../utils";
 import "./Notifications.css";
+import ReactTimeAgo from "react-time-ago";
 
 function constructActorStr(actors) {
     if (actors.length >= 4) return `${actors[0]}, ${actors[1]}, and ${actors.length - 2} more users`;
@@ -34,7 +34,7 @@ export default function Notification({ notif, updateNotif }) {
             {constructNotifMessage(notif)}
         </div>
         <div style={{ fontSize: "0.8rem", color: "#999" }}>
-            {getTimeAgo(notif.created_at)}
+            <ReactTimeAgo date={notif.created_at} locale="en-US" timeStyle="mini" />
         </div>
     </div>
 }

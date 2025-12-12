@@ -11,6 +11,11 @@ import { AuthProvider } from "./database/authProvider";
 import { useEffect, useState } from "react";
 import { RequestsCacheProvider } from "./database/RequestsCacheProvider";
 
+import TimeAgo from "javascript-time-ago"
+import en from "javascript-time-ago/locale/en"
+
+TimeAgo.addDefaultLocale(en)
+
 const paths = [
     { path: "/builds", title: "Explore Team Builds" },
     { path: "/my-profile", title: "My Profile", subpaths: [

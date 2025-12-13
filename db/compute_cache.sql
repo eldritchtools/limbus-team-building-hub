@@ -6,28 +6,11 @@ BEGIN
 
   -- Insert top builds
   INSERT INTO public.popular_builds_cache (
-    build_id, user_id, title, score, deployment_order, active_sinners, like_count, comment_count,
-    created_at, identity_ids, ego_ids, keyword_ids, tags, ranking_type, computed_at
+    build_id, score, ranking_type, computed_at
   )
   SELECT
     b.id,
-    b.user_id,
-    b.title,
     b.score,
-    b.deployment_order,
-    b.active_sinners,
-    b.like_count,
-    b.comment_count,
-    b.created_at,
-    b.identity_ids,
-    b.ego_ids,
-    b.keyword_ids,
-    COALESCE((
-      SELECT array_agg(t.name ORDER BY t.name)
-      FROM public.build_tags bt
-      JOIN public.tags t ON bt.tag_id = t.id
-      WHERE bt.build_id = b.id
-    ), ARRAY[]::text[]) AS tags,
     'recent' AS ranking_type,
     NOW() AS computed_at
   FROM public.builds b

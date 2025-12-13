@@ -19,19 +19,25 @@ BEGIN
   SELECT
     p.build_id,
     u.username,
-    p.title,
-    p.score,
-    p.deployment_order,
-    p.active_sinners,
-    p.like_count,
-    p.comment_count,
-    p.created_at,
-    p.identity_ids,
-    p.ego_ids,
-    p.keyword_ids,
-    p.tags
+    b.title,
+    b.score,
+    b.deployment_order,
+    b.active_sinners,
+    b.like_count,
+    b.comment_count,
+    b.created_at,
+    b.identity_ids,
+    b.ego_ids,
+    b.keyword_ids,
+    COALESCE((
+      SELECT array_agg(t.name)
+      FROM public.build_tags bt
+      JOIN public.tags t ON bt.tag_id = t.id
+      WHERE bt.build_id = b.id
+    ), ARRAY[]::text[]) AS tags
   FROM popular_builds_cache p
-  JOIN users u ON p.user_id = u.id
+  JOIN builds b ON p.build_id = b.id
+  JOIN users u ON b.user_id = u.id
   WHERE p.ranking_type = 'recent'
   ORDER BY p.score DESC
   OFFSET offset_count

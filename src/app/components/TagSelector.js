@@ -3,9 +3,9 @@
 import { useState } from "react";
 import debounce from "lodash.debounce";
 import { fetchTags, handleCreateTag } from "../database/tags";
-import { selectStyle, selectStyleWide } from "../styles";
 
 import dynamic from "next/dynamic";
+import { selectStyle } from "../styles";
 const AsyncSelect = dynamic(() => import("react-select/async"), { ssr: false });
 const AsyncCreatableSelect = dynamic(() => import("react-select/async-creatable"), { ssr: false });
 
@@ -39,14 +39,14 @@ function validateTag(name) {
     return { valid: true, value: cleaned };
 }
 
-export default function TagSelector({ selected, onChange, creatable = false, wide = false }) {
+export default function TagSelector({ selected, onChange, creatable = false, styles = selectStyle }) {
     const loadOptionsFinal = (inputValue) => new Promise((resolve) => debouncedLoadOptions(inputValue, resolve));
 
     const SelectComponent = creatable ? AsyncCreatableSelect : AsyncSelect;
     const [error, setError] = useState("");
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", width: "40rem" }}>
+        <div style={{ display: "flex", flexDirection: "column", width: "auto" }}>
             <SelectComponent
                 isMulti
                 cacheOptions={false}
@@ -70,7 +70,7 @@ export default function TagSelector({ selected, onChange, creatable = false, wid
                         }
                         : undefined
                 }
-                styles={wide ? selectStyleWide : selectStyle}
+                styles={styles}
                 noOptionsMessage={() => "No matching tags"}
             />
             {error && (

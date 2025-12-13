@@ -30,7 +30,8 @@ export default function MarkdownEditor({ value, onChange, placeholder }) {
             ],
             height: "auto",
             minHeight: "10rem",
-            maxHeight: "20rem"
+            maxHeight: "20rem",
+            width: "100%"
         };
     }, [placeholder]);
 
@@ -42,7 +43,7 @@ export default function MarkdownEditor({ value, onChange, placeholder }) {
         {mode === "edit" ? <SimpleMDE value={value} onChange={onChange} options={mdeOptions} /> : null}
         {mode === "preview" ? <MarkdownRenderer content={value} /> : null}
         {mode === "edit" ?
-            <div style={{ fontSize: "0.8rem" }}>You can reference things like statuses and keywords with tokens like {"{keyword:Burn}"}.&nbsp;
+            <div style={{ fontSize: "0.8rem" }}>You can reference things like statuses and keywords with tokens like {"{keyword:Burn}"} to show icons and tooltips when hovering on them.&nbsp;
                 <Link href={"/markdown-tokens"} target="_blank" rel="noopener noreferrer">Click here</Link> for more details.</div>
             : null
         }

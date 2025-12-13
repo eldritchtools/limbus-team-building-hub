@@ -1,12 +1,13 @@
 "use client";
 
 import { Icon } from "@eldritchtools/limbus-shared-library";
-import { selectStyleWide } from "../styles";
+import { selectStyleVariable, selectStyleWide } from "../styles";
 import TagSelector, { tagToTagSelectorOption } from "../components/TagSelector";
 import { useState } from "react";
 import { keywordIconConvert, keywordIdMapping, keywordToIdMapping } from "../keywordIds";
 import { EgoSelector, IdentitySelector } from "../components/Selectors";
 import Link from "next/link";
+import { useBreakpoint } from "@eldritchtools/shared-components";
 
 function KeywordSelector({ selectedKeywords, setSelectedKeywords }) {
     const handleToggle = (filter, selected) => {
@@ -33,7 +34,7 @@ function KeywordSelector({ selectedKeywords, setSelectedKeywords }) {
         </div>
     }
 
-    return <div style={{ display: "flex", flexWrap: "wrap", border: "1px #777 dotted", borderRadius: "1rem", minWidth: "200px", padding: "0.5rem" }}>
+    return <div style={{ display: "flex", flexWrap: "wrap", border: "1px #777 dotted", borderRadius: "1rem", minWidth: "100px", padding: "0.5rem" }}>
         {Object.keys(keywordToIdMapping).reduce((acc, kw) => [...acc, toggleComponent(kw, selectedKeywords.includes(kw))], [])}
         {<div style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }} onClick={clearAll}>Clear All</div>}
     </div>
@@ -48,6 +49,9 @@ export default function SearchComponent({ options = {} }) {
     const [keywords, setKeywords] = useState((options.keywords || []).map(kw => keywordIdMapping[kw]) || []);
     const [sortBy, setSortBy] = useState(options.sortBy || "score");
     const [strictFiltering, setStrictFiltering] = useState(options.strictFiltering || false);
+
+    const { isDesktop } = useBreakpoint();
+    // const initialized = useRef(false);
 
     const applyFilters = () => {
         const searchFilters = {};
@@ -71,11 +75,11 @@ export default function SearchComponent({ options = {} }) {
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>User</span>
             <div style={{ display: "flex" }}><input value={username} onChange={e => setUsername(e.target.value)} style={{ width: "25rem" }} /></div>
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Tags</span>
-            <TagSelector selected={tags} onChange={setTags} creatable={false} wide={true} />
+            <TagSelector selected={tags} onChange={setTags} creatable={false} styles={isDesktop ? selectStyleWide : selectStyleVariable} />
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Identities</span>
-            <IdentitySelector selected={identities} setSelected={setIdentities} isMulti={true} styles={selectStyleWide} />
+            <IdentitySelector selected={identities} setSelected={setIdentities} isMulti={true} styles={isDesktop ? selectStyleWide : selectStyleVariable} />
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>EGOs</span>
-            <EgoSelector selected={egos} setSelected={setEgos} isMulti={true} styles={selectStyleWide} />
+            <EgoSelector selected={egos} setSelected={setEgos} isMulti={true} styles={isDesktop ? selectStyleWide : selectStyleVariable} />
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Keywords</span>
             <KeywordSelector selectedKeywords={keywords} setSelectedKeywords={setKeywords} />
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Sort By</span>

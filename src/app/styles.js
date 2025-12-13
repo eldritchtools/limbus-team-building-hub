@@ -74,8 +74,29 @@ const selectStyleWide = {
     }),
 };
 
+const selectStyleVariable = {
+    ...selectStyle,
+    control: (provided, state) => ({
+        ...provided,
+        backgroundColor: "#2a2a2a",
+        color: "#ddd",
+        borderColor: state.isFocused ? "#888" : "#555",
+        boxShadow: "none",
+        "&:hover": { borderColor: "#888" },
+        minHeight: "32px",
+        width: "100%"
+    }),
+    menu: (provided) => ({
+        ...provided,
+        backgroundColor: "#2a2a2a",
+        border: "1px solid #555",
+        minHeight: "32px",
+        width: "100%"
+    }),
+};
+
 const tooltipStyle = { outlineStyle: "solid", outlineColor: "#ddd", outlineWidth: "1px", backgroundColor: "#000000", borderRadius: "1rem", zIndex: "9999" };
 
 const tabStyle = { fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.2s" };
 
-export { tooltipStyle, selectStyle, selectStyleWide, tabStyle };
+export { tooltipStyle, selectStyle, selectStyleWide, selectStyleVariable, tabStyle };

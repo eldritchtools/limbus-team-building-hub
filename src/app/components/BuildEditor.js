@@ -98,7 +98,7 @@ function EgoSelector({ value, setValue, options, rank }) {
                 {value ? <div data-tooltip-id="ego-tooltip" data-tooltip-content={value.id} style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }}>
                     <EgoImg ego={value} banner={true} type={"awaken"} displayName={true} displayRarity={false} />
                 </div> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <RarityImg rarity={egoRankReverseMapping[rank]} alt={true} />
+                    <RarityImg rarity={egoRankReverseMapping[rank]} alt={true} style={{width: "18%", height: "auto"}} />
                 </div>}
             </Select.Trigger>
 
@@ -275,7 +275,7 @@ export default function BuildEditor({ mode, buildId }) {
         Loading...
     </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", containerType: "inline-size" }}>
         <span style={{ fontSize: "1.2rem" }}>Title</span>
-        <input type="text" value={title} style={{ width: "100ch" }} onChange={e => setTitle(e.target.value)} />
+        <input type="text" value={title} style={{ width: "clamp(20ch, 80%, 100ch)" }} onChange={e => setTitle(e.target.value)} />
         <span style={{ fontSize: "1.2rem" }}>Team Build</span>
         {identitiesLoading || egosLoading ? null :
             <div className="sinner-grid" style={{ alignSelf: "center", width: "98%", paddingBottom: "1rem" }}>
@@ -330,13 +330,13 @@ export default function BuildEditor({ mode, buildId }) {
             <span style={{ fontSize: "1.2rem", borderBottom: "1px #ddd dotted" }} data-tooltip-id="team-code-tooltip">Team Code</span>
         </div>
         <div>
-            <textarea value={teamCode} onChange={e => setTeamCode(e.target.value)} rows={3} cols={100} />
+            <textarea value={teamCode} onChange={e => setTeamCode(e.target.value)} rows={3} style={{width: "clamp(20ch, 80%, 100ch)"}} />
         </div>
         <div>
             <span style={{ fontSize: "1.2rem" }} >Video</span>
         </div>
         <div>
-            <input type="text" value={youtubeVideo} onChange={(e) => setYoutubeVideo(e.target.value)} size={50} placeholder="Paste a YouTube Video link or id (optional)" />
+            <input type="text" value={youtubeVideo} onChange={(e) => setYoutubeVideo(e.target.value)} placeholder="Paste a YouTube Video link or id (optional)" style={{width: "clamp(20ch, 80%, 50ch)"}}/>
         </div>
         {youtubeVideo.length > 0 ?
             <span style={{ fontSize: "0.8rem" }}>Youtube Video Id: {extractYouTubeId(youtubeVideo.trim()) ?? "Not found"}</span> :

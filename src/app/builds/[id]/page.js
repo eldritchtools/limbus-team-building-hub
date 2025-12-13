@@ -55,7 +55,7 @@ const egoRankReverseMapping = {
 
 function EgoProfile({ ego, displayType, rank }) {
     if (!ego) return <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }}>
-        <RarityImg rarity={egoRankReverseMapping[rank]} alt={true} />
+        <RarityImg rarity={egoRankReverseMapping[rank]} alt={true} style={{width: "18%", height: "auto"}} />
     </div>
 
     return ego && displayType !== null ? <Link href={`/egos/${ego.id}`}>
@@ -273,7 +273,7 @@ export default function BuildPage({ params }) {
 
         <div style={{ border: "1px #777 solid" }} />
         {build.is_published ?
-            <div style={{ width: "clamp(800px, 60%, 100%)", alignSelf: "center" }}>
+            <div style={{ width: "clamp(200px, 60%, 100%)", alignSelf: "center" }}>
                 <CommentSection buildId={id} commentCount={commentCount} />
             </div> :
             <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>No comments while the build is not published.</p>

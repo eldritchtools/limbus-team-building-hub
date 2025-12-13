@@ -380,7 +380,7 @@ export default function Identities() {
     }, [identities, identitiesLoading, statuses, statusesLoading]);
 
     return <div style={{ display: "flex", flexDirection: "column", maxHeight: "100%", width: "100%", gap: "1rem", alignItems: "center" }}>
-        <div style={{ display: "flex", gap: "2rem", alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "2rem", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, auto)", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
                 <span style={{ textAlign: 'end' }}>Search:</span>
                 <input value={searchString} onChange={e => setSearchString(e.target.value)} />

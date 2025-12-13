@@ -99,18 +99,7 @@ CREATE TABLE public.notifications (
 CREATE TABLE public.popular_builds_cache (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   build_id UUID NOT NULL REFERENCES public.builds(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL,
-  title TEXT NOT NULL,
   score NUMERIC NOT NULL,
-  deployment_order INTEGER[] DEFAULT '{}',
-  active_sinners INTEGER DEFAULT 0,
-  like_count INTEGER DEFAULT 0,
-  comment_count INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ NOT NULL,
-  identity_ids INTEGER[] DEFAULT '{}',
-  ego_ids INTEGER[] DEFAULT '{}',
-  keyword_ids INTEGER[] DEFAULT '{}',
-  tags TEXT[] DEFAULT '{}',
   ranking_type TEXT DEFAULT 'all_time', -- 'all_time', 'weekly', etc.
   computed_at TIMESTAMPTZ DEFAULT NOW()
 );

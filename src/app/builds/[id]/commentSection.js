@@ -13,6 +13,7 @@ import "../../pageButton.css";
 import MarkdownRenderer from "@/app/components/MarkdownRenderer";
 import Username from "@/app/components/Username";
 import ReactTimeAgo from "react-time-ago";
+import { pinComment, unpinComment } from "@/app/database/builds";
 
 function CommentInput({ buildId, parentId = null, editId = null, initialValue = "", onEdit, onPost, onCancel }) {
     const [body, setBody] = useState(initialValue);
@@ -38,29 +39,43 @@ function CommentInput({ buildId, parentId = null, editId = null, initialValue = 
     return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         <MarkdownEditor value={body} onChange={setBody} placeholder={"Write a comment..."} short={true} />
         <div style={{ display: "flex", gap: "0.5rem" }}>
-            <button style={{ fontSize: "1.2rem" }} onClick={handleSubmit} disabled={loading}>{editId ? "Update" : "Post"}</button>
-            {editId ? <button style={{ fontSize: "1.2rem" }} onClick={onCancel}>Cancel</button> : null}
+            <button style={{ fontSize: "1rem" }} onClick={handleSubmit} disabled={loading}>{editId ? "Update" : "Post"}</button>
+            {editId ? <button style={{ fontSize: "1rem" }} onClick={onCancel}>Cancel</button> : null}
         </div>
     </div>;
 }
 
-function Comment({ comment, buildId, onPost, onEdit, onDelete }) {
+function Comment({ comment, buildId, buildOwnerId, pinned, onPost, onEdit, onDelete, onPin }) {
     const [replying, setReplying] = useState(false);
     const [editing, setEditing] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [pinLoading, setPinLoading] = useState(false);
     const { user } = useAuth();
 
     async function handleDelete() {
         setDeleteLoading(true);
         await deleteComment(comment.id);
         onDelete(comment.id);
+        if (pinned) onPin(null);
         setDeleteLoading(false);
         setDeleteOpen(false);
     }
 
+    async function handlePin() {
+        setPinLoading(true);
+        if (await (pinComment(buildId, comment.id))) onPin(comment);
+        setPinLoading(false);
+    }
+
+    async function handleUnpin() {
+        setPinLoading(true);
+        if (await (unpinComment(buildId))) onPin(null);
+        setPinLoading(false);
+    }
+
     return (
-        <div style={{ border: "1px #777 solid", borderRadius: "1rem", padding: "1rem" }}>
+        <div style={{ border: "1px #777 solid", borderRadius: "1rem", padding: "0.8rem 1rem 0.2rem 1rem" }}>
             {comment.parent_author && (
                 <div style={{ paddingBottom: "0.25rem" }}>
                     {comment.parent_deleted ?
@@ -71,23 +86,19 @@ function Comment({ comment, buildId, onPost, onEdit, onDelete }) {
                             </div>
                         </div> :
                         <div style={{ display: "flex", flexDirection: "column", textAlign: "start", gap: "0.25rem" }}>
-                            <span style={{ fontSize: "0.8rem" }}>Replying to <Username username={comment.parent_author}/></span>
+                            <span style={{ fontSize: "0.8rem" }}>Replying to <Username username={comment.parent_author} /></span>
                             <div style={{ border: "1px #777 solid", borderRadius: "0.5rem", padding: "0.25rem", paddingLeft: "0.5rem" }}>
                                 <MarkdownRenderer content={comment.parent_body} />
                             </div>
                         </div>}
                 </div>
-                // <blockquote className="quoted-comment">
-                //     <span style={{ fontSize: "0.8rem" }}>Replying to {comment.parent_author}</span>
-                //     <ReactMarkdown remarkPlugins={[remarkGfm]}>{comment.parent_body}</ReactMarkdown>
-                // </blockquote>
             )}
 
             {editing ?
                 <CommentInput buildId={buildId} initialValue={comment.body} parentId={comment.parent_id}
                     editId={comment.id} onEdit={(body) => { setEditing(false); onEdit(comment.id, body); }} onCancel={() => setEditing(false)} /> :
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                    <div style={{ fontSize: "0.8rem" }}>by <Username username={comment.username}/> • <ReactTimeAgo date={comment.created_at} locale="en-US" timeStyle="mini" /> {comment.edited ? `(edited)` : null}</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                    <div style={{ fontSize: "0.8rem" }}>by <Username username={comment.username} /> • <ReactTimeAgo date={comment.created_at} locale="en-US" timeStyle="mini" /> {comment.edited ? `(edited)` : null}</div>
                     <MarkdownRenderer content={comment.body} />
 
                     <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
@@ -97,6 +108,11 @@ function Comment({ comment, buildId, onPost, onEdit, onDelete }) {
                             <button onClick={() => setDeleteOpen(true)}>🗑 Delete</button>
                         </>
                         }
+                        {user?.id === buildOwnerId ? (
+                            pinned ?
+                                <button onClick={handleUnpin} disabled={pinLoading}>📌 Unpin</button> :
+                                <button onClick={handlePin} disabled={pinLoading}>📌 Pin</button>
+                        ) : null}
                     </div>
 
                     {replying && (
@@ -126,8 +142,9 @@ function Comment({ comment, buildId, onPost, onEdit, onDelete }) {
     );
 }
 
-function CommentSection({ buildId, commentCount }) {
+function CommentSection({ buildId, ownerId, commentCount, pinnedComment = null }) {
     const [comments, setComments] = useState([]);
+    const [pinned, setPinned] = useState(pinnedComment);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const { user, profile } = useAuth();
@@ -146,22 +163,30 @@ function CommentSection({ buildId, commentCount }) {
     const onPost = (comment) => { setComments(p => [{ ...comment, username: profile.username }, ...p]) };
     const onEdit = (id, body) => setComments(p => p.map(c => c.id === id ? { ...c, body: body, edited: true } : c));
     const onDelete = id => setComments(p => p.filter(c => c.id !== id));
+    const onPin = (comment) => setPinned(comment);
 
     return (
-        <section style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-            <h3 style={{ fontSize: "1.2rem" }}>Comments ({commentCount})</h3>
+        <section style={{ display: "flex", flexDirection: "column" }}>
+            <h3 style={{ fontSize: "1.2rem", marginBottom: "0.5rem" }}>Comments ({commentCount})</h3>
+
+            {pinned ? <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", paddingBottom: "1rem" }}>
+                <span style={{ fontWeight: "bold", paddingLeft: "1rem" }}>📌 Pinned Comment</span>
+                <Comment comment={pinned} buildId={buildId} buildOwnerId={ownerId} pinned={true} onPost={onPost} onEdit={onEdit} onDelete={onDelete} onPin={onPin} />
+            </div> : null}
 
             {user ?
                 <CommentInput buildId={buildId} onPost={onPost} /> :
                 <div style={{ color: "#aaa", fontWeight: "bold", textAlign: "center" }}>Login to create comments</div>
             }
 
+            <div style={{ height: "0.5rem" }} />
+
             {loading ?
                 <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading...</p> :
                 comments.length === 0 ?
                     <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>{page === 1 ? "No comments yet." : "No more comments."}</p> :
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                        {comments.map((c, i) => <Comment key={i} comment={c} buildId={buildId} onPost={onPost} onEdit={onEdit} onDelete={onDelete} />)}
+                        {comments.map((c, i) => <Comment key={i} comment={c} buildId={buildId} buildOwnerId={ownerId} onPost={onPost} onEdit={onEdit} onDelete={onDelete} onPin={onPin} />)}
 
                         <div style={{ display: "flex", gap: "0.5rem", alignSelf: "end" }}>
                             <button className="page-button" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>

@@ -62,6 +62,13 @@ CREATE TABLE public.comments (
   parent_id UUID REFERENCES public.comments(id) ON DELETE SET NULL
 );
 
+ALTER TABLE public.builds
+ADD COLUMN pinned_comment_id UUID DEFAULT NULL,
+ADD CONSTRAINT fk_pinned_comment
+FOREIGN KEY (pinned_comment_id)
+REFERENCES public.comments(id)
+ON DELETE SET NULL;
+
 CREATE TABLE public.saves (
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
   build_id UUID REFERENCES public.builds(id) ON DELETE CASCADE,

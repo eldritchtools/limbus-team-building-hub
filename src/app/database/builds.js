@@ -94,4 +94,27 @@ async function deleteBuild(build_id) {
     return { deleted: true };
 }
 
-export { getPopularBuilds, getFilteredBuilds, getBuild, insertBuild, updateBuild, deleteBuild };
+async function pinComment(buildId, commentId) {
+    const { error } = await getSupabase().from('builds').update({ pinned_comment_id: commentId }).eq('id', buildId);
+
+    if (error) {
+        console.error('Error pinning comment:', error);
+        return null;
+    }
+
+    return true;
+}
+
+async function unpinComment(buildId) {
+    const { error } = await getSupabase().from('builds').update({ pinned_comment_id: null }).eq('id', buildId)
+
+    if (error) {
+        console.error('Error unpinning comment:', error);
+        return null;
+    }
+
+    return true;
+}
+
+
+export { getPopularBuilds, getFilteredBuilds, getBuild, insertBuild, updateBuild, deleteBuild, pinComment, unpinComment };

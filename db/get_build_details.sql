@@ -64,15 +64,33 @@ BEGIN
       'comment_count', b.comment_count,
       'created_at', b.created_at,
       'updated_at', b.updated_at,
-      'is_published', b.is_published
+      'is_published', b.is_published,
+      'pinned_comment', CASE
+        WHEN pc.id IS NULL THEN NULL
+        ELSE jsonb_build_object(
+          'id', pc.id,
+          'user_id', pc.user_id,
+          'username', pu.username,
+          'body', pc.body,
+          'created_at', pc.created_at,
+          'edited', pc.edited,
+          'parent_body', pp.body,
+          'parent_author', ppu.username,
+          'parent_deleted', pp.deleted
+        )
+        END
     )
     INTO build_data
     FROM public.builds b
     LEFT JOIN public.users u ON b.user_id = u.id
     LEFT JOIN public.build_tags bt ON b.id = bt.build_id
     LEFT JOIN public.tags t ON bt.tag_id = t.id
+    LEFT JOIN public.comments pc ON b.pinned_comment_id = pc.id AND NOT pc.deleted
+    LEFT JOIN public.users pu ON pu.id = pc.user_id
+    LEFT JOIN public.comments pp ON pp.id = pc.parent_id
+    LEFT JOIN public.users ppu ON ppu.id = pp.user_id
     WHERE b.id = p_build_id
-    GROUP BY b.id, u.id, u.username;
+    GROUP BY b.id, u.id, u.username, pc.id, pu.username, pp.body, ppu.username, pp.deleted;
   END IF;
 
   RETURN build_data;

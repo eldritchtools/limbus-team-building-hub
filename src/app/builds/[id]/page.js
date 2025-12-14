@@ -274,7 +274,7 @@ export default function BuildPage({ params }) {
         <div style={{ border: "1px #777 solid" }} />
         {build.is_published ?
             <div style={{ width: "clamp(200px, 60%, 100%)", alignSelf: "center" }}>
-                <CommentSection buildId={id} commentCount={commentCount} />
+                <CommentSection buildId={id} ownerId={build.user_id} commentCount={commentCount} pinnedComment={build.pinned_comment} />
             </div> :
             <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>No comments while the build is not published.</p>
         }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon, Status, useData } from "@eldritchtools/limbus-shared-library";
+import { Gift, Icon, Status, useData } from "@eldritchtools/limbus-shared-library";
 import { keywordIconConvert } from "../keywordIds";
 import { sinnerMapping } from "../utils";
 import { Tooltip } from "react-tooltip";
@@ -14,6 +14,10 @@ import { getFilteredBuilds } from "../database/builds";
 import { tooltipStyle } from "../styles";
 import BuildEntry from "./BuildEntry";
 import "./MarkdownRenderer.css";
+
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 function tokenExtractionPlugin() {
     return (tree) => {
@@ -30,7 +34,7 @@ function tokenExtractionPlugin() {
 
                 parts.push({
                     type: "tokenNode",
-                    data: { hName: "tokenNode", hProperties: { tokenType: match[1], tokenValue: match[2] } },
+                    data: { hName: "tokenNode", hProperties: { tokenType: match[1], tokenValues: match[2].split(":") } },
                 });
 
                 lastIndex = match.index + match[0].length;
@@ -60,6 +64,93 @@ function sanitizeUrl(url) {
     }
 }
 
+function IdentityItem({ id }) {
+    const [identities, identitiesLoading] = useData("identities_mini");
+    if (identitiesLoading) {
+        return <span>{"{Loading...}"}</span>
+    } else {
+        if (id in identities)
+            return <Link href={`/identities/${id}`} data-tooltip-id="identity-tooltip" data-tooltip-content={id}>
+                [{sinnerMapping[identities[id].sinnerId]}] {identities[id].name}
+            </Link>;
+        else
+            return <span>{`{identity:${id}}`}</span>;
+    }
+}
+
+function EgoItem({ id }) {
+    const [egos, egosLoading] = useData("egos_mini");
+    if (egosLoading) {
+        return <span>{"{Loading...}"}</span>
+    } else {
+        if (id in egos)
+            return <Link href={`/egos/${id}`} data-tooltip-id="ego-tooltip" data-tooltip-content={id}>
+                [{sinnerMapping[egos[id].sinnerId]}] {egos[id].name}
+            </Link>;
+        else
+            return <span>{`{ego:${id}}`}</span>;
+    }
+}
+
+function StatusItem({ id }) {
+    const [statuses, statusesLoading] = useData("statuses");
+    if (statusesLoading) {
+        return <span>{"{Loading...}"}</span>
+    } else {
+        if (id in statuses)
+            return <Status id={id} status={statuses[id]} includeTooltip={true} />;
+        else
+            return <span>{`{status:${id}}`}</span>;
+    }
+}
+
+function GiftNameItem({ val }) {
+    const [gifts, giftsLoading] = useData("gifts");
+    const split = val.split("|");
+    const id = split[0];
+    const enhanceRank = split.length > 1 ? split[1] : 0;
+
+    const checkValidity = () => {
+        if (!(id in gifts)) return false;
+        const rank = Number(enhanceRank);
+        if (isNaN(rank) || !Number.isInteger(rank) || rank >= gifts[id].names.length || rank < 0) return false;
+        return true;
+    }
+
+    if (giftsLoading) {
+        return <span>{"{Loading...}"}</span>
+    } else {
+        if (checkValidity())
+            return <span style={{ display: "inline", textDecoration: "underline" }}>
+                <Gift gift={gifts[id]} enhanceRank={Number(enhanceRank)} text={true} />
+            </span>
+        else {
+            return <span>{`{giftname:${val}}`}</span>
+        }
+    }
+}
+
+function GiftIconsItem({ vals }) {
+    const [gifts, giftsLoading] = useData("gifts");
+
+    if (giftsLoading) {
+        return <span>{"{Loading...}"}</span>
+    } else {
+        return <div style={{display: "flex", flexWrap: "wrap", justifyContent: "center"}}>
+            {vals.map((val, i) => {
+                const split = val.split("|");
+                const id = split[0];
+                const enhanceRank = split.length > 1 ? Number(split[1]) : 0;
+
+                if (id in gifts && !isNaN(enhanceRank) && Number.isInteger(enhanceRank) && enhanceRank >= 0 && enhanceRank < gifts[id].names.length) {
+                    return <Gift key={i} gift={gifts[id]} enhanceRank={enhanceRank} />
+                } else {
+                    return <Gift key={i} gift={null} />
+                }
+            })}
+        </div>
+    }
+}
 
 function BuildItem({ id }) {
     const [build, setBuild] = useState(null);
@@ -87,57 +178,44 @@ function BuildItem({ id }) {
 }
 
 export default function MarkdownRenderer({ content }) {
-    const [identities, identitiesLoading] = useData("identities_mini");
-    const [egos, egosLoading] = useData("egos_mini");
-    const [statuses, statusesLoading] = useData("statuses");
-
     const renderedMarkdown = useMemo(() => {
-        if (identitiesLoading || egosLoading || statusesLoading) return null;
         return <ReactMarkdown
-            remarkPlugins={[remarkGfm, remarkBreaks, tokenExtractionPlugin]}
+            remarkPlugins={[remarkGfm, remarkBreaks, remarkMath, tokenExtractionPlugin]}
+            rehypePlugins={[rehypeKatex]}
             skipHtml={true}
             components={{
                 tokenNode: ({ node }) => {
-                    const { tokenType, tokenValue } = node.properties;
+                    const { tokenType, tokenValues } = node.properties;
 
                     switch (tokenType) {
                         case "identity":
-                            if (tokenValue in identities)
-                                return <Link href={`/identities/${tokenValue}`} data-tooltip-id="identity-tooltip" data-tooltip-content={tokenValue}>
-                                    [{sinnerMapping[identities[tokenValue].sinnerId]}] {identities[tokenValue].name}
-                                </Link>;
-                            else
-                                return <span>{`{${tokenType}:${tokenValue}}`}</span>;
+                            return <IdentityItem id={tokenValues[0]} />;
                         case "ego":
-                            if (tokenValue in egos)
-                                return <Link href={`/egos/${tokenValue}`} data-tooltip-id="ego-tooltip" data-tooltip-content={tokenValue}>
-                                    [{sinnerMapping[egos[tokenValue].sinnerId]}] {egos[tokenValue].name}
-                                </Link>;
-                            else
-                                return <span>{`{${tokenType}:${tokenValue}}`}</span>;
+                            return <EgoItem id={tokenValues[0]} />;
                         case "status":
-                            if (tokenValue in statuses)
-                                return <Status id={tokenValue} status={statuses[tokenValue]} includeTooltip={true} />;
-                            else
-                                return <span>{`{${tokenType}:${tokenValue}}`}</span>;
+                            return <StatusItem id={tokenValues[0]} />;
                         case "keyword":
-                            const path = keywordIconConvert(tokenValue);
+                            const path = keywordIconConvert(tokenValues[0]);
                             if (path)
                                 return <Icon path={path} style={{ display: "inline-block", width: "2rem", height: "2rem", verticalAlign: "middle" }} />;
                             else
-                                return <span>{`{${tokenType}:${tokenValue}}`}</span>;
+                                return <span>{`{${tokenType}:${tokenValues[0]}}`}</span>;
+                        case "giftname":
+                            return <GiftNameItem val={tokenValues[0]} />
+                        case "gifticons":
+                            return <GiftIconsItem vals={tokenValues} />
                         case "build":
-                            return <BuildItem id={tokenValue} />;
+                            return <BuildItem id={tokenValues[0]} />;
                         case "user":
-                            return <Link href={`/profiles/${tokenValue}`}>{tokenValue}</Link>;
+                            return <Link href={`/profiles/${tokenValues[0]}`}>{tokenValues[0]}</Link>;
                         case "sinner":
                             try {
-                                return <span>{sinnerMapping[parseInt(tokenValue)]}</span>;
+                                return <span>{sinnerMapping[parseInt(tokenValues[0])]}</span>;
                             } catch (err) {
-                                return <span>{`{${tokenType}:${tokenValue}}`}</span>;
+                                return <span>{`{${tokenType}:${tokenValues[0]}}`}</span>;
                             }
                         default:
-                            return <span>{`{${tokenType}:${tokenValue}}`}</span>;
+                            return <span>{`{${tokenType}:${tokenValues.join(":")}}`}</span>;
                     }
                 },
                 p: ({ node, ...props }) => (
@@ -156,23 +234,21 @@ export default function MarkdownRenderer({ content }) {
         >
             {content}
         </ReactMarkdown>
-    }, [content, identities, identitiesLoading, egos, egosLoading, statuses, statusesLoading]);
+    }, [content]);
 
-    return identitiesLoading || egosLoading || statusesLoading ?
-        <div>Loading...</div> :
-        <div>
-            <div style={{ lineHeight: "1.4", textAlign: "justify" }}>
-                {renderedMarkdown}
-            </div>
-
-            <Tooltip
-                id="markdown-build-tooltip"
-                render={({ content }) => <div style={tooltipStyle}>
-                    <BuildEntry build={JSON.parse(decodeURIComponent(content))} />
-                </div>}
-                getTooltipContainer={() => document.body}
-                style={{ backgroundColor: "transparent", zIndex: "9999" }}
-            />
+    return <div>
+        <div style={{ lineHeight: "1.4", textAlign: "justify", wordWrap: "break-word", overflowWrap: "break-word", wordBreak: "break-word" }}>
+            {renderedMarkdown}
         </div>
+
+        <Tooltip
+            id="markdown-build-tooltip"
+            render={({ content }) => <div style={tooltipStyle}>
+                <BuildEntry build={JSON.parse(decodeURIComponent(content))} />
+            </div>}
+            getTooltipContainer={() => document.body}
+            style={{ backgroundColor: "transparent", zIndex: "9999" }}
+        />
+    </div>
 
 }

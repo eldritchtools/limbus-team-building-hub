@@ -1,6 +1,6 @@
 "use client";
 
-import { DataProvider, getMeta, StatusTooltip } from "@eldritchtools/limbus-shared-library";
+import { DataProvider, getMeta, GiftTooltip, StatusTooltip } from "@eldritchtools/limbus-shared-library";
 import { Layout } from "@eldritchtools/shared-components";
 import Link from "next/link";
 import { IdentityTooltip } from "./components/IdentityTooltip";
@@ -60,6 +60,7 @@ export default function LayoutComponent({ children }) {
                     <IdentityTooltip />
                     <EgoTooltip />
                     <TeamCodeTooltip />
+                    <GiftTooltip />
                 </DataProvider>
             </Layout>
         </RequestsCacheProvider>

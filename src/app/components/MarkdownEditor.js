@@ -11,7 +11,42 @@ import "./MarkdownEditor.css";
 import dynamic from "next/dynamic";
 const SimpleMDE = dynamic(() => import("react-simplemde-editor"), { ssr: false });
 
-export default function MarkdownEditor({ value, onChange, placeholder, short=false }) {
+
+const inlineLaTeX = {
+    name: "inline-math",
+    action: function (editor) {
+        const cm = editor.codemirror;
+        const selection = cm.getSelection();
+        const text = selection || "x";
+        cm.replaceSelection(`$${text}$`);
+        if (!selection) {
+            const cursor = cm.getCursor();
+            cm.setCursor({ line: cursor.line, ch: cursor.ch - 1 });
+        }
+        cm.focus();
+    },
+    title: "Insert inline LaTeX",
+    icon: "$"
+};
+
+const blockLaTeX = {
+    name: "block-math",
+    action: function (editor) {
+        const cm = editor.codemirror;
+        const selection = cm.getSelection();
+        const text = selection || "x";
+        cm.replaceSelection(`$$\n${text}\n$$\n`);
+        if (!selection) {
+            const cursor = cm.getCursor();
+            cm.setCursor({ line: cursor.line - 2, ch: 0 });
+        }
+        cm.focus();
+    },
+    title: "Insert block LaTeX",
+    icon: "$$"
+};
+
+export default function MarkdownEditor({ value, onChange, placeholder, short = false }) {
     const [mode, setMode] = useState("edit");
     const modeStyle = { fontSize: "1rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.2s" };
 
@@ -26,6 +61,7 @@ export default function MarkdownEditor({ value, onChange, placeholder, short=fal
                 "bold", "italic", "heading", "|",
                 "quote", "unordered-list", "ordered-list", "|",
                 "link", "image", "|",
+                inlineLaTeX, blockLaTeX, "|",
                 "guide"
             ],
             minHeight: short ? "10rem" : "20rem",

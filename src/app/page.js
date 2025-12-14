@@ -1,14 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import BuildsPage from './builds/page';
 
 export default function Home() {
-    const router = useRouter();
-
-    useEffect(() => {
-        router.replace('/builds');
-    }, [router]);
-
-    return null;
+    return <BuildsPage />
 }

@@ -29,7 +29,7 @@ export default function BuildEntry({ build, minified, minifull }) {
                 <IdentityImgSpread identityIds={build.identity_ids} scale={.275} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} />
             </div>
             {minifull ?
-                <div style={{ display: "flex", flexDirection: "row", gap: "0.2rem", marginTop: "0.1rem", alignItems: "center" }}>
+                <div style={{ display: "flex", flexDirection: "row", gap: "0.2rem", marginTop: "0.1rem", alignItems: "center", flexWrap: "wrap" }}>
                     {build.tags.map((t, i) => t ? <Tag key={i} tag={t} /> : null)}
                 </div> : null}
             {minifull ?
@@ -56,7 +56,7 @@ export default function BuildEntry({ build, minified, minifull }) {
             <div style={{ display: "flex", flexDirection: "row", marginBottom: "0.5rem", alignSelf: "center" }}>
                 <IdentityImgSpread identityIds={build.identity_ids} scale={.375} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} />
             </div>
-            <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
+            <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
                 Tags: {build.tags.map((t, i) => t ? <Tag key={i} tag={t} /> : null)}
             </div>
             <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", marginTop: "0.25rem" }}>

@@ -11,7 +11,7 @@ import "./MarkdownEditor.css";
 import dynamic from "next/dynamic";
 const SimpleMDE = dynamic(() => import("react-simplemde-editor"), { ssr: false });
 
-export default function MarkdownEditor({ value, onChange, placeholder }) {
+export default function MarkdownEditor({ value, onChange, placeholder, short=false }) {
     const [mode, setMode] = useState("edit");
     const modeStyle = { fontSize: "1rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.2s" };
 
@@ -19,7 +19,7 @@ export default function MarkdownEditor({ value, onChange, placeholder }) {
         return {
             theme: "monokai",
             spellChecker: false,
-            autofocus: true,
+            autofocus: false,
             placeholder: placeholder,
             status: false,
             toolbar: [
@@ -28,12 +28,10 @@ export default function MarkdownEditor({ value, onChange, placeholder }) {
                 "link", "image", "|",
                 "guide"
             ],
-            height: "auto",
-            minHeight: "10rem",
-            maxHeight: "20rem",
+            minHeight: short ? "10rem" : "20rem",
             width: "100%"
         };
-    }, [placeholder]);
+    }, [short, placeholder]);
 
     return <div style={{ display: "flex", flexDirection: "column", gap: "0.1rem" }}>
         <div style={{ display: "flex", marginBottom: "0.5rem", gap: "1rem" }}>

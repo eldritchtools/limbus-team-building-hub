@@ -75,11 +75,11 @@ export default function SearchComponent({ options = {} }) {
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>User</span>
             <div style={{ display: "flex" }}><input value={username} onChange={e => setUsername(e.target.value)} style={{ width: "25rem" }} /></div>
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Tags</span>
-            <TagSelector selected={tags} onChange={setTags} creatable={false} styles={isDesktop ? selectStyleWide : selectStyleVariable} />
+            <TagSelector selected={tags} onChange={setTags} creatable={false} styles={selectStyleVariable} />
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Identities</span>
-            <IdentitySelector selected={identities} setSelected={setIdentities} isMulti={true} styles={isDesktop ? selectStyleWide : selectStyleVariable} />
+            <IdentitySelector selected={identities} setSelected={setIdentities} isMulti={true} styles={selectStyleVariable} />
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>EGOs</span>
-            <EgoSelector selected={egos} setSelected={setEgos} isMulti={true} styles={isDesktop ? selectStyleWide : selectStyleVariable} />
+            <EgoSelector selected={egos} setSelected={setEgos} isMulti={true} styles={selectStyleVariable} />
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Keywords</span>
             <KeywordSelector selectedKeywords={keywords} setSelectedKeywords={setKeywords} />
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Sort By</span>
@@ -101,7 +101,7 @@ export default function SearchComponent({ options = {} }) {
                 </label>
             </div>
         </div>
-        <div style={{display: "flex", gap: "0.5rem", alignItems: "center", marginTop: "0.2rem"}}>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginTop: "0.2rem" }}>
             <button style={{ fontSize: "1.2rem", cursor: "pointer" }} onClick={applyFilters}>Search Builds</button>
             or <Link href={"/builds/new"}>create a build</Link>
         </div>

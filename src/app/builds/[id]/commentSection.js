@@ -36,7 +36,7 @@ function CommentInput({ buildId, parentId = null, editId = null, initialValue = 
     }
 
     return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <MarkdownEditor value={body} onChange={setBody} placeholder={"Write a comment..."} />
+        <MarkdownEditor value={body} onChange={setBody} placeholder={"Write a comment..."} short={true} />
         <div style={{ display: "flex", gap: "0.5rem" }}>
             <button style={{ fontSize: "1.2rem" }} onClick={handleSubmit} disabled={loading}>{editId ? "Update" : "Post"}</button>
             {editId ? <button style={{ fontSize: "1.2rem" }} onClick={onCancel}>Cancel</button> : null}

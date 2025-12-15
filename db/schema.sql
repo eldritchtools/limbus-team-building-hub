@@ -26,6 +26,7 @@ CREATE TABLE public.builds (
   active_sinners INTEGER NOT NULL,
   team_code TEXT,
   youtube_video_id TEXT,
+  extra_opts TEXT DEFAULT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   like_count INTEGER DEFAULT 0,
@@ -61,6 +62,13 @@ CREATE TABLE public.comments (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   parent_id UUID REFERENCES public.comments(id) ON DELETE SET NULL
 );
+
+ALTER TABLE public.builds
+ADD COLUMN pinned_comment_id UUID DEFAULT NULL,
+ADD CONSTRAINT fk_pinned_comment
+FOREIGN KEY (pinned_comment_id)
+REFERENCES public.comments(id)
+ON DELETE SET NULL;
 
 CREATE TABLE public.saves (
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,

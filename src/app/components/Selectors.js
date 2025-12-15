@@ -126,6 +126,32 @@ function KeywordSelector({ selected, setSelected, isMulti = false, styles = sele
     />;
 }
 
+function GiftSelector({ selected, setSelected, isMulti = false, styles = selectStyle }) {
+    const [gifts, loading] = useData("gifts");
+
+    const optionsMapped = useMemo(() => loading ? [] : Object.entries(gifts).reduce((acc, [id, gift]) => {
+        acc[id] = {
+            value: id,
+            label: gift.names[0],
+            name: gift.names[0]
+        };
+        return acc;
+    }, {}), [gifts, loading]);
+
+    const optionsSorted = useMemo(() => Object.values(optionsMapped).sort((a, b) => normalizeString(a.name).localeCompare(normalizeString(b.name))), [optionsMapped]);
+
+    return <Select
+        isMulti={isMulti}
+        isClearable={true}
+        options={optionsSorted}
+        value={isMulti ? selected.map(id => optionsMapped[id]) : (selected ? optionsMapped[selected]: selected)}
+        onChange={isMulti ? items => setSelected(items.map(x => x.value)) : item => setSelected(item ? item.value : item)}
+        placeholder={"Search Gifts..."}
+        filterOption={(candidate, input) => checkSearch(candidate.data.name, null, input)}
+        styles={styles}
+    />;
+}
+
 function SinnerSelector({ selected, setSelected, isMulti = false, styles = selectStyle }) {
     const optionsMapped = useMemo(() => Object.entries(sinnerMapping).reduce((acc, [id, sinner]) => {
         acc[id] = {
@@ -148,4 +174,4 @@ function SinnerSelector({ selected, setSelected, isMulti = false, styles = selec
     />;
 }
 
-export { IdentitySelector, EgoSelector, StatusSelector, KeywordSelector, SinnerSelector };
+export { IdentitySelector, EgoSelector, StatusSelector, KeywordSelector, GiftSelector, SinnerSelector };

@@ -9,8 +9,15 @@ import IdentityImgSpread from "./IdentityImgSpread";
 import LikeButton from "./LikeButton";
 import SaveButton from "./SaveButton";
 import ReactTimeAgo from "react-time-ago";
+import { decodeBuildExtraOpts } from "./BuildExtraOpts";
 
 export default function BuildEntry({ build, minified, minifull }) {
+    const extraProps = {};
+    if (build.extra_opts) {
+        const extraOpts = decodeBuildExtraOpts(build.extra_opts, ["iu"])
+        if (extraOpts.identityUpties) extraProps.identityUpties = extraOpts.identityUpties;
+    }
+
     if (minified)
         return <div style={{ width: "450px", display: "flex", flexDirection: "column", border: "1px #777 solid", borderRadius: "1rem", padding: "0.5rem", boxSizing: "border-box", textAlign: "left" }}>
             <Link href={`/builds/${build.id}`}>
@@ -26,10 +33,10 @@ export default function BuildEntry({ build, minified, minifull }) {
                 by <Username username={build.username} /> •{" "}<ReactTimeAgo date={build.created_at} locale="en-US" timeStyle="mini" />
             </div>
             <div style={{ display: "flex", flexDirection: "row", alignSelf: "center" }}>
-                <IdentityImgSpread identityIds={build.identity_ids} scale={.275} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} />
+                <IdentityImgSpread identityIds={build.identity_ids} scale={.275} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} {...extraProps} />
             </div>
             {minifull ?
-                <div style={{ display: "flex", flexDirection: "row", gap: "0.2rem", marginTop: "0.1rem", alignItems: "center" }}>
+                <div style={{ display: "flex", flexDirection: "row", gap: "0.2rem", marginTop: "0.1rem", alignItems: "center", flexWrap: "wrap" }}>
                     {build.tags.map((t, i) => t ? <Tag key={i} tag={t} /> : null)}
                 </div> : null}
             {minifull ?
@@ -54,9 +61,9 @@ export default function BuildEntry({ build, minified, minifull }) {
                 by <Username username={build.username} /> •{" "}<ReactTimeAgo date={build.created_at} locale="en-US" timeStyle="mini" />
             </div>
             <div style={{ display: "flex", flexDirection: "row", marginBottom: "0.5rem", alignSelf: "center" }}>
-                <IdentityImgSpread identityIds={build.identity_ids} scale={.375} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} />
+                <IdentityImgSpread identityIds={build.identity_ids} scale={.375} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} {...extraProps} />
             </div>
-            <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
+            <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
                 Tags: {build.tags.map((t, i) => t ? <Tag key={i} tag={t} /> : null)}
             </div>
             <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", marginTop: "0.25rem" }}>

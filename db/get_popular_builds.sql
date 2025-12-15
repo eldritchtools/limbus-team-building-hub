@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_popular_builds(limit_count INTEGER, offset_count INTEGER)
+CREATE OR REPLACE FUNCTION public.get_popular_builds_v2(limit_count INTEGER, offset_count INTEGER)
 RETURNS TABLE (
   build_id UUID,
   username TEXT,
@@ -12,7 +12,8 @@ RETURNS TABLE (
   identity_ids INTEGER[],
   ego_ids INTEGER[],
   keyword_ids INTEGER[],
-  tags TEXT[]
+  tags TEXT[],
+  extra_opts TEXT
 ) AS $$
 BEGIN
   RETURN QUERY
@@ -34,7 +35,8 @@ BEGIN
       FROM public.build_tags bt
       JOIN public.tags t ON bt.tag_id = t.id
       WHERE bt.build_id = b.id
-    ), ARRAY[]::text[]) AS tags
+    ), ARRAY[]::text[]) AS tags,
+    b.extra_opts
   FROM popular_builds_cache p
   JOIN builds b ON p.build_id = b.id
   JOIN users u ON b.user_id = u.id

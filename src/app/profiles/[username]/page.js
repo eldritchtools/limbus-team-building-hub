@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { checkUsername } from "@/app/database/users";
 import { getFilteredBuilds } from "@/app/database/builds";
 import React from "react";
@@ -8,6 +8,10 @@ import BuildsGrid from "@/app/components/BuildsGrid";
 
 export default function ProfilePage({params}) {
     const { username } = React.use(params);
+    const parsedUsername = useMemo(() => {
+        return decodeURIComponent(username);
+    }, [username]); 
+
     const [builds, setBuilds] = useState([]);
     const [buildsLoading, setBuildsLoading] = useState(false);
     const [page, setPage] = useState(1);
@@ -15,32 +19,32 @@ export default function ProfilePage({params}) {
     const [checkingUser, setCheckingUser] = useState(true);
 
     useEffect(() => {
-        checkUsername(username).then(x => {
+        checkUsername(parsedUsername).then(x => {
             if (x) setUserExists(true);
             else setUserExists(false);
             setCheckingUser(false);
         })
-    }, [username]);
+    }, [parsedUsername]);
 
     useEffect(() => {
         setBuildsLoading(true);
-        getFilteredBuilds({ "username_exact": username }, true, "recency", false, page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
-    }, [username, page]);
+        getFilteredBuilds({ "username_exact": parsedUsername }, true, "recency", false, page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
+    }, [parsedUsername, page]);
 
     if (checkingUser) {
         return <div style={{ display: "flex", flexDirection: "column" }}>
-            <h2>Checking user {username}</h2>
+            <h2>Checking user {parsedUsername}</h2>
         </div>
     }
 
     if (!userExists) {
         return <div style={{ display: "flex", flexDirection: "column" }}>
-            <h2>User {username} not found</h2>
+            <h2>User {parsedUsername} not found</h2>
         </div>
     }
 
     return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <h2 style={{ alignSelf: "center" }}>{username}&apos;s Builds</h2>
+        <h2 style={{ alignSelf: "center" }}>{parsedUsername}&apos;s Builds</h2>
         <div style={{ border: "1px #777 solid" }} />
         {buildsLoading ?
             <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading...</p> :

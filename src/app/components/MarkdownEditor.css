@@ -9,6 +9,8 @@
   /* editor background (edit area) */
   background: #272822 !important;   /* Monokai-like bg */
   color: #ddd !important;        /* Monokai-like text */
+  /* height: auto;
+  max-height: 20rem; */
 }
 
 /* Editor gutter (line numbers) */
@@ -63,6 +65,7 @@
 .editor-preview,
 .CodeMirror-scroll {
   scrollbar-color: #555 #222; /* firefox */
+  min-height: 100px;
 }
 
 /* Some CodeMirror themes may set specific styles; force the font-color in code mirror text */

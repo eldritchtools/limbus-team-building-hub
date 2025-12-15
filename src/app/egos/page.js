@@ -88,7 +88,7 @@ function EgoCard({ ego }) {
             <div style={{ display: "flex", gap: "0.25rem" }}>
                 {Object.entries(ego.cost).map(([affinity, cost]) => <div key={affinity} style={{ display: "flex", flexDirection: "column" }}>
                     <Icon path={affinity} style={{ height: "32px", width: "32px" }} />
-                    <span>{affinity in ego.cost ? ego.cost[affinity] : <span style={{ color: "#777" }}>0</span>}</span>
+                    <span>{cost}</span>
                 </div>)}
             </div>
         </div>
@@ -375,7 +375,7 @@ export default function EgosPage() {
     }, [egos, egosLoading]);
 
     return <div style={{ display: "flex", flexDirection: "column", maxHeight: "100%", width: "100%", gap: "1rem", alignItems: "center" }}>
-        <div style={{ display: "flex", gap: "2rem", alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "2rem", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, auto)", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
                 <span style={{ textAlign: 'end' }}>Search:</span>
                 <input value={searchString} onChange={e => setSearchString(e.target.value)} />

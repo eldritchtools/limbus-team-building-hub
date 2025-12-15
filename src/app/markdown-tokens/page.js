@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { EgoSelector, IdentitySelector, KeywordSelector, SinnerSelector, StatusSelector } from "../components/Selectors";
+import { EgoSelector, GiftSelector, IdentitySelector, KeywordSelector, SinnerSelector, StatusSelector } from "../components/Selectors";
 import MarkdownRenderer from "../components/MarkdownRenderer";
 
 const headerStyle = { fontSize: "1.2rem", fontWeight: "bold" };
@@ -11,6 +11,7 @@ export default function MarkdownTokens() {
     const [ego, setEgo] = useState(null);
     const [status, setStatus] = useState(null);
     const [keyword, setKeyword] = useState(null);
+    const [gift, setGift] = useState(null);
     const [buildId, setBuildId] = useState("");
     const [buildTestString, setBuildTestString] = useState("");
     const [username, setUsername] = useState("");
@@ -38,7 +39,7 @@ export default function MarkdownTokens() {
             {identity ?
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <code>{`Sample markdown referencing {identity:${identity}}`}</code>
-                    <div style={{fontSize: "1.2rem"}}>→</div>
+                    <div style={{ fontSize: "1.2rem" }}>→</div>
                     <MarkdownRenderer content={`Sample markdown referencing {identity:${identity}}`} />
                 </div> :
                 null
@@ -55,7 +56,7 @@ export default function MarkdownTokens() {
             {ego ?
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <code>{`Sample markdown referencing {ego:${ego}}`}</code>
-                    <div style={{fontSize: "1.2rem"}}>→</div>
+                    <div style={{ fontSize: "1.2rem" }}>→</div>
                     <MarkdownRenderer content={`Sample markdown referencing {ego:${ego}}`} />
                 </div> :
                 null
@@ -72,7 +73,7 @@ export default function MarkdownTokens() {
             {status ?
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <code>{`Sample markdown referencing {status:${status}}`}</code>
-                    <div style={{fontSize: "1.2rem"}}>→</div>
+                    <div style={{ fontSize: "1.2rem" }}>→</div>
                     <MarkdownRenderer content={`Sample markdown referencing {status:${status}}`} />
                 </div> :
                 null
@@ -89,8 +90,34 @@ export default function MarkdownTokens() {
             {keyword ?
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <code>{`Sample markdown referencing {keyword:${keyword}}. Lowercase {keyword:${keyword.toLowerCase()}} Uppercase {keyword:${keyword.toUpperCase()}}`}</code>
-                    <div style={{fontSize: "1.2rem"}}>→</div>
+                    <div style={{ fontSize: "1.2rem" }}>→</div>
                     <MarkdownRenderer content={`Sample markdown referencing {keyword:${keyword}}. Lowercase {keyword:${keyword.toLowerCase()}} Uppercase {keyword:${keyword.toUpperCase()}}`} />
+                </div> :
+                null
+            }
+        </div>
+        <h2 style={headerStyle}>E.G.O. Gifts</h2>
+        <div>
+            Reference E.G.O Gifts using <code>{"{giftname:id}"}</code> or <code>{"{gifticons:id1:id2:...}"}</code>. The former will show the name of the gift while the latter will show the icons of the gifts included.
+            <br /> <br />
+            Both the name and icons versions will show the description of the gift on hover and can be clicked to show a modal with more details (the modal may break on mobile or other thin screens). This uses the same logic as my MD site (link in the header).
+            <br /> <br />
+            Unfortunately due to the way HTML works, <code>gifticons</code> can only work on a separate line even if you try putting it on the same line as other tokens or text.
+            <br /> <br />
+            Enhance rank can optionally be included by adding a <code>{"|rank"}</code> to the id for example <code>{"{giftname:9003|2}"}</code> will give Ashes to Ashes++. Invalid enhancement ranks will make the entire gift invalid.
+            <br /> <br />
+            You can find a gift&apos;s id below. Currently this only includes gifts available in the regular MD. Gifts from story dungeons are not included.
+            <br /> <br />
+            <GiftSelector selected={gift} setSelected={setGift} />
+
+            {gift ?
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
+                        <code>{`Sample markdown referencing {giftname:${gift}} {giftname:${gift}|2}`}</code>
+                        <div style={{ fontSize: "1.2rem" }}>→</div>
+                        <MarkdownRenderer content={`Sample markdown referencing {giftname:${gift}} {giftname:${gift}|2}`} />
+                    </div>
+                    <MarkdownRenderer content={`{gifticons:${gift}}`} />
                 </div> :
                 null
             }
@@ -101,15 +128,15 @@ export default function MarkdownTokens() {
             <br /> <br />
             You can find a build&apos;s id in the URL of its respective page. Only published builds will work. You can input the build&apos;s id below to test it.
             <br /> <br />
-            <div style={{display: "flex", gap: "0.5rem"}}>
-                <input value={buildId} onChange={e => setBuildId(e.target.value)} style={{width: "20rem"}}/> 
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+                <input value={buildId} onChange={e => setBuildId(e.target.value)} style={{ width: "20rem" }} />
                 <button onClick={handleTestBuild}>Test Build</button>
             </div>
 
             {buildTestString.length > 0 ?
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <code>{buildTestString}</code>
-                    <div style={{fontSize: "1.2rem"}}>→</div>
+                    <div style={{ fontSize: "1.2rem" }}>→</div>
                     <MarkdownRenderer content={buildTestString} />
                 </div> :
                 null
@@ -121,15 +148,15 @@ export default function MarkdownTokens() {
             <br /> <br />
             Nonexistent users will still appear as a link, but will navigate to a user not found page. You can input a username below to test it.
             <br /> <br />
-            <div style={{display: "flex", gap: "0.5rem"}}>
-                <input value={username} onChange={e => setUsername(e.target.value)} style={{width: "20rem"}} /> 
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+                <input value={username} onChange={e => setUsername(e.target.value)} style={{ width: "20rem" }} />
                 <button onClick={handleTestUsername}>Test Username</button>
             </div>
 
             {usernameTestString.length > 0 ?
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <code>{usernameTestString}</code>
-                    <div style={{fontSize: "1.2rem"}}>→</div>
+                    <div style={{ fontSize: "1.2rem" }}>→</div>
                     <MarkdownRenderer content={usernameTestString} />
                 </div> :
                 null
@@ -144,7 +171,7 @@ export default function MarkdownTokens() {
             {sinner ?
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <code>{`Sample markdown referencing {sinner:${sinner}}`}</code>
-                    <div style={{fontSize: "1.2rem"}}>→</div>
+                    <div style={{ fontSize: "1.2rem" }}>→</div>
                     <MarkdownRenderer content={`Sample markdown referencing {sinner:${sinner}}`} />
                 </div> :
                 null

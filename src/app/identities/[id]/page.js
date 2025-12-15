@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Icon, IdentityImg, KeywordIcon, RarityImg, SinnerIcon, useData } from '@eldritchtools/limbus-shared-library';
-import { ColorResist, getSeasonString, sinnerMapping } from "@/app/utils";
+import { ColorResist, getSeasonString, LEVEL_CAP, sinnerMapping } from "@/app/utils";
 import { Tooltip } from "react-tooltip";
 import { tabStyle, tooltipStyle } from "../../styles";
 import SkillCard from "@/app/components/SkillCard";
@@ -11,52 +11,13 @@ import UptieSelector from "@/app/components/UptieSelector";
 import MarkdownRenderer from "@/app/components/MarkdownRenderer";
 import BuildEntry from "@/app/components/BuildEntry";
 import { getFilteredBuilds } from "@/app/database/builds";
-
-const LEVEL_CAP = 55;
+import NumberInputWithButtons from "@/app/components/NumberInputWithButtons";
 
 function constructHp(data, level) {
     const hp = Math.floor(data.hp.base + level * data.hp.level);
     const thresholds = data.breakSection.toReversed().map(x => Math.floor(hp * x / 100)).join(",");
 
     return `${hp} (${thresholds})`;
-}
-
-function LevelInput({ value, setValue, min = 1, max = 100 }) {
-    return (
-        <div style={{
-            display: "inline-flex",
-            alignItems: "center",
-            border: "1px solid #444",
-            borderRadius: "8px",
-            padding: "4px",
-            background: "#1f1f1f",
-        }}>
-            <button
-                onClick={() => setValue(Math.max(min, value - 1))}
-                style={{ marginRight: "6px" }}
-            >−</button>
-            <input
-                type="text"
-                value={value}
-                onChange={(e) => {
-                    const v = parseInt(e.target.value);
-                    if (!isNaN(v)) setValue(Math.min(max, Math.max(min, v)));
-                }}
-                style={{
-                    width: "3ch",
-                    textAlign: "center",
-                    border: "none",
-                    background: "transparent",
-                    color: "white",
-                    fontSize: "1rem",
-                }}
-            />
-            <button
-                onClick={() => setValue(Math.min(max, value + 1))}
-                style={{ marginLeft: "6px" }}
-            >+</button>
-        </div>
-    );
 }
 
 function constructPassive(passiveId, passiveData) {
@@ -140,7 +101,7 @@ export default function Identity({ params }) {
                 <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem", justifyContent: "center", padding: "0.5rem" }}>
                     <SinnerIcon num={identityData.sinnerId} style={{ height: "40px" }} />
                     Uptie: <UptieSelector value={uptie} setValue={setUptie} />
-                    Level: <LevelInput value={level} setValue={setLevel} min={1} max={LEVEL_CAP} />
+                    Level: <NumberInputWithButtons value={level} setValue={setLevel} min={1} max={LEVEL_CAP} />
                 </div>
                 <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                     <IdentityImg identity={identityData} uptie={2} scale={0.75} />

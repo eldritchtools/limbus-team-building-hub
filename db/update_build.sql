@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION update_build_with_tags(
+CREATE OR REPLACE FUNCTION update_build_with_tags_v2(
   p_build_id UUID,
   p_user_id UUID,
   p_title TEXT,
@@ -11,6 +11,7 @@ CREATE OR REPLACE FUNCTION update_build_with_tags(
   p_team_code TEXT,
   p_youtube_video_id TEXT,
   p_tags TEXT[],
+  p_extra_opts TEXT,
   p_published BOOLEAN
 )
 RETURNS VOID
@@ -44,6 +45,7 @@ BEGIN
     active_sinners = p_active_sinners,
     team_code = p_team_code,
     youtube_video_id = p_youtube_video_id,
+    extra_opts = p_extra_opts,
     is_published = p_published,
     updated_at = NOW()
   WHERE id = p_build_id;

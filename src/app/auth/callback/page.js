@@ -18,7 +18,7 @@ export default function AuthCallback() {
         }
 
         // If user has no profile, they’re new → setup flow
-        if (!profile || profile.username.trim().length === 0) {
+        if (!profile || !profile.username || profile.username.trim().length === 0) {
             (async () => {
                 await refreshProfile(); // make sure we didn’t just miss it
                 router.replace('/login/setup');

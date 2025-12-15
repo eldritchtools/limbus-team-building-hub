@@ -46,7 +46,7 @@ const blockLaTeX = {
     icon: "$$"
 };
 
-export default function MarkdownEditor({ value, onChange, placeholder, short = false }) {
+export default function MarkdownEditorWrapper({ value, onChange, placeholder, short = false }) {
     const [mode, setMode] = useState("edit");
     const modeStyle = { fontSize: "1rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.2s" };
 

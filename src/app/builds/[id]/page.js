@@ -21,6 +21,7 @@ import SaveButton from "@/app/components/SaveButton";
 import { YouTubeThumbnailEmbed } from "@/app/YoutubeUtils";
 import ReactTimeAgo from "react-time-ago";
 import { decodeBuildExtraOpts } from "@/app/components/BuildExtraOpts";
+import { generalTooltipProps } from "@/app/components/GeneralTooltip";
 
 function SkillTypes({ skillType }) {
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.2rem", width: "100%", height: "100%", justifyContent: "center" }}>

@@ -10,10 +10,15 @@
     "sitemap": "next-sitemap"
   },
   "dependencies": {
+    "@codemirror/view": "^6.39.4",
     "@eldritchtools/limbus-shared-library": "github:eldritchtools/limbus-shared-library#v0.6.4",
-    "@eldritchtools/shared-components": "github:eldritchtools/shared-components#v1.5.10",
+    "@eldritchtools/shared-components": "github:eldritchtools/shared-components#v1.5.11",
     "@radix-ui/react-select": "^2.2.6",
     "@supabase/supabase-js": "^2.81.1",
+    "@tiptap/extension-placeholder": "^3.13.0",
+    "@tiptap/react": "^3.13.0",
+    "@tiptap/starter-kit": "^3.13.0",
+    "@tiptap/suggestion": "^3.13.0",
     "easymde": "^2.20.0",
     "javascript-time-ago": "^2.5.12",
     "katex": "^0.16.27",

@@ -88,7 +88,7 @@ function EgoCard({ ego }) {
             <div style={{ display: "flex", gap: "0.25rem" }}>
                 {Object.entries(ego.cost).map(([affinity, cost]) => <div key={affinity} style={{ display: "flex", flexDirection: "column" }}>
                     <Icon path={affinity} style={{ height: "32px", width: "32px" }} />
-                    <span>{affinity in ego.cost ? ego.cost[affinity] : <span style={{ color: "#777" }}>0</span>}</span>
+                    <span>{cost}</span>
                 </div>)}
             </div>
         </div>

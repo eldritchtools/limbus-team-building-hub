@@ -32,6 +32,7 @@ BEGIN
       'ego_ids', b.ego_ids,
       'keyword_ids', b.keyword_ids,
       'tags', COALESCE(jsonb_agg(DISTINCT t.name) FILTER (WHERE t.id IS NOT NULL), '[]'::JSONB),
+      'extra_opts', b.extra_opts,
       'is_published', b.is_published
     )
     INTO build_data
@@ -60,6 +61,7 @@ BEGIN
         'id', t.id,
         'name', t.name
       )) FILTER (WHERE t.id IS NOT NULL), '[]'::JSONB),
+      'extra_opts', b.extra_opts,
       'like_count', b.like_count,
       'comment_count', b.comment_count,
       'created_at', b.created_at,

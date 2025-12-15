@@ -5,7 +5,7 @@ import { getSupabase } from "./connection";
 async function getPopularBuilds(page = 1, pageSize = 20) {
     const start = (page - 1) * pageSize;
 
-    const { data, error } = await getSupabase().rpc('get_popular_builds', { offset_count: start, limit_count: pageSize });
+    const { data, error } = await getSupabase().rpc('get_popular_builds_v2', { offset_count: start, limit_count: pageSize });
 
     if (error) throw error;
     return data.map(x => { return { ...x, id: x.build_id } });
@@ -30,7 +30,7 @@ async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", 
     options.limit_count = pageSize;
     options.offset_count = start;
 
-    const { data, error } = await getSupabase().rpc('get_filtered_builds', options);
+    const { data, error } = await getSupabase().rpc('get_filtered_builds_v2', options);
 
     if (error) throw (error);
     return data;
@@ -46,8 +46,8 @@ async function getBuild(id, forEdit = false) {
     return data;
 }
 
-async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, is_published) {
-    const { data, error } = await getSupabase().rpc('create_build_with_tags', {
+async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, extra_opts, is_published) {
+    const { data, error } = await getSupabase().rpc('create_build_with_tags_v2', {
         p_user_id: user_id,
         p_title: title,
         p_body: body,
@@ -59,6 +59,7 @@ async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_
         p_team_code: team_code,
         p_youtube_video_id: youtube_video_id,
         p_tags: tags,
+        p_extra_opts: extra_opts,
         p_published: is_published
     });
 
@@ -66,8 +67,8 @@ async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_
     return data;
 }
 
-async function updateBuild(build_id, user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, is_published) {
-    const { error } = await getSupabase().rpc('update_build_with_tags', {
+async function updateBuild(build_id, user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, extra_opts, is_published) {
+    const { error } = await getSupabase().rpc('update_build_with_tags_v2', {
         p_build_id: build_id,
         p_user_id: user_id,
         p_title: title,
@@ -80,6 +81,7 @@ async function updateBuild(build_id, user_id, title, body, identity_ids, ego_ids
         p_team_code: team_code,
         p_youtube_video_id: youtube_video_id,
         p_tags: tags,
+        p_extra_opts: extra_opts,
         p_published: is_published
     });
 

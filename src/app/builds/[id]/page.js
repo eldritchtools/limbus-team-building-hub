@@ -20,6 +20,7 @@ import LikeButton from "@/app/components/LikeButton";
 import SaveButton from "@/app/components/SaveButton";
 import { YouTubeThumbnailEmbed } from "@/app/YoutubeUtils";
 import ReactTimeAgo from "react-time-ago";
+import { decodeBuildExtraOpts } from "@/app/components/BuildExtraOpts";
 
 function SkillTypes({ skillType }) {
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.2rem", width: "100%", height: "100%", justifyContent: "center" }}>
@@ -29,10 +30,18 @@ function SkillTypes({ skillType }) {
     </div>
 }
 
-function IdentityProfile({ identity, displayType }) {
+function IdentityProfile({ identity, displayType, sinnerId, uptie, level }) {
+    if (!identity) return <div style={{ width: "100%", aspectRatio: "1/1", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <SinnerIcon num={sinnerId} style={{ width: "75%" }} />
+    </div>
+
+    const otherProps = {};
+    if (uptie) otherProps.displayUptie = true;
+    if (level) otherProps.level = level;
+
     return identity && displayType !== null ? <Link href={`/identities/${identity.id}`}>
         <div style={{ position: "relative", width: "100%" }} data-tooltip-id="identity-tooltip" data-tooltip-content={identity.id}>
-            <IdentityImg identity={identity} uptie={4} displayName={displayType === 1} displayRarity={true} />
+            <IdentityImg identity={identity} uptie={(!uptie || uptie === "") ? 4 : uptie} displayName={displayType === 1} displayRarity={true} {...otherProps} />
             {displayType === 2 ? <div style={{ position: "absolute", width: "100%", aspectRatio: "1/1", background: "rgba(0, 0, 0, 0.65)", top: 0, left: 0 }}>
                 <div style={{ display: "grid", gridTemplateRows: "repeat(4, 1fr)", width: "100%", height: "100%", justifyContent: "center" }}>
                     {[0, 1, 2].map(x => <div key={x} style={{ display: "flex", justifyContent: "center" }}><SkillTypes skillType={identity.skillTypes[x].type} /></div>)}
@@ -53,14 +62,17 @@ const egoRankReverseMapping = {
     4: "aleph"
 }
 
-function EgoProfile({ ego, displayType, rank }) {
+function EgoProfile({ ego, displayType, rank, threadspin }) {
     if (!ego) return <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }}>
-        <RarityImg rarity={egoRankReverseMapping[rank]} alt={true} style={{width: "18%", height: "auto"}} />
+        <RarityImg rarity={egoRankReverseMapping[rank]} alt={true} style={{ width: "18%", height: "auto" }} />
     </div>
+
+    const otherProps = {}
+    if (threadspin) otherProps.threadspin = threadspin
 
     return ego && displayType !== null ? <Link href={`/egos/${ego.id}`}>
         <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }} data-tooltip-id="ego-tooltip" data-tooltip-content={ego.id}>
-            <EgoImg ego={ego} banner={true} type={"awaken"} displayName={displayType === 1} displayRarity={false} />
+            <EgoImg ego={ego} banner={true} type={"awaken"} displayName={displayType === 1} displayRarity={false} {...otherProps} />
             {displayType === 2 ? <div style={{ position: "absolute", width: "100%", aspectRatio: "4/1", background: "rgba(0, 0, 0, 0.65)", top: 0, left: 0 }}>
                 <div style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
                     <SkillTypes skillType={ego.awakeningType} />
@@ -108,6 +120,9 @@ export default function BuildPage({ params }) {
     const [linkCopySuccess, setLinkCopySuccess] = useState('');
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [identityLevels, setIdentityLevels] = useState(null);
+    const [identityUpties, setIdentityUpties] = useState(null);
+    const [egoThreadspins, setEgoThreadspins] = useState(null);
 
     const [displayType, setDisplayType] = useState(null);
 
@@ -125,6 +140,12 @@ export default function BuildPage({ params }) {
         if (loading)
             getBuild(id).then(x => {
                 setBuild(x);
+                if (x.extra_opts) {
+                    const extraOpts = decodeBuildExtraOpts(x.extra_opts);
+                    if (extraOpts.identityLevels) setIdentityLevels(extraOpts.identityLevels);
+                    if (extraOpts.identityUpties) setIdentityUpties(extraOpts.identityUpties);
+                    if (extraOpts.egoThreadspins) setEgoThreadspins(extraOpts.egoThreadspins);
+                }
                 setLoading(false);
                 setLikeCount(x.like_count);
                 setCommentCount(x.comment_count);
@@ -197,16 +218,24 @@ export default function BuildPage({ params }) {
                 {Array.from({ length: 12 }, (_, index) =>
                     <div key={index} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", border: "1px #444 solid" }}>
                         <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
-                            {build.identity_ids[index] ?
-                                <IdentityProfile identity={identities[build.identity_ids[index]]} displayType={displayType} /> :
-                                <div style={{ width: "100%", aspectRatio: "1/1", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                    <SinnerIcon num={index + 1} style={{ width: "75%" }} />
-                                </div>
-                            }
+                            <IdentityProfile
+                                identity={identities[build.identity_ids[index]] || null}
+                                displayType={displayType}
+                                sinnerId={index + 1}
+                                uptie={identityUpties ? identityUpties[index] : null}
+                                level={identityLevels ? identityLevels[index] : null}
+                            />
                             <DeploymentComponent order={build.deployment_order} activeSinners={build.active_sinners} sinnerId={index + 1} />
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
-                            {Array.from({ length: 5 }, (_, rank) => <EgoProfile key={rank} ego={egos[build.ego_ids[index][rank]] || null} displayType={displayType} rank={rank} />)}
+                            {Array.from({ length: 5 }, (_, rank) =>
+                                <EgoProfile
+                                    key={rank}
+                                    ego={egos[build.ego_ids[index][rank]] || null}
+                                    displayType={displayType}
+                                    rank={rank}
+                                    threadspin={egoThreadspins ? egoThreadspins[index][rank] : null}
+                                />)}
                         </div>
                     </div>
                 )}
@@ -231,7 +260,7 @@ export default function BuildPage({ params }) {
             <div style={{ display: "flex", flexDirection: "column", paddingLeft: "0.5rem", width: "30%", gap: "0.25rem" }}>
                 {build.team_code.trim().length > 0 ? <>
                     <div>
-                        <span style={{ fontSize: "1.2rem", borderBottom: "1px #ddd dotted" }} data-tooltip-id="team-code-tooltip">Team Code</span>
+                        <span style={{ fontSize: "1.2rem", borderBottom: "1px #ddd dotted" }} {...generalTooltipProps("teamcode")}>Team Code</span>
                     </div>
                     <div style={{ position: "relative", width: "100%" }}>
                         <textarea value={build.team_code} ref={teamCodeRef} readOnly={true} style={{ width: "100%", height: "3rem", cursor: "pointer" }} onClick={handleTeamCodeCopy} />

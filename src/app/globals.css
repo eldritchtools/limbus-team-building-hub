@@ -21,6 +21,7 @@ textarea {
 button:hover,
 select:hover {
   background-color: #3a3a3a;
+  cursor: pointer;
 }
 
 .input:focus {
@@ -48,6 +49,7 @@ input[type="checkbox"] {
   border-radius: 4px;
   margin: 2px;
   transition: background-color 0.2s, border-color 0.2s;
+  cursor: pointer;
 }
 
 .toggle-button:hover {
@@ -62,9 +64,10 @@ input[type="checkbox"] {
 }
 
 .toggle-button-active {
-  background-color: #3a3a3a;
+  background-color: #4a4a4a;
   color: #fff;
   border-color: #4a4a4a;
+  cursor: pointer;
 }
 
 .toggle-button-active:hover {

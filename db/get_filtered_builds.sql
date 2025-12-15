@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_filtered_builds(
+CREATE OR REPLACE FUNCTION public.get_filtered_builds_v2(
   title_filter TEXT DEFAULT NULL,
   username_filter TEXT DEFAULT NULL,
   username_exact_filter TEXT DEFAULT NULL,
@@ -26,6 +26,7 @@ RETURNS TABLE (
   is_published BOOLEAN,
   username TEXT,
   tags TEXT[],
+  extra_opts TEXT,
   identity_ids INT[],
   keyword_ids INT[]
 ) AS $$
@@ -43,6 +44,7 @@ BEGIN
     b.is_published,
     u.username,
     ARRAY_AGG(DISTINCT t.name) AS tags,
+    b.extra_opts,
     b.identity_ids,
     b.keyword_ids
   FROM public.builds AS b

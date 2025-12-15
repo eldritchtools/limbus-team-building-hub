@@ -1,5 +1,4 @@
 import { replaceStatusVariables } from "@eldritchtools/limbus-shared-library";
-import { useEffect, useState } from "react";
 
 const romanMapping = { 1: "I", 2: "II", 3: "III", 4: "IV", 5: "V", 6: "VI", 7: "VII", 8: "VIII", 9: "IX", 10: "X" };
 
@@ -29,6 +28,8 @@ const seasonMapping = {
     8000: "Pilgrimage of Compassion"
 }
 
+const LEVEL_CAP = 55;
+
 function getSeasonString(season) {
     if (season > 9100) return `Walpurgisnacht ${season - 9100}`;
     else return seasonMapping[season];
@@ -57,4 +58,4 @@ function ColorResist({ resist }) {
     }
 }
 
-export { romanMapping, sinnerMapping, getSeasonString, capitalizeFirstLetter, ProcessedText, ColorResist };
+export { romanMapping, sinnerMapping, LEVEL_CAP, getSeasonString, capitalizeFirstLetter, ProcessedText, ColorResist };

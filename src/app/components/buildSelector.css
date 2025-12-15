@@ -27,7 +27,7 @@
     padding: 0.5rem;
     width: 900px;
     max-height: 400px;
-    z-index: 100;
+    z-index: 1000;
     overflow-y: auto;
 }
 
@@ -98,7 +98,7 @@
     border-radius: 5px;
     max-width: 900px;
     max-height: 400px;
-    z-index: 100;
+    z-index: 1000;
     overflow-y: auto;
 }
 

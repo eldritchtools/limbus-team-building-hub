@@ -1,14 +1,23 @@
 "use client";
 
 import { getIdentityImgSrc, getSinnerIconSrc, useData } from '@eldritchtools/limbus-shared-library';
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import IdentityImgSpread from './IdentityImgSpread';
+import { decodeBuildExtraOpts } from './BuildExtraOpts';
 
 const ImageStitcher = ({ build, outputFileName = "stitched_image.png" }) => {
     const canvasRef = useRef(null);
     const [identities, identitiesLoading] = useData("identities_mini");
     const [includeOrder, setIncludeOrder] = useState(false);
     const identitiesList = build.identity_ids;
+
+    let identityUpties = useMemo(() => {
+        if (build.extra_opts) {
+            const extraOpts = decodeBuildExtraOpts(build.extra_opts, ["iu"])
+            if (extraOpts.identityUpties) return extraOpts.identityUpties;
+        }
+        return null;
+    }, [build.extra_opts]);
 
     const stitchImages = async (baseSize) => {
         const canvas = document.createElement("canvas");
@@ -30,7 +39,7 @@ const ImageStitcher = ({ build, outputFileName = "stitched_image.png" }) => {
             images.forEach((img, i) => {
                 img.onload = onImageLoad;
                 img.onerror = onImageError;
-                img.src = identitiesList[i] ? getIdentityImgSrc(identities[identitiesList[i]]) : getSinnerIconSrc(i + 1);
+                img.src = identitiesList[i] ? getIdentityImgSrc(identities[identitiesList[i]], identityUpties && identityUpties[i] !== "" ? identityUpties[i] : 4) : getSinnerIconSrc(i + 1);
             })
         });
 
@@ -90,8 +99,8 @@ const ImageStitcher = ({ build, outputFileName = "stitched_image.png" }) => {
             <div style={{ alignSelf: "start" }}>Download team build image</div>
             {
                 includeOrder ?
-                    <IdentityImgSpread identityIds={identitiesList} scale={0.5} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} /> :
-                    <IdentityImgSpread identityIds={identitiesList} scale={0.5} />
+                    <IdentityImgSpread identityIds={identitiesList} scale={0.5} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} identityUpties={identityUpties} /> :
+                    <IdentityImgSpread identityIds={identitiesList} scale={0.5} identityUpties={identityUpties} />
             }
             <br />
 

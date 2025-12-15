@@ -20,12 +20,12 @@ function DeploymentPosition({ sinnerId, deploymentOrder, activeSinners }) {
     </div>
 }
 
-export default function IdentityImgSpread({ identityIds, scale, deploymentOrder = [], activeSinners = 0 }) {
+export default function IdentityImgSpread({ identityIds, scale, deploymentOrder = [], activeSinners = 0, identityUpties = null }) {
     const size = scale * 256;
     return <div style={{ display: "grid", gridTemplateColumns: `repeat(6, ${size}px)`, gridTemplateRows: `repeat(2, ${size}px)`, width: `${size * 6}px`, alignItems: "center", justifyItems: "center" }}>
         {identityIds.map((id, i) => <div key={i} style={{ position: "relative", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
             {id ?
-                <IdentityImg key={i} id={id} scale={scale} /> :
+                <IdentityImg key={i} id={id} scale={scale} uptie={identityUpties ? (identityUpties[i] === "" ? undefined : identityUpties[i]) : undefined} /> :
                 <SinnerIcon key={i} num={i + 1} style={{ height: `${size * .75}px` }} />}
 
             <DeploymentPosition sinnerId={i + 1} deploymentOrder={deploymentOrder} activeSinners={activeSinners} />

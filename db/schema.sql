@@ -26,6 +26,7 @@ CREATE TABLE public.builds (
   active_sinners INTEGER NOT NULL,
   team_code TEXT,
   youtube_video_id TEXT,
+  extra_opts TEXT DEFAULT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   like_count INTEGER DEFAULT 0,

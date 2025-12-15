@@ -5,7 +5,7 @@ import { Layout } from "@eldritchtools/shared-components";
 import Link from "next/link";
 import { IdentityTooltip } from "./components/IdentityTooltip";
 import { EgoTooltip } from "./components/EgoTooltip";
-import { TeamCodeTooltip } from "./components/TeamCodeTooltip";
+import { GeneralTooltip } from "./components/GeneralTooltip";
 import UserStatus from "./components/UserStatus";
 import { AuthProvider } from "./database/authProvider";
 import { useEffect, useState } from "react";
@@ -59,7 +59,7 @@ export default function LayoutComponent({ children }) {
                     <StatusTooltip />
                     <IdentityTooltip />
                     <EgoTooltip />
-                    <TeamCodeTooltip />
+                    <GeneralTooltip />
                     <GiftTooltip />
                 </DataProvider>
             </Layout>

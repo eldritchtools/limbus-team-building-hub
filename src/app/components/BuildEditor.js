@@ -12,6 +12,11 @@ import { useRouter } from "next/navigation";
 import MarkdownEditor from "./MarkdownEditor";
 import "./SinnerGrid.css";
 import { extractYouTubeId } from "../YoutubeUtils";
+import NumberInputWithButtons from "./NumberInputWithButtons";
+import { LEVEL_CAP } from "../utils";
+import UptieSelector from "./UptieSelector";
+import { generalTooltipProps } from "./GeneralTooltip";
+import { decodeBuildExtraOpts, encodeBuildExtraOpts } from "./BuildExtraOpts";
 
 const egoRankMapping = {
     "ZAYIN": 0,
@@ -56,34 +61,36 @@ function IdentitySelector({ value, setValue, options, num }) {
                 </div>}
             </Select.Trigger>
 
-            <Select.Content className="identity-select-content" position="popper">
-                <div style={{ paddingBottom: "0.2rem" }}>
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                    />
-                </div>
-
-                <Select.Viewport>
-                    <div className="identity-select-grid">
-                        {filtered.map((option) =>
-                            <Select.Item key={option.id} value={option.id} className="identity-select-item">
-                                <div className="identity-item-inner" data-tooltip-id="identity-tooltip" data-tooltip-content={option.id}>
-                                    <IdentityImg identity={option} uptie={4} displayName={true} displayRarity={true} />
-                                </div>
-                            </Select.Item>
-                        )}
-                        {value ? <Select.Item key={"cancel"} value={null} className="identity-select-item">
-                            <div className="identity-item-inner" style={{ height: "100%", justifyContent: "center", color: "#ff4848", fontSize: "3rem", fontWeight: "bold" }}>
-                                ✕
-                            </div>
-                        </Select.Item> : null}
+            <Select.Portal>
+                <Select.Content className="identity-select-content" position="popper">
+                    <div style={{ paddingBottom: "0.2rem" }}>
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value)}
+                        />
                     </div>
-                    {filtered.length > 12 ? <div className="identity-select-fade-bottom" > ▼ </div> : null}
-                </Select.Viewport>
-            </Select.Content>
+
+                    <Select.Viewport>
+                        <div className="identity-select-grid">
+                            {filtered.map((option) =>
+                                <Select.Item key={option.id} value={option.id} className="identity-select-item">
+                                    <div className="identity-item-inner" data-tooltip-id="identity-tooltip" data-tooltip-content={option.id}>
+                                        <IdentityImg identity={option} uptie={4} displayName={true} displayRarity={true} />
+                                    </div>
+                                </Select.Item>
+                            )}
+                            {value ? <Select.Item key={"cancel"} value={null} className="identity-select-item">
+                                <div className="identity-item-inner" style={{ height: "100%", justifyContent: "center", color: "#ff4848", fontSize: "3rem", fontWeight: "bold" }}>
+                                    ✕
+                                </div>
+                            </Select.Item> : null}
+                        </div>
+                        {filtered.length > 12 ? <div className="identity-select-fade-bottom" > ▼ </div> : null}
+                    </Select.Viewport>
+                </Select.Content>
+            </Select.Portal>
         </Select.Root>
     );
 }
@@ -98,55 +105,33 @@ function EgoSelector({ value, setValue, options, rank }) {
                 {value ? <div data-tooltip-id="ego-tooltip" data-tooltip-content={value.id} style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }}>
                     <EgoImg ego={value} banner={true} type={"awaken"} displayName={true} displayRarity={false} />
                 </div> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <RarityImg rarity={egoRankReverseMapping[rank]} alt={true} style={{width: "18%", height: "auto"}} />
+                    <RarityImg rarity={egoRankReverseMapping[rank]} alt={true} style={{ width: "18%", height: "auto" }} />
                 </div>}
             </Select.Trigger>
 
-            <Select.Content className="ego-select-content" position="popper">
-                {options.length === 0 ? <div style={{ fontSize: "1.2rem", padding: "0.5rem" }}>No Options</div> : null}
-                <Select.Viewport>
-                    <div className="ego-select-grid">
-                        {options.map((option) =>
-                            <Select.Item key={option.id} value={option.id} className="ego-select-item">
-                                <div className="ego-item-inner" data-tooltip-id="ego-tooltip" data-tooltip-content={option.id}>
-                                    <EgoImg ego={option} type={"awaken"} displayName={true} displayRarity={false} />
+            <Select.Portal>
+                <Select.Content className="ego-select-content" position="popper">
+                    {options.length === 0 ? <div style={{ fontSize: "1.2rem", padding: "0.5rem" }}>No Options</div> : null}
+                    <Select.Viewport>
+                        <div className="ego-select-grid">
+                            {options.map((option) =>
+                                <Select.Item key={option.id} value={option.id} className="ego-select-item">
+                                    <div className="ego-item-inner" data-tooltip-id="ego-tooltip" data-tooltip-content={option.id}>
+                                        <EgoImg ego={option} type={"awaken"} displayName={true} displayRarity={false} />
+                                    </div>
+                                </Select.Item>
+                            )}
+                            {value ? <Select.Item key={"cancel"} value={null} className="ego-select-item">
+                                <div className="ego-item-inner" style={{ height: "100%", width: "128px", justifyContent: "center", color: "#ff4848", fontSize: "3rem", fontWeight: "bold" }}>
+                                    ✕
                                 </div>
-                            </Select.Item>
-                        )}
-                        {value ? <Select.Item key={"cancel"} value={null} className="ego-select-item">
-                            <div className="ego-item-inner" style={{ height: "100%", width: "128px", justifyContent: "center", color: "#ff4848", fontSize: "3rem", fontWeight: "bold" }}>
-                                ✕
-                            </div>
-                        </Select.Item> : null}
-                    </div>
-                    {options.length > 12 ? <div className="ego-select-fade-bottom" > ▼ </div> : null}
-                </Select.Viewport>
-            </Select.Content>
+                            </Select.Item> : null}
+                        </div>
+                        {options.length > 12 ? <div className="ego-select-fade-bottom" > ▼ </div> : null}
+                    </Select.Viewport>
+                </Select.Content>
+            </Select.Portal>
         </Select.Root>
-    );
-}
-
-function ActiveSinnersInput({ value, setValue, min = 1, max = 12 }) {
-    return (
-        <div style={{ display: "inline-flex", alignItems: "center", border: "1px solid #444", borderRadius: "8px", padding: "4px" }}>
-            <button
-                onClick={() => setValue(Math.max(min, value - 1))}
-                style={{ marginRight: "6px" }}
-            >−</button>
-            <input
-                type="text"
-                value={value}
-                onChange={(e) => {
-                    const v = parseInt(e.target.value);
-                    if (!isNaN(v)) setValue(Math.min(max, Math.max(min, v)));
-                }}
-                style={{ width: "3ch", textAlign: "center", border: "none", background: "transparent", fontSize: "1rem" }}
-            />
-            <button
-                onClick={() => setValue(Math.min(max, value + 1))}
-                style={{ marginLeft: "6px" }}
-            >+</button>
-        </div>
     );
 }
 
@@ -183,6 +168,10 @@ export default function BuildEditor({ mode, buildId }) {
     const [teamCode, setTeamCode] = useState('');
     const [youtubeVideo, setYoutubeVideo] = useState('');
     const [tags, setTags] = useState([]);
+    const [uptieLevelToggle, setUptieLevelToggle] = useState(false);
+    const [identityUpties, setIdentityUpties] = useState(Array.from({ length: 12 }, () => ""));
+    const [identityLevels, setIdentityLevels] = useState(Array.from({ length: 12 }, () => ""));
+    const [egoThreadspins, setEgoThreadspins] = useState(Array.from({ length: 12 }, () => Array.from({ length: 5 }, () => "")));
     const [isPublished, setIsPublished] = useState(false);
     const [loading, setLoading] = useState(mode === "edit");
     const [message, setMessage] = useState("");
@@ -210,6 +199,14 @@ export default function BuildEditor({ mode, buildId }) {
                     setTags(build.tags.map(t => tagToTagSelectorOption(t)));
                     setIsPublished(build.is_published);
                     setLoading(false);
+
+                    if (build.extra_opts) {
+                        const extraOpts = decodeBuildExtraOpts(build.extra_opts);
+                        if (Object.keys(extraOpts).length > 0) setUptieLevelToggle(true);
+                        if ("identityLevels" in extraOpts) setIdentityLevels(extraOpts.identityLevels);
+                        if ("identityUpties" in extraOpts) setIdentityUpties(extraOpts.identityUpties);
+                        if ("egoThreadspins" in extraOpts) setEgoThreadspins(extraOpts.egoThreadspins);
+                    }
                 }
             }).catch(_err => {
                 router.push(`/builds/${buildId}`);
@@ -228,6 +225,10 @@ export default function BuildEditor({ mode, buildId }) {
     }, Object.fromEntries(Array.from({ length: 12 }, (_, index) => [index + 1, Array.from({ length: 5 }, () => [])]))), [egos, egosLoading]);
 
     const setEgoId = (egoId, index, rank) => setEgoIds(prev => prev.map((x, i) => i === index ? x.map((y, r) => r === rank ? egoId : y) : x));
+
+    const setIdentityLevel = (level, index) => setIdentityLevels(prev => prev.map((x, i) => i === index ? level : x));
+    const setIdentityUptie = (uptie, index) => setIdentityUpties(prev => prev.map((x, i) => i === index ? uptie : x));
+    const setEgoThreadspin = (uptie, index, rank) => setEgoThreadspins(prev => prev.map((x, i) => i === index ? x.map((y, r) => r === rank ? uptie : y) : x));
 
     const keywordOptions = useMemo(() => identitiesLoading ? {} : identityIds.reduce((acc, id) => {
         if (id) {
@@ -261,12 +262,14 @@ export default function BuildEditor({ mode, buildId }) {
             return;
         }
 
+        const extraOpts = encodeBuildExtraOpts(identityUpties, identityLevels, egoThreadspins);
+
         setSaving(true);
         if (mode === "edit") {
-            const data = await updateBuild(buildId, user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, isPublished);
+            const data = await updateBuild(buildId, user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, extraOpts, isPublished);
             router.push(`/builds/${data}`);
         } else {
-            const data = await insertBuild(user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, isPublished);
+            const data = await insertBuild(user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, extraOpts, isPublished);
             router.push(`/builds/${data}`);
         }
     }
@@ -280,22 +283,44 @@ export default function BuildEditor({ mode, buildId }) {
         {identitiesLoading || egosLoading ? null :
             <div className="sinner-grid" style={{ alignSelf: "center", width: "98%", paddingBottom: "1rem" }}>
                 {Array.from({ length: 12 }, (_, index) =>
-                    <div key={index} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", aspectRatio: "8/5", boxSizing: "border-box" }}>
-                        <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
-                            <IdentitySelector value={identities[identityIds[index]] || null} setValue={v => setIdentityId(v, index)} options={identityOptions[index + 1]} num={index + 1} />
-                            <DeploymentComponent order={deploymentOrder} setOrder={setDeploymentOrder} activeSinners={activeSinners} sinnerId={index + 1} />
+                    <div key={index} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", boxSizing: "border-box" }}>
+                            <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
+                                <IdentitySelector value={identities[identityIds[index]] || null} setValue={v => setIdentityId(v, index)} options={identityOptions[index + 1]} num={index + 1} />
+                                <DeploymentComponent order={deploymentOrder} setOrder={setDeploymentOrder} activeSinners={activeSinners} sinnerId={index + 1} />
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
+                                {Array.from({ length: 5 }, (_, rank) =>
+                                    <EgoSelector key={rank} value={egos[egoIds[index][rank]] || null} setValue={v => setEgoId(v, index, rank)} options={egoOptions[index + 1][rank]} rank={rank} />
+                                )}
+                            </div>
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
-                            {Array.from({ length: 5 }, (_, rank) => <EgoSelector key={rank} value={egos[egoIds[index][rank]] || null} setValue={v => setEgoId(v, index, rank)} options={egoOptions[index + 1][rank]} rank={rank} />)}
-                        </div>
+                        {uptieLevelToggle ? <>
+                            <div style={{ display: "flex" }}>
+                                <NumberInputWithButtons value={identityLevels[index]} setValue={v => setIdentityLevel(v, index)} max={LEVEL_CAP} allowEmpty={true} />
+                                <UptieSelector value={identityUpties[index]} setValue={v => setIdentityUptie(v, index)} allowEmpty={true} />
+                            </div>
+                            <div style={{ display: "flex" }}>
+                                {Array.from({ length: 5 }, (_, rank) =>
+                                    <UptieSelector
+                                        key={rank}
+                                        value={egoThreadspins[index][rank]}
+                                        setValue={v => setEgoThreadspin(v, index, rank)}
+                                        allowEmpty={true}
+                                        emptyIcon={<RarityImg rarity={egoRankReverseMapping[rank]} alt={true} style={{ width: "100%", height: "auto" }} />}
+                                    />)}
+                            </div>
+                        </> : null}
                     </div>
                 )}
             </div>
         }
-
+        <div style={{ display: "flex" }}>
+            <button className={uptieLevelToggle ? "toggle-button-active" : "toggle-button"} onClick={() => setUptieLevelToggle(p => !p)} {...generalTooltipProps("optionaluptieorlevel")}>Indicate Uptie or Level</button>
+        </div>
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
             <span style={{ fontSize: "1.2rem" }}>Active Sinners</span>
-            <ActiveSinnersInput value={activeSinners} setValue={setActiveSinners} />
+            <NumberInputWithButtons value={activeSinners} setValue={setActiveSinners} min={1} max={12} />
             <button onClick={() => setDeploymentOrder([])} style={{ fontSize: "1.2rem" }}>Reset Deployment Order</button>
         </div>
         <span style={{ fontSize: "1.2rem" }}>Description</span>
@@ -327,16 +352,16 @@ export default function BuildEditor({ mode, buildId }) {
             </div>
         </div>
         <div>
-            <span style={{ fontSize: "1.2rem", borderBottom: "1px #ddd dotted" }} data-tooltip-id="team-code-tooltip">Team Code</span>
+            <span style={{ fontSize: "1.2rem", borderBottom: "1px #ddd dotted" }} {...generalTooltipProps("teamcode")}>Team Code</span>
         </div>
         <div>
-            <textarea value={teamCode} onChange={e => setTeamCode(e.target.value)} rows={3} style={{width: "clamp(20ch, 80%, 100ch)"}} />
+            <textarea value={teamCode} onChange={e => setTeamCode(e.target.value)} rows={3} style={{ width: "clamp(20ch, 80%, 100ch)" }} />
         </div>
         <div>
             <span style={{ fontSize: "1.2rem" }} >Video</span>
         </div>
         <div>
-            <input type="text" value={youtubeVideo} onChange={(e) => setYoutubeVideo(e.target.value)} placeholder="Paste a YouTube Video link or id (optional)" style={{width: "clamp(20ch, 80%, 50ch)"}}/>
+            <input type="text" value={youtubeVideo} onChange={(e) => setYoutubeVideo(e.target.value)} placeholder="Paste a YouTube Video link or id (optional)" style={{ width: "clamp(20ch, 80%, 50ch)" }} />
         </div>
         {youtubeVideo.length > 0 ?
             <span style={{ fontSize: "0.8rem" }}>Youtube Video Id: {extractYouTubeId(youtubeVideo.trim()) ?? "Not found"}</span> :

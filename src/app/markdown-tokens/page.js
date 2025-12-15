@@ -98,13 +98,13 @@ export default function MarkdownTokens() {
         </div>
         <h2 style={headerStyle}>E.G.O. Gifts</h2>
         <div>
-            Reference E.G.O Gifts using <code>{"{giftname:id}"}</code> or <code>{"{gifticons:id1:id2:...}"}</code>. The former will show the name of the gift while the latter will show the icons of the gifts included.
+            Reference E.G.O Gifts using <code>{"{giftname:id}"}</code> or <code>{"{gifticons:id1:id2:...}"}</code>. The former will show the name of the gift while the latter will show the icons of all the gifts included in the list.
             <br /> <br />
             Both the name and icons versions will show the description of the gift on hover and can be clicked to show a modal with more details (the modal may break on mobile or other thin screens). This uses the same logic as my MD site (link in the header).
             <br /> <br />
             Unfortunately due to the way HTML works, <code>gifticons</code> can only work on a separate line even if you try putting it on the same line as other tokens or text.
             <br /> <br />
-            Enhance rank can optionally be included by adding a <code>{"|rank"}</code> to the id for example <code>{"{giftname:9003|2}"}</code> will give Ashes to Ashes++. Invalid enhancement ranks will make the entire gift invalid.
+            Enhance rank can optionally be included by adding a <code>{"|rank"}</code> to the id for example <code>{"{giftname:9003|2}"}</code> will give Ashes to Ashes++. Invalid enhancement ranks will make the entire gift invalid as seen below if you try it with a gift with no enhancement ranks.
             <br /> <br />
             You can find a gift&apos;s id below. Currently this only includes gifts available in the regular MD. Gifts from story dungeons are not included.
             <br /> <br />

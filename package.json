@@ -12,7 +12,7 @@
   "dependencies": {
     "@codemirror/view": "^6.39.4",
     "@eldritchtools/limbus-shared-library": "github:eldritchtools/limbus-shared-library#v0.6.4",
-    "@eldritchtools/shared-components": "github:eldritchtools/shared-components#v1.5.10",
+    "@eldritchtools/shared-components": "github:eldritchtools/shared-components#v1.5.11",
     "@radix-ui/react-select": "^2.2.6",
     "@supabase/supabase-js": "^2.81.1",
     "@tiptap/extension-placeholder": "^3.13.0",

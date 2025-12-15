@@ -62,7 +62,7 @@ function IdentitySelector({ value, setValue, options, num }) {
             </Select.Trigger>
 
             <Select.Portal>
-                <Select.Content className="identity-select-content" position="popper">
+                <Select.Content className="identity-select-content" position="popper" style={{width: null, maxWidth: "clamp(450px, 80vw, 900px)"}}>
                     <div style={{ paddingBottom: "0.2rem" }}>
                         <input
                             type="text"
@@ -73,7 +73,7 @@ function IdentitySelector({ value, setValue, options, num }) {
                     </div>
 
                     <Select.Viewport>
-                        <div className="identity-select-grid">
+                        <div className="identity-select-grid" style={{maxWidth: "clamp(450px, 80vw, 900px)"}}>
                             {filtered.map((option) =>
                                 <Select.Item key={option.id} value={option.id} className="identity-select-item">
                                     <div className="identity-item-inner" data-tooltip-id="identity-tooltip" data-tooltip-content={option.id}>
@@ -110,10 +110,10 @@ function EgoSelector({ value, setValue, options, rank }) {
             </Select.Trigger>
 
             <Select.Portal>
-                <Select.Content className="ego-select-content" position="popper">
+                <Select.Content className="ego-select-content" position="popper" style={{maxWidth: "clamp(450px, 80vw, 900px)"}}>
                     {options.length === 0 ? <div style={{ fontSize: "1.2rem", padding: "0.5rem" }}>No Options</div> : null}
                     <Select.Viewport>
-                        <div className="ego-select-grid">
+                        <div className="ego-select-grid" style={{maxWidth: "clamp(450px, 80vw, 900px)"}}>
                             {options.map((option) =>
                                 <Select.Item key={option.id} value={option.id} className="ego-select-item">
                                     <div className="ego-item-inner" data-tooltip-id="ego-tooltip" data-tooltip-content={option.id}>

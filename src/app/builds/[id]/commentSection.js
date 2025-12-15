@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { addComment, deleteComment, getComments, updateComment } from "@/app/database/comments";
 import { Modal } from "@/app/components/Modal";
 import { useAuth } from "@/app/database/authProvider";
-import MarkdownEditor from "@/app/components/MarkdownEditor";
+import MarkdownEditorWrapper from "@/app/components/MarkdownEditorWrapper";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -37,7 +37,7 @@ function CommentInput({ buildId, parentId = null, editId = null, initialValue = 
     }
 
     return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <MarkdownEditor value={body} onChange={setBody} placeholder={"Write a comment..."} short={true} />
+        <MarkdownEditorWrapper value={body} onChange={setBody} placeholder={"Write a comment..."} short={true} />
         <div style={{ display: "flex", gap: "0.5rem" }}>
             <button style={{ fontSize: "1rem" }} onClick={handleSubmit} disabled={loading}>{editId ? "Update" : "Post"}</button>
             {editId ? <button style={{ fontSize: "1rem" }} onClick={onCancel}>Cancel</button> : null}

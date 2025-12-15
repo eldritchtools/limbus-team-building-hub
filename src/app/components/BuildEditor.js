@@ -9,7 +9,7 @@ import { keywordIdMapping, keywordToIdMapping } from "../keywordIds";
 import TagSelector, { tagToTagSelectorOption } from "./TagSelector";
 import { useAuth } from "../database/authProvider";
 import { useRouter } from "next/navigation";
-import MarkdownEditor from "./MarkdownEditor";
+import MarkdownEditorWrapper from "./MarkdownEditorWrapper";
 import "./SinnerGrid.css";
 import { extractYouTubeId } from "../YoutubeUtils";
 import NumberInputWithButtons from "./NumberInputWithButtons";
@@ -325,7 +325,7 @@ export default function BuildEditor({ mode, buildId }) {
         </div>
         <span style={{ fontSize: "1.2rem" }}>Description</span>
         <div className={{ maxWidth: "48rem", marginLeft: "auto", marginRight: "auto" }}>
-            <MarkdownEditor value={body} onChange={setBody} placeholder={"Describe your build here..."} />
+            <MarkdownEditorWrapper value={body} onChange={setBody} placeholder={"Describe your build here..."} />
         </div>
         <span style={{ fontSize: "1.2rem" }}>Keywords</span>
         <div style={{ display: "flex", flexDirection: "column" }}>

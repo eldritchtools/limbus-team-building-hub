@@ -22,6 +22,7 @@ import { YouTubeThumbnailEmbed } from "@/app/YoutubeUtils";
 import ReactTimeAgo from "react-time-ago";
 import { decodeBuildExtraOpts } from "@/app/components/BuildExtraOpts";
 import { generalTooltipProps } from "@/app/components/GeneralTooltip";
+import { useBreakpoint } from "@eldritchtools/shared-components";
 
 function SkillTypes({ skillType }) {
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.2rem", width: "100%", height: "100%", justifyContent: "center" }}>
@@ -124,6 +125,7 @@ export default function BuildPage({ params }) {
     const [identityLevels, setIdentityLevels] = useState(null);
     const [identityUpties, setIdentityUpties] = useState(null);
     const [egoThreadspins, setEgoThreadspins] = useState(null);
+    const { isDesktop } = useBreakpoint();
 
     const [displayType, setDisplayType] = useState(null);
 
@@ -196,21 +198,21 @@ export default function BuildPage({ params }) {
     return loading ? <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontSize: "1.5rem", fontWeight: "bold" }}>
         Loading...
     </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", containerType: "inline-size" }}>
-        <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "end" }}>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-                <h2 style={{ display: "flex", fontSize: "1.2rem", fontWeight: "bold", alignItems: "center" }}>
-                    <div style={{ display: "flex", gap: "0.2rem" }}>
-                        {build.keyword_ids.map(id => <KeywordIcon key={id} id={keywordIdMapping[id]} />)}
-                    </div>
-                    {build.title}
-                </h2>
+        <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+            <h2 style={{ display: "flex", fontSize: "1.2rem", fontWeight: "bold", alignItems: "center" }}>
+                <div style={{ display: "flex", gap: "0.2rem" }}>
+                    {build.keyword_ids.map(id => <KeywordIcon key={id} id={keywordIdMapping[id]} />)}
+                </div>
+                {build.title}
+            </h2>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ fontSize: "0.9rem", marginBottom: "0.5rem", color: "#ddd" }}>
                     by <Username username={build.username} /> • <ReactTimeAgo date={build.created_at} locale="en-US" timeStyle="mini" /> {build.updated_at !== build.created_at ? <span> • Last edited <ReactTimeAgo date={build.updated_at} locale="en-US" timeStyle="mini" /></span> : null}
                 </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "10rem", gap: "0.2rem" }}>
-                <div>Display Type</div>
-                <button onClick={() => setDisplayType(p => (p + 1) % 3)}>{displayType === 0 ? "Icons Only" : (displayType === 1 ? "Icons with Names" : "Skill Types")}</button>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+                    <div>Display Type</div>
+                    <button onClick={() => setDisplayType(p => (p + 1) % 3)}>{displayType === 0 ? "Icons Only" : (displayType === 1 ? "Icons with Names" : "Skill Types")}</button>
+                </div>
             </div>
         </div>
 
@@ -243,8 +245,8 @@ export default function BuildPage({ params }) {
             </div>
         }
         <div style={{ height: "0.5rem" }} />
-        <div style={{ display: "flex", flexDirection: "row", width: "90%", alignSelf: "center", marginBottom: "1rem" }}>
-            <div style={{ display: "flex", flexDirection: "column", paddingRight: "0.5rem", gap: "0.5rem", width: "70%" }}>
+        <div style={{ display: "flex", flexDirection: isDesktop ? "row" : "column", width: isDesktop ? "90%" : "100%", alignSelf: "center", marginBottom: "1rem", gap: isDesktop ? 0 : "1rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", paddingRight: "0.5rem", gap: "0.5rem", width: isDesktop ? "70%" : "100%" }}>
                 <span style={{ fontSize: "1.2rem" }}>Description</span>
                 <div className={{ maxWidth: "48rem", marginLeft: "auto", marginRight: "auto" }}>
                     <div>
@@ -258,7 +260,7 @@ export default function BuildPage({ params }) {
 
             <div style={{ border: "1px #777 solid" }} />
 
-            <div style={{ display: "flex", flexDirection: "column", paddingLeft: "0.5rem", width: "30%", gap: "0.25rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", paddingLeft: "0.5rem", width: isDesktop ? "30%" : "100%", gap: "0.25rem" }}>
                 {build.team_code.trim().length > 0 ? <>
                     <div>
                         <span style={{ fontSize: "1.2rem", borderBottom: "1px #ddd dotted" }} {...generalTooltipProps("teamcode")}>Team Code</span>
@@ -303,7 +305,7 @@ export default function BuildPage({ params }) {
 
         <div style={{ border: "1px #777 solid" }} />
         {build.is_published ?
-            <div style={{ width: "clamp(200px, 60%, 100%)", alignSelf: "center" }}>
+            <div style={{ width: "clamp(300px, 100%, 1200px)", alignSelf: "center" }}>
                 <CommentSection buildId={id} ownerId={build.user_id} commentCount={commentCount} pinnedComment={build.pinned_comment} />
             </div> :
             <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>No comments while the build is not published.</p>

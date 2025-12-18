@@ -89,7 +89,7 @@ export default function Identity({ params }) {
     const supportPassives = skillData.supportPassives.findLast(passives => passives.level <= uptie);
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-        <div style={{ display: "flex", flexDirection: "row", width: "100%" }}>
+        <div style={{ display: "flex", flexDirection: "row", width: "100%", flexWrap: "wrap", justifyContent: "center" }}>
             <div style={{ display: "flex", flexDirection: "column", padding: "1rem", minWidth: "480px", width: "480px", maxWidth: "480px" }}>
                 <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: "100%" }}>
                     <RarityImg rarity={identityData.rank} style={{ display: "inline", height: "2rem" }} />
@@ -174,7 +174,7 @@ export default function Identity({ params }) {
                     }
                 </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "0.5rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", minWidth: "480px", flex: 1, gap: "0.5rem" }}>
                 <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "0.5rem" }}>
                     {[1, 2, 3, 4].map(tier => {
                         const list = identityData.skillTypes.filter(skill => skill.type.tier === tier);

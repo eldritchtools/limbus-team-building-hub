@@ -7,7 +7,7 @@ function PassiveCost({ condition }) {
 }
 
 export default function PassiveCard({ passive }) {
-    return <div style={{ width: "100%", minWidth: "600px", height: "100%", display: "flex", flexDirection: "column", border: `1px #777 solid`, borderRadius: "0.5rem", textAlign: "start", padding: "0.5rem", boxSizing: "border-box" }}>
+    return <div style={{ width: "100%", minWidth: "480px", height: "100%", display: "flex", flexDirection: "column", border: `1px #777 solid`, borderRadius: "0.5rem", textAlign: "start", padding: "0.5rem", boxSizing: "border-box" }}>
         <div style={{ display: "flex", flexDirection: "row", marginBottom: "0.5rem" }}>
             <div style={{ borderRadius: "5px", backgroundColor: "grey", padding: "5px", color: "#ddd", textShadow: "black 1px 1px 5px", fontWeight: "bold" }}>{passive.name}</div>
             {"condition" in passive ? <PassiveCost condition={passive.condition} /> : null}

@@ -88,21 +88,25 @@ function EgoProfile({ ego, displayType, rank, threadspin }) {
 
 const deploymentComponentStyle = {
     flex: 1,
-    fontSize: "1.5rem",
     textAlign: "center",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    containerType: "size"
 }
 
 function DeploymentComponent({ order, activeSinners, sinnerId }) {
     const index = order.findIndex(x => x === sinnerId);
     if (index === -1) {
-        return <div style={deploymentComponentStyle}></div>
+        return <div style={deploymentComponentStyle} />
     } else if (index < activeSinners) {
-        return <div style={{ ...deploymentComponentStyle, color: "#fefe3d" }}>Active {index + 1}</div>
+        return <div style={deploymentComponentStyle}>
+            <span style={{ fontSize: `clamp(0.6rem, 20cqw, 1.5rem)`, color: "#fefe3d" }}>Active {index + 1}</span>
+        </div>
     } else {
-        return <div style={{ ...deploymentComponentStyle, color: "#29fee9" }}>Backup {index + 1}</div>
+        return <div style={deploymentComponentStyle}>
+            <span style={{ fontSize: `clamp(0.6rem, 20cqw, 1.5rem)`, color: "#29fee9" }}>Backup {index + 1}</span>
+        </div>
     }
 }
 

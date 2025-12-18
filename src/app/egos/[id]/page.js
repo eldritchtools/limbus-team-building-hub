@@ -8,7 +8,7 @@ import { tabStyle, tooltipStyle } from "../../styles";
 import SkillCard from "@/app/components/SkillCard";
 import PassiveCard from "@/app/components/PassiveCard";
 import UptieSelector from "@/app/components/UptieSelector";
-import MarkdownRenderer from "@/app/components/MarkdownRenderer";
+import MarkdownRenderer from "@/app/components/Markdown/MarkdownRenderer";
 import BuildEntry from "@/app/components/BuildEntry";
 import { getFilteredBuilds } from "@/app/database/builds";
 

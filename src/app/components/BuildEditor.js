@@ -9,7 +9,7 @@ import { keywordIdMapping, keywordToIdMapping } from "../keywordIds";
 import TagSelector, { tagToTagSelectorOption } from "./TagSelector";
 import { useAuth } from "../database/authProvider";
 import { useRouter } from "next/navigation";
-import MarkdownEditorWrapper from "./MarkdownEditorWrapper";
+import MarkdownEditorWrapper from "./Markdown/MarkdownEditorWrapper";
 import "./SinnerGrid.css";
 import { extractYouTubeId } from "../YoutubeUtils";
 import NumberInputWithButtons from "./NumberInputWithButtons";

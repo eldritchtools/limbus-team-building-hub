@@ -4,11 +4,7 @@ import { EgoImg, Icon, KeywordIcon, Status, useData } from "@eldritchtools/limbu
 import { Tooltip } from "react-tooltip";
 import { tooltipStyle } from "../styles";
 
-function TooltipContent({ id }) {
-    const [egos, egosLoading] = useData("egos");
-    if (!id || egosLoading) return null;
-
-    const ego = egos[id];
+function EgoTooltipContent({ ego }) {
     const types = [];
 
     types.push(ego.awakeningType.affinity);
@@ -21,7 +17,7 @@ function TooltipContent({ id }) {
 
     return <div style={tooltipStyle}>
         <div style={{ display: "flex", flexDirection: "row", padding: "0.5rem", gap: "0.5rem", alignItems: "center" }}>
-            <div><EgoImg ego={ego} type={"awaken"} displayName={false} style={{width: "128px", height: "128px"}} /></div>
+            <div><EgoImg ego={ego} type={"awaken"} displayName={false} style={{ width: "128px", height: "128px" }} /></div>
             <div style={{ display: "flex", flexDirection: "column", width: "192px", minHeight: "128px" }}>
                 <div style={{ flex: 1, wordWrap: "normal", textAlign: "center" }}>{ego.name}</div>
                 <div style={{ flex: 1, display: "flex" }}>
@@ -41,11 +37,20 @@ function TooltipContent({ id }) {
     </div>
 }
 
-export function EgoTooltip() {
+function TooltipLoader({ id }) {
+    const [egos, egosLoading] = useData("egos");
+    if (!id || egosLoading) return null;
+
+    return <EgoTooltipContent ego={egos[id]} />
+}
+
+function EgoTooltip() {
     return <Tooltip
         id="ego-tooltip"
-        render={({ content }) => <TooltipContent id={content} />}
+        render={({ content }) => <TooltipLoader id={content} />}
         getTooltipContainer={() => document.body}
         style={{ backgroundColor: "transparent", zIndex: "9999" }}
     />
 }
+
+export { EgoTooltip, EgoTooltipContent };

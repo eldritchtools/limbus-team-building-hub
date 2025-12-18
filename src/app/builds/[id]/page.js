@@ -14,7 +14,7 @@ import Link from "next/link";
 
 import "./builds.css";
 import "@/app/components/SinnerGrid.css"
-import MarkdownRenderer from "@/app/components/MarkdownRenderer";
+import MarkdownRenderer from "@/app/components/Markdown/MarkdownRenderer";
 import ImageStitcher from "@/app/components/ImageStitcher";
 import LikeButton from "@/app/components/LikeButton";
 import SaveButton from "@/app/components/SaveButton";

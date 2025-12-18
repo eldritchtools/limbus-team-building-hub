@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { addComment, deleteComment, getComments, updateComment } from "@/app/database/comments";
 import { Modal } from "@/app/components/Modal";
 import { useAuth } from "@/app/database/authProvider";
-import MarkdownEditorWrapper from "@/app/components/MarkdownEditorWrapper";
+import MarkdownEditorWrapper from "@/app/components/Markdown/MarkdownEditorWrapper";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import "./builds.css";
 import "../../pageButton.css";
-import MarkdownRenderer from "@/app/components/MarkdownRenderer";
+import MarkdownRenderer from "@/app/components/Markdown/MarkdownRenderer";
 import Username from "@/app/components/Username";
 import ReactTimeAgo from "react-time-ago";
 import { pinComment, unpinComment } from "@/app/database/builds";

@@ -1,8 +1,8 @@
 "use client";
 
 import { Gift, Icon, Status, useData } from "@eldritchtools/limbus-shared-library";
-import { keywordIconConvert } from "../keywordIds";
-import { sinnerMapping } from "../utils";
+import { keywordIconConvert } from "../../keywordIds";
+import { sinnerMapping } from "../../utils";
 import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
@@ -10,9 +10,9 @@ import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import { visit } from "unist-util-visit";
 import { useEffect, useMemo, useState } from "react";
-import { getFilteredBuilds } from "../database/builds";
-import { tooltipStyle } from "../styles";
-import BuildEntry from "./BuildEntry";
+import { getFilteredBuilds } from "../../database/builds";
+import { tooltipStyle } from "../../styles";
+import BuildEntry from "../BuildEntry";
 import "./MarkdownRenderer.css";
 
 import remarkMath from "remark-math";

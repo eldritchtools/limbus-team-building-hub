@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { EgoSelector, GiftSelector, IdentitySelector, KeywordSelector, SinnerSelector, StatusSelector } from "../components/Selectors";
-import MarkdownRenderer from "../components/MarkdownRenderer";
+import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
 
 const headerStyle = { fontSize: "1.2rem", fontWeight: "bold" };
 

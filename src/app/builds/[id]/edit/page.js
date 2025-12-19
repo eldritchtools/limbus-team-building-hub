@@ -1,6 +1,6 @@
 "use client";
 
-import BuildEditor from "@/app/components/BuildEditor";
+import BuildEditor from "@/app/builds/BuildEditor";
 import React from "react";
 
 export default function EditBuildPage({params}) {

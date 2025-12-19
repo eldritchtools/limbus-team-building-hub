@@ -42,10 +42,10 @@ function capitalizeFirstLetter(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function ProcessedText({ text }) {
+function ProcessedText({ text, enableTooltips = true, iconStyleOverride = {}, nameStyleOverride = {} }) {
     let str = text.replaceAll("<style=\"highlight\">", "").replaceAll("</style>", "");
 
-    return replaceStatusVariables(str);
+    return replaceStatusVariables(str, enableTooltips, iconStyleOverride, nameStyleOverride);
 }
 
 function ColorResist({ resist }) {

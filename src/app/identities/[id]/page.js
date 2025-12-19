@@ -12,24 +12,7 @@ import MarkdownRenderer from "@/app/components/Markdown/MarkdownRenderer";
 import BuildEntry from "@/app/components/BuildEntry";
 import { getFilteredBuilds } from "@/app/database/builds";
 import NumberInputWithButtons from "@/app/components/NumberInputWithButtons";
-
-function constructHp(data, level) {
-    const hp = Math.floor(data.hp.base + level * data.hp.level);
-    const thresholds = data.breakSection.toReversed().map(x => Math.floor(hp * x / 100)).join(",");
-
-    return `${hp} (${thresholds})`;
-}
-
-function constructPassive(passiveId, passiveData) {
-    const passive = passiveData[passiveId];
-    if ("condition" in passive) return passive;
-    Object.entries(passiveData).forEach(([_, p]) => {
-        if ("condition" in p && p.name === passive.name)
-            passive["condition"] = p.condition;
-    })
-
-    return passive;
-}
+import { constructHp, constructPassive } from "../IdentityUtils";
 
 function NotesTab({ notes }) {
     if (!notes || !notes.main) return <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>;

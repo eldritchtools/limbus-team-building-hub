@@ -102,7 +102,7 @@ BEGIN
     b.id, u.username
   ORDER BY
     CASE 
-      WHEN sort_by = 'recency' THEN EXTRACT(EPOCH FROM b.created_at)
+      WHEN sort_by = 'recency' THEN EXTRACT(EPOCH FROM COALESCE(b.published_at, b.created_at))
       WHEN sort_by = 'likes' THEN b.like_count
       WHEN sort_by = 'comments' THEN b.comment_count
       WHEN sort_by = 'random' THEN RANDOM()

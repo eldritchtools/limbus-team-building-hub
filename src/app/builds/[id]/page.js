@@ -123,7 +123,7 @@ export default function BuildPage({ params }) {
             </h2>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ fontSize: "0.9rem", marginBottom: "0.5rem", color: "#ddd" }}>
-                    by <Username username={build.username} /> • <ReactTimeAgo date={build.published_at ?? build.created_at} locale="en-US" timeStyle="mini" /> {build.updated_at !== build.created_at ? <span> • Last edited <ReactTimeAgo date={build.updated_at} locale="en-US" timeStyle="mini" /></span> : null}
+                    by <Username username={build.username} /> • <ReactTimeAgo date={build.published_at ?? build.created_at} locale="en-US" timeStyle="mini" /> {build.updated_at !== (build.published_at ?? build.created_at) ? <span> • Last edited <ReactTimeAgo date={build.updated_at} locale="en-US" timeStyle="mini" /></span> : null}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
                     <div>Display Type</div>

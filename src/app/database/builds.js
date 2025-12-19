@@ -5,7 +5,7 @@ import { getSupabase } from "./connection";
 async function getPopularBuilds(page = 1, pageSize = 20) {
     const start = (page - 1) * pageSize;
 
-    const { data, error } = await getSupabase().rpc('get_popular_builds_v2', { offset_count: start, limit_count: pageSize });
+    const { data, error } = await getSupabase().rpc('get_popular_builds_v3', { offset_count: start, limit_count: pageSize });
 
     if (error) throw error;
     return data.map(x => { return { ...x, id: x.build_id } });
@@ -30,7 +30,7 @@ async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", 
     options.limit_count = pageSize;
     options.offset_count = start;
 
-    const { data, error } = await getSupabase().rpc('get_filtered_builds_v2', options);
+    const { data, error } = await getSupabase().rpc('get_filtered_builds_v3', options);
 
     if (error) throw (error);
     return data;

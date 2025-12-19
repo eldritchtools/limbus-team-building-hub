@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_popular_builds_v2(limit_count INTEGER, offset_count INTEGER)
+CREATE OR REPLACE FUNCTION public.get_popular_builds_v3(limit_count INTEGER, offset_count INTEGER)
 RETURNS TABLE (
   build_id UUID,
   username TEXT,
@@ -9,6 +9,7 @@ RETURNS TABLE (
   like_count INTEGER,
   comment_count INTEGER,
   created_at TIMESTAMPTZ,
+  published_at TIMESTAMPTZ,
   identity_ids INTEGER[],
   ego_ids INTEGER[],
   keyword_ids INTEGER[],
@@ -27,6 +28,7 @@ BEGIN
     b.like_count,
     b.comment_count,
     b.created_at,
+    b.published_at,
     b.identity_ids,
     b.ego_ids,
     b.keyword_ids,

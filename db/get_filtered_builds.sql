@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_filtered_builds_v2(
+CREATE OR REPLACE FUNCTION public.get_filtered_builds_v3(
   title_filter TEXT DEFAULT NULL,
   username_filter TEXT DEFAULT NULL,
   username_exact_filter TEXT DEFAULT NULL,
@@ -18,6 +18,7 @@ RETURNS TABLE (
   id UUID,
   title TEXT,
   created_at TIMESTAMPTZ,
+  published_at TIMESTAMPTZ,
   like_count INTEGER,
   comment_count INTEGER,
   deployment_order INTEGER[],
@@ -36,6 +37,7 @@ BEGIN
     b.id,
     b.title,
     b.created_at,
+    b.published_at,
     b.like_count,
     b.comment_count,
     b.deployment_order,

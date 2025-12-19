@@ -65,6 +65,7 @@ BEGIN
       'like_count', b.like_count,
       'comment_count', b.comment_count,
       'created_at', b.created_at,
+      'published_at', b.published_at,
       'updated_at', b.updated_at,
       'is_published', b.is_published,
       'pinned_comment', CASE

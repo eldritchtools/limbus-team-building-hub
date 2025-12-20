@@ -47,7 +47,8 @@ export default function BuildPage({ params }) {
 
     useEffect(() => {
         const savedType = localStorage.getItem("buildDisplayType");
-        if (savedType) setDisplayType(savedType);
+        if (["0", "1", "2"].includes(savedType)) setDisplayType("names");
+        else if (savedType) setDisplayType(savedType);
         else setDisplayType("names");
     }, [])
 
@@ -132,7 +133,7 @@ export default function BuildPage({ params }) {
             </div>
         </div>
 
-        <SinnerGrid 
+        <SinnerGrid
             identityIds={build.identity_ids}
             egoIds={build.ego_ids}
             identityUpties={identityUpties}

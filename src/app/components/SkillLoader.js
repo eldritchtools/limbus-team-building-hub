@@ -21,6 +21,7 @@ function IdentitySkillLoader({ identity, type, uptie = 4, level = LEVEL_CAP }) {
                 ...getSkillList("s1"),
                 ...getSkillList("s2"),
                 ...getSkillList("s3"),
+                ...identity.skillTypes.filter(skill => skill.type.tier === 4).map((s, i) => ["atk", s, i]),
                 ...getSkillList("def")
             ]
         if (t === "passives1") {

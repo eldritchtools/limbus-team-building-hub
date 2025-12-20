@@ -8,6 +8,7 @@ import Link from "next/link";
 import "./identities.css";
 
 import dynamic from "next/dynamic";
+import IdentityComparison from "./IdentityComparison";
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const mainFilters = {
@@ -103,7 +104,7 @@ function checkSearchMatch(searchString, identity) {
     return false;
 }
 
-function IdentityList({ identities, searchString, selectedMainFilters, displayType, separateSinners, strictFiltering, selectedKeywords, selectedFactionTags, selectedSeasons }) {
+function IdentityList({ identities, searchString, selectedMainFilters, displayType, separateSinners, strictFiltering, selectedKeywords, selectedFactionTags, selectedSeasons, compareMode }) {
     const filters = useMemo(() => selectedMainFilters.reduce((acc, filter) => {
         if (mainFiltersMapping[filter] in acc) acc[mainFiltersMapping[filter]].push(filter);
         else acc[mainFiltersMapping[filter]] = [filter];
@@ -173,6 +174,14 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
 
         return true;
     }), [searchString, filters, identities, selectedKeywords, selectedFactionTags, selectedSeasons, strictFiltering]);
+
+    if (compareMode) {
+        return <IdentityComparison
+            identities={list}
+            displayType={displayType}
+            separateSinners={separateSinners}
+        />
+    }
 
     const splitBySinner = list => list.reduce((acc, [id, identity]) => {
         if (identity.sinnerId in acc) acc[identity.sinnerId].push([id, identity]);
@@ -323,6 +332,7 @@ export default function Identities() {
     const [displayType, setDisplayType] = useState(null);
     const [strictFiltering, setStrictFiltering] = useState(false);
     const [separateSinners, setSeparateSinners] = useState(false);
+    const [compareMode, setCompareMode] = useState(false);
 
     useEffect(() => {
         const savedDisplayType = localStorage.getItem("idEgoDisplayType");
@@ -383,7 +393,7 @@ export default function Identities() {
         <div style={{ display: "flex", gap: "2rem", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, auto)", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
                 <span style={{ textAlign: 'end' }}>Search:</span>
-                <input value={searchString} onChange={e => setSearchString(e.target.value)} />
+                <input value={searchString} onChange={e => setSearchString(e.target.value)} placeholder="Identity Name" />
                 <span style={{ textAlign: "end" }}>Filter Statuses:</span>
                 <MultiSelector options={keywordOptions} selected={selectedKeywords} setSelected={setSelectedKeywords} placeholder={"Select Statuses..."} />
                 <span style={{ textAlign: "end" }}>Filter Factions:</span>
@@ -393,7 +403,7 @@ export default function Identities() {
                 <span style={{ textAlign: "end" }}>Display Type:</span>
                 <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
                     <label>
-                        <input type="radio" name="displayType" value={"icon"} checked={displayType === "icon"} onChange={e => setDisplayType(e.target.value)} />
+                        <input type="radio" name="displayType" value={"icon"} checked={displayType === "icon"} onChange={e => setDisplayType(e.target.value)} disabled={compareMode} />
                         Icons Only
                     </label>
                     <label>
@@ -406,18 +416,32 @@ export default function Identities() {
                     </label>
                 </div>
                 <div />
-                <label>
-                    <input type="checkbox" checked={strictFiltering} onChange={e => handleStrictFilteringToggle(e.target.checked)} />
-                    Strict Filtering (require all selected filters)
-                </label>
+                <div>
+                    <label>
+                        <input type="checkbox" checked={strictFiltering} onChange={e => handleStrictFilteringToggle(e.target.checked)} />
+                        Strict Filtering (require all selected filters)
+                    </label>
+                </div>
                 <div />
-                <label>
-                    <input type="checkbox" checked={separateSinners} onChange={e => handleSeparateSinnersToggle(e.target.checked)} />
-                    Separate by Sinner
-                </label>
+                <div>
+                    <label>
+                        <input type="checkbox" checked={separateSinners} onChange={e => handleSeparateSinnersToggle(e.target.checked)} />
+                        Separate by Sinner
+                    </label>
+                </div>
+                <div />
+                <div>
+                    <label>
+                        <input type="checkbox" checked={compareMode} onChange={e => setCompareMode(p => !p)} />
+                        Enable Advanced Search/Compare Mode
+                        <br />
+                        (not recommended on mobile)
+                    </label>
+                </div>
             </div>
             <MainFilterSelector selectedMainFilters={selectedMainFilters} setSelectedMainFilters={setSelectedMainFilters} />
         </div>
+        <div style={{ border: "1px #777 solid", width: "100%" }} />
         {identitiesLoading ? null :
             <IdentityList
                 identities={identities}
@@ -429,6 +453,8 @@ export default function Identities() {
                 selectedKeywords={selectedKeywords}
                 selectedFactionTags={selectedFactionTags}
                 selectedSeasons={selectedSeasons}
-            />}
+                compareMode={compareMode}
+            />
+        }
     </div>;
 }

@@ -2,7 +2,7 @@ import { autocompletion, startCompletion } from "@codemirror/autocomplete";
 import { Facet } from "@codemirror/state";
 import { useData } from "@eldritchtools/limbus-shared-library";
 import { keywordToIdMapping } from "../../keywordIds";
-import { sinnerMapping } from "../../utils";
+import { fuzzyScore, sinnerMapping } from "../../utils";
 import { createAutocompleteLabel } from "./MarkdownEditorAutocompleteLabel";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { keymap } from "@codemirror/view";
@@ -149,26 +149,6 @@ function useAutocompleteDataFacetExtension(viewRef) {
     );
 
     return facetExtension;
-}
-
-function fuzzyScore(query, target) {
-    query = query.toLowerCase();
-    target = target.toLowerCase();
-
-    let qi = 0;
-    let score = 0;
-
-    for (let ti = 0; ti < target.length && qi < query.length; ti++) {
-        if (target[ti] === query[qi]) {
-            score += 2;
-            if (ti === qi) score += 1;
-            qi++;
-        } else {
-            score -= 1;
-        }
-    }
-
-    return qi === query.length ? score : -Infinity;
 }
 
 async function tokenCompletionSource(context) {

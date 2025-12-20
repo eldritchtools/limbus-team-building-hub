@@ -1,12 +1,6 @@
 import { affinityColorMapping, Icon } from "@eldritchtools/limbus-shared-library";
-import { capitalizeFirstLetter, ProcessedText, romanMapping } from "../utils";
-
-function Coin({ num }) {
-    return <div style={{ position: "relative", height: "1.5rem", width: "1.5rem", verticalAlign: "center" }}>
-        <Icon path={"Coin Outline"} style={{ height: "1.5rem", width: "1.5rem" }} />
-        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", fontSize: "1rem" }}> {romanMapping[num]} </div>
-    </div>
-}
+import { capitalizeFirstLetter, ProcessedText } from "../utils";
+import Coin from "./Coin";
 
 function SkillLabel({ skill, type, index }) {
     switch (type) {
@@ -24,7 +18,7 @@ function SkillLabel({ skill, type, index }) {
     }
 }
 
-export default function SkillCard({ skill, uptie, count = 0, level, type = "attack", index = 0, mini = false }) {
+export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "attack", index = 0, mini = false }) {
     let skillData = skill.data.reduce((acc, dataTier) => dataTier.uptie <= uptie ? { ...acc, ...dataTier } : acc, {});
     let skillText = skill.text.reduce((acc, textTier) => textTier.uptie <= uptie ? { ...acc, ...textTier } : acc, {});
 
@@ -86,15 +80,12 @@ export default function SkillCard({ skill, uptie, count = 0, level, type = "atta
         <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
             {skillText.coinDescs ? skillText.coinDescs.map((coinDescs, index) => coinDescs.length > 0 ?
                 <div key={index} style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
-                    <Coin num={index + 1} />
+                    <Coin num={index + 1} mini={mini} />
                     <div style={{ display: "flex", flex: 1, flexDirection: "column", whiteSpace: "pre-wrap", gap: "0.1rem" }}>
                         {coinDescs.map((desc, innerIndex) => <ProcessedText key={`${innerIndex}-text`} text={desc} iconStyleOverride={iconStyleOverride} nameStyleOverride={nameStyleOverride} />)}
                     </div>
                 </div> : null
             ) : null}
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, auto)", whiteSpace: "pre-wrap" }}>
-
         </div>
     </div>
 }

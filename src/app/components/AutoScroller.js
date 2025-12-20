@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useSmoothAutoScroll } from "smooth-auto-scroll";
 
-export default function AutoScroller({ children }) {
+export default function AutoScroller({ fade = true, children }) {
     const containerRef = useRef(null);
     const innerRef = useRef(null);
     const hasReachedEndRef = useRef(false);
@@ -39,11 +39,11 @@ export default function AutoScroller({ children }) {
                 transformStyle: "preserve-3d"
             }}
         >
-            <div ref={innerRef} style={{padding: "10px 0px"}}>{children}</div>
-        </div>;
+            <div ref={innerRef} style={{ padding: "10px 0px" }}>{children}</div>
+        </div>
 
         {/* Top fade */}
-        <div
+        {fade ? <div
             style={{
                 position: 'absolute',
                 top: 0,
@@ -53,10 +53,10 @@ export default function AutoScroller({ children }) {
                 background: 'linear-gradient(to bottom, rgba(0,0,0,0.8), transparent)',
                 pointerEvents: 'none',
             }}
-        />
+        /> : null}
 
         {/* Bottom fade */}
-        <div
+        {fade ? <div
             style={{
                 position: 'absolute',
                 bottom: 0,
@@ -66,6 +66,6 @@ export default function AutoScroller({ children }) {
                 background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
                 pointerEvents: 'none',
             }}
-        />
+        /> : null}
     </div>
 }

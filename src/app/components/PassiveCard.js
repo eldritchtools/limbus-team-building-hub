@@ -1,12 +1,15 @@
 import { Icon } from "@eldritchtools/limbus-shared-library";
 import { ProcessedText } from "../utils";
 
-function PassiveCost({ condition, iconSize }) {
+export function PassiveCost({ condition, iconSize, vertical = false }) {
     const costs = condition.requirement.map((cost, i) => {
-        return [<Icon key={`${i}-icon`} path={cost.type} style={{ width: iconSize }} />, <span key={`${i}-num`}> x{cost.value}</span>]
+        return <div key={i} style={{ display: "flex", alignItems: "center" }} >
+            <Icon key={`${i}-icon`} path={cost.type} style={{ width: iconSize }} />
+            <span key={`${i}-num`}> x{cost.value}</span>
+        </div>
     }).flat();
 
-    return <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+    return <div style={{ display: "flex", flexDirection: vertical ? "column" : "row", alignItems: "center" }}>
         {costs}
         <span style={{ "paddingLeft": "0.2em" }}>{condition.type.toUpperCase()}</span>
     </div>

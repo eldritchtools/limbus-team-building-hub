@@ -17,9 +17,8 @@ function EgoTooltipContent({ ego }) {
 
     return <div style={tooltipStyle}>
         <div style={{ display: "flex", flexDirection: "row", padding: "0.5rem", gap: "0.5rem", alignItems: "center" }}>
-            <div><EgoImg ego={ego} type={"awaken"} displayName={false} style={{ width: "128px", height: "128px" }} /></div>
+            <div><EgoImg ego={ego} type={"awaken"} displayName={true} displayRarity={true} style={{ width: "128px", height: "128px" }} /></div>
             <div style={{ display: "flex", flexDirection: "column", width: "192px", minHeight: "128px" }}>
-                <div style={{ flex: 1, wordWrap: "normal", textAlign: "center" }}>{ego.name}</div>
                 <div style={{ flex: 1, display: "flex" }}>
                     {types.map(x => <KeywordIcon key={x} id={x} />)}
                 </div>

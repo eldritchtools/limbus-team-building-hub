@@ -6,10 +6,11 @@ import { tooltipStyle } from "../styles";
 
 function IdentityTooltipContent({ identity }) {
     return <div style={tooltipStyle}>
-        <div style={{ display: "flex", flexDirection: "row", padding: "0.5rem", gap: "0.5rem" }}>
-            <IdentityImg identity={identity} uptie={4} displayName={false} width={128} />
+        <div style={{ display: "flex", flexDirection: "row", padding: "0.5rem", gap: "0.5rem", height: "128px" }}>
+            <div>
+                <IdentityImg identity={identity} uptie={4} displayName={true} displayRarity={true} style={{width: "128px", height: "128px"}} />
+            </div>
             <div style={{ display: "flex", flexDirection: "column", width: "192px" }}>
-                <div style={{ flex: 1 }}>{identity.name}</div>
                 <div style={{ flex: 1, display: "flex" }}>
                     {identity.skillKeywordList.map(x => <KeywordIcon key={x} id={x} />)}
                 </div>

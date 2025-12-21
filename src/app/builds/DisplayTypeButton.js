@@ -31,5 +31,5 @@ const optionsWithEdit = {
 }
 
 export default function DisplayTypeButton({ value, setValue, includeEdit = false }) {
-    return <DropdownButton value={value} setValue={setValue} options={includeEdit ? optionsWithEdit : options} />
+    return <DropdownButton value={value} setValue={setValue} left={false} options={includeEdit ? optionsWithEdit : options} />
 }

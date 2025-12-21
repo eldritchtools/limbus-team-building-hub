@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./DropdownButton.css";
 
-export default function DropdownButton({ value, setValue, options, styleOverride={} }) {
+export default function DropdownButton({ value, setValue, options, left=true, styleOverride={} }) {
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
 
@@ -15,6 +15,7 @@ export default function DropdownButton({ value, setValue, options, styleOverride
         return () => document.removeEventListener("mousedown", handleClick);
     }, []);
 
+    const extraStyle = left ? {left:0} : {right:0};
 
     return <div ref={ref} style={{ position: "relative", display: "inline-block" }}>
         <button onClick={() => setOpen(o => !o)}>
@@ -26,7 +27,6 @@ export default function DropdownButton({ value, setValue, options, styleOverride
                 style={{
                     position: "absolute",
                     top: "100%",
-                    right: 0,
                     background: "#1a1a1a",
                     border: "1px solid #777",
                     borderRadius: "4px",
@@ -34,7 +34,8 @@ export default function DropdownButton({ value, setValue, options, styleOverride
                     maxHeight: "240px",
                     overflowY: "auto",
                     overflowX: "hidden",
-                    ...styleOverride
+                    ...styleOverride,
+                    ...extraStyle
                 }}
             >
                 {Object.entries(options).map(([k, v]) => (

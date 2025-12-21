@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useImperativeHandle, useRef } from 'react';
 import { EditorSelection, EditorState } from '@codemirror/state';
 import { EditorView, keymap, placeholder as cmPlaceholder } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
@@ -196,6 +196,7 @@ function guideClick() {
 /* ---------- Component ---------- */
 
 export default function MarkdownEditorMain({
+    ref,
     value = '',
     onChange,
     placeholder = 'Write here...',
@@ -204,6 +205,17 @@ export default function MarkdownEditorMain({
     const editorRef = useRef(null);
     const viewRef = useRef();
     const dataFacetExtension = useAutocompleteDataFacetExtension(viewRef);
+
+    useImperativeHandle(ref, () => ({
+        appendToEditor(text) {
+            if (!viewRef.current) return;
+            const end = viewRef.current.state.doc.length;
+            viewRef.current.dispatch({
+                changes: { from: end, insert: text },
+                selection: { anchor: end + text.length }
+            });
+        }
+    }))
 
     useEffect(() => {
         if (!editorRef.current) return;

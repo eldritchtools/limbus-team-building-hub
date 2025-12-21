@@ -394,7 +394,7 @@ export default function EgosPage() {
                 <span style={{ textAlign: "end" }}>Filter Season:</span>
                 <MultiSelector options={seasonOptions} selected={selectedSeasons} setSelected={setSelectedSeasons} placeholder={"Select Seasons..."} />
                 <span style={{ textAlign: "end" }}>Display Type:</span>
-                <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>
+                <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
                     <label>
                         <input type="radio" name="displayType" value={"icon"} checked={displayType === "icon"} onChange={e => setDisplayType(e.target.value)} disabled={compareMode} />
                         Icons Only
@@ -410,25 +410,25 @@ export default function EgosPage() {
                 </div>
                 <div />
                 <div>
-                    <label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.2rem", flexWrap: "wrap" }}>
                         <input type="checkbox" checked={strictFiltering} onChange={e => handleStrictFilteringToggle(e.target.checked)} />
-                        Strict Filtering (require all selected filters)
+                        Strict Filtering
+                        <span style={{ fontSize: "0.8rem", color: "#aaa" }}>(Require all selected filters)</span>
                     </label>
                 </div>
                 <div />
                 <div>
-                    <label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
                         <input type="checkbox" checked={separateSinners} onChange={e => handleSeparateSinnersToggle(e.target.checked)} />
                         Separate by Sinner
                     </label>
                 </div>
                 <div />
                 <div>
-                    <label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.2rem", flexWrap: "wrap" }}>
                         <input type="checkbox" checked={compareMode} onChange={e => setCompareMode(p => !p)} />
-                        Enable Advanced Search/Compare Mode
-                        <br />
-                        (not recommended on mobile)
+                        Advanced Compare Mode
+                        <span style={{ fontSize: "0.8rem", color: "#aaa" }}>(May not work well on mobile)</span>
                     </label>
                 </div>
             </div>

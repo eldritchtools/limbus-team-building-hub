@@ -19,7 +19,7 @@ function GeneralTooltip() {
     return <Tooltip
         id="general-tooltip"
         getTooltipContainer={() => document.body}
-        render={({ content }) => <div style={{ ...tooltipStyle, padding: "0.5rem", width: "60ch" }}>
+        render={({ content }) => <div style={{ ...tooltipStyle, padding: "0.5rem", maxWidth: "60ch" }}>
             {content}
         </div>}
         style={{ backgroundColor: "transparent", zIndex: "9999" }}

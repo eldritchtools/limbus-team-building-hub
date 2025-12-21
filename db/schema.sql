@@ -6,9 +6,14 @@
 CREATE TABLE public.users (
   id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
   username TEXT UNIQUE,
+  flair TEXT DEFAULT NULL,
+  description TEXT DEFAULT NULL,
   is_admin BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE public.users
+ADD CONSTRAINT flair_length CHECK (char_length(flair) <= 32);
 
 -- ========================
 -- 2. CONTENT

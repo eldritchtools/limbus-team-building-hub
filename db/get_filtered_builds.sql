@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_filtered_builds_v3(
+CREATE OR REPLACE FUNCTION public.get_filtered_builds_v4(
   title_filter TEXT DEFAULT NULL,
   username_filter TEXT DEFAULT NULL,
   username_exact_filter TEXT DEFAULT NULL,
@@ -26,6 +26,7 @@ RETURNS TABLE (
   score NUMERIC,
   is_published BOOLEAN,
   username TEXT,
+  user_flair TEXT,
   tags TEXT[],
   extra_opts TEXT,
   identity_ids INT[],
@@ -45,6 +46,7 @@ BEGIN
     b.score,
     b.is_published,
     u.username,
+    u.flair,
     ARRAY_AGG(DISTINCT t.name) AS tags,
     b.extra_opts,
     b.identity_ids,
@@ -99,7 +101,7 @@ BEGIN
       )
     )
   GROUP BY 
-    b.id, u.username
+    b.id, u.username, u.flair
   ORDER BY
     CASE 
       WHEN sort_by = 'recency' THEN EXTRACT(EPOCH FROM COALESCE(b.published_at, b.created_at))

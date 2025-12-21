@@ -1,7 +1,8 @@
-CREATE OR REPLACE FUNCTION public.get_popular_builds_v3(limit_count INTEGER, offset_count INTEGER)
+CREATE OR REPLACE FUNCTION public.get_popular_builds_v4(limit_count INTEGER, offset_count INTEGER)
 RETURNS TABLE (
   build_id UUID,
   username TEXT,
+  user_flair TEXT,
   title TEXT,
   score NUMERIC,
   deployment_order INTEGER[],
@@ -21,6 +22,7 @@ BEGIN
   SELECT
     p.build_id,
     u.username,
+    u.flair,
     b.title,
     b.score,
     b.deployment_order,

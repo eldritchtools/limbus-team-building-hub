@@ -13,11 +13,14 @@ function constructWrapper(maxWidth) {
 
 function constructImageElement(path, size) {
     const img = document.createElement("img");
-    img.src = path;
     img.style.width = `${size}px`;
     img.style.height = `${size}px`;
     img.style.objectFit = "contain";
     img.style.borderRadius = "4px";
+    img.addEventListener("error", () => {
+        img.style.display = "none";
+    });
+    img.src = path;
     return img;
 }
 
@@ -40,7 +43,7 @@ function constructTitleElement(name, withIcon = null) {
         row.appendChild(title);
         return row;
     } else {
-        title.style.marginBottom = "8px";   
+        title.style.marginBottom = "8px";
         title.style.textAlign = "center";
         return title;
     }
@@ -113,7 +116,7 @@ function constructGiftAutocompleteTooltip(entry, otherData) {
     return wrapper;
 }
 
-export default function constructMarkdownEditorAutocompleteTooltip(entry, type, otherData=null) {
+export default function constructMarkdownEditorAutocompleteTooltip(entry, type, otherData = null) {
     if (type === "identity") return constructIdentityAutocompleteTooltip(entry);
     if (type === "ego") return constructEgoAutocompleteTooltip(entry);
     if (type === "status") return constructStatusAutocompleteTooltip(entry);

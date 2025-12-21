@@ -50,9 +50,6 @@ export default function SearchComponent({ options = {} }) {
     const [sortBy, setSortBy] = useState(options.sortBy || "score");
     const [strictFiltering, setStrictFiltering] = useState(options.strictFiltering || false);
 
-    const { isDesktop } = useBreakpoint();
-    // const initialized = useRef(false);
-
     const applyFilters = () => {
         const searchFilters = {};
         if (title !== "") searchFilters.title = title;

@@ -1,26 +1,35 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { checkUsername } from "@/app/database/users";
+import { getUserFromUsername } from "@/app/database/users";
 import { getFilteredBuilds } from "@/app/database/builds";
 import React from "react";
 import BuildsGrid from "@/app/components/BuildsGrid";
+import MarkdownRenderer from "@/app/components/Markdown/MarkdownRenderer";
+import { useBreakpoint } from "@eldritchtools/shared-components";
 
-export default function ProfilePage({params}) {
+export default function ProfilePage({ params }) {
     const { username } = React.use(params);
     const parsedUsername = useMemo(() => {
         return decodeURIComponent(username);
-    }, [username]); 
+    }, [username]);
 
     const [builds, setBuilds] = useState([]);
     const [buildsLoading, setBuildsLoading] = useState(false);
     const [page, setPage] = useState(1);
+    const [flair, setFlair] = useState("");
+    const [description, setDescription] = useState("");
     const [userExists, setUserExists] = useState(false);
     const [checkingUser, setCheckingUser] = useState(true);
+    const { isDesktop } = useBreakpoint();
 
     useEffect(() => {
-        checkUsername(parsedUsername).then(x => {
-            if (x) setUserExists(true);
+        getUserFromUsername(parsedUsername).then(x => {
+            if (x) {
+                setUserExists(true);
+                setFlair(x.flair ?? "");
+                setDescription(x.description ?? "");
+            }
             else setUserExists(false);
             setCheckingUser(false);
         })
@@ -43,9 +52,11 @@ export default function ProfilePage({params}) {
         </div>
     }
 
-    return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <h2 style={{ alignSelf: "center" }}>{parsedUsername}&apos;s Builds</h2>
-        <div style={{ border: "1px #777 solid" }} />
+    return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center" }}>
+        <h2 style={{ marginBottom: "0" }}>{parsedUsername}&apos;s Builds</h2>
+        <div ><em>{flair}</em></div>
+        <div style={{ width: isDesktop ? "70%" : "90%" }}> <MarkdownRenderer content={description} /></div>
+        <div style={{ border: "1px #777 solid", width: "90%" }} />
         {buildsLoading ?
             <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading...</p> :
             builds.length === 0 ?

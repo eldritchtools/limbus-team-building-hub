@@ -30,7 +30,7 @@ export default function BuildEntry({ build, minified, minifull }) {
                 </h2>
             </Link>
             <div style={{ fontSize: "0.8rem", marginBottom: "0.5rem", color: "#ddd" }}>
-                by <Username username={build.username} /> •{" "}<ReactTimeAgo date={build.published_at ?? build.created_at} locale="en-US" timeStyle="mini" />
+                by <Username username={build.username} flair={build.user_flair} /> •{" "}<ReactTimeAgo date={build.published_at ?? build.created_at} locale="en-US" timeStyle="mini" />
             </div>
             <div style={{ display: "flex", flexDirection: "row", alignSelf: "center" }}>
                 <IdentityImgSpread identityIds={build.identity_ids} scale={.275} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} {...extraProps} />
@@ -58,7 +58,7 @@ export default function BuildEntry({ build, minified, minifull }) {
                 </h2>
             </Link>
             <div style={{ fontSize: "0.8rem", marginBottom: "0.5rem", color: "#ddd" }}>
-                by <Username username={build.username} /> •{" "}<ReactTimeAgo date={build.published_at ?? build.created_at} locale="en-US" timeStyle="mini" />
+                by <Username username={build.username} flair={build.user_flair} /> •{" "}<ReactTimeAgo date={build.published_at ?? build.created_at} locale="en-US" timeStyle="mini" />
             </div>
             <div style={{ display: "flex", flexDirection: "row", marginBottom: "0.5rem", alignSelf: "center" }}>
                 <IdentityImgSpread identityIds={build.identity_ids} scale={.375} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} {...extraProps} />

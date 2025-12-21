@@ -3,7 +3,7 @@
 import { getSupabase } from "./connection";
 
 async function getComments(id, page = 1) {
-    const { data, error } = await getSupabase().rpc("get_build_comments", {
+    const { data, error } = await getSupabase().rpc("get_build_comments_v2", {
         p_build_id: id,
         p_limit: 20,
         p_offset: (page - 1) * 20

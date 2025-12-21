@@ -2,15 +2,30 @@
 
 import { getSupabase } from "./connection";
 
-async function checkUsername(username) {
+async function getUserFromUsername(username) {
     const { data: user } = await getSupabase()
         .from("users")
         .select("*")
         .eq("username", username)
         .maybeSingle();
 
-    if (user) return true;
-    else return false;
+    if (user) return user;
+    else return null;
 }
 
-export { checkUsername };
+async function updateUser(userId, flair, description) {
+    const update = {
+        flair: flair.trim(),
+        description: description.trim()
+    };
+
+    const { data, error } = await getSupabase()
+        .from("users")
+        .update(update)
+        .eq("id", userId)
+
+    if (error) throw error;
+    return data;
+}
+
+export { getUserFromUsername, updateUser };

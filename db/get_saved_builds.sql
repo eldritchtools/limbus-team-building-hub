@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_saved_builds(
+CREATE OR REPLACE FUNCTION public.get_saved_builds_v2(
   p_user_id UUID,
   limit_count INTEGER DEFAULT 20,
   offset_count INTEGER DEFAULT 0
@@ -12,6 +12,7 @@ RETURNS TABLE (
   deployment_order INTEGER[],
   active_sinners INTEGER,
   username TEXT,
+  user_flair TEXT,
   tags TEXT[],
   identity_ids INT[],
   keyword_ids INT[],
@@ -28,6 +29,7 @@ BEGIN
     b.deployment_order,
     b.active_sinners,
     u.username,
+    u.flair,
     ARRAY_AGG(DISTINCT t.name) AS tags,
     b.identity_ids,
     b.keyword_ids,
@@ -38,7 +40,7 @@ BEGIN
   LEFT JOIN public.build_tags bt ON b.id = bt.build_id
   LEFT JOIN public.tags t ON bt.tag_id = t.id
   WHERE s.user_id = p_user_id
-  GROUP BY b.id, u.username, s.created_at
+  GROUP BY b.id, u.username, u.flair, s.created_at
   ORDER BY s.created_at DESC
   LIMIT limit_count
   OFFSET offset_count;

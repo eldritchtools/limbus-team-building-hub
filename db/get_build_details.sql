@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_build_details(
+CREATE OR REPLACE FUNCTION public.get_build_details_v2(
   p_build_id UUID,
   p_for_edit BOOLEAN DEFAULT FALSE
 )
@@ -22,6 +22,7 @@ BEGIN
     SELECT jsonb_build_object(
       'id', b.id,
       'username', u.username,
+      'user_flair', u.flair,
       'title', b.title,
       'body', b.body,
       'deployment_order', b.deployment_order,
@@ -48,6 +49,7 @@ BEGIN
       'id', b.id,
       'user_id', u.id,
       'username', u.username,
+      'user_flair', u.flair,
       'title', b.title,
       'body', b.body,
       'deployment_order', b.deployment_order,
@@ -74,11 +76,13 @@ BEGIN
           'id', pc.id,
           'user_id', pc.user_id,
           'username', pu.username,
+          'user_flair', pu.flair,
           'body', pc.body,
           'created_at', pc.created_at,
           'edited', pc.edited,
           'parent_body', pp.body,
           'parent_author', ppu.username,
+          'parent_flair', ppu.flair,
           'parent_deleted', pp.deleted
         )
         END
@@ -93,7 +97,7 @@ BEGIN
     LEFT JOIN public.comments pp ON pp.id = pc.parent_id
     LEFT JOIN public.users ppu ON ppu.id = pp.user_id
     WHERE b.id = p_build_id
-    GROUP BY b.id, u.id, u.username, pc.id, pu.username, pp.body, ppu.username, pp.deleted;
+    GROUP BY b.id, u.id, u.username, u.flair, pc.id, pu.username, pu.flair, pp.body, ppu.username, ppu.flair, pp.deleted;
   END IF;
 
   RETURN build_data;

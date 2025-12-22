@@ -10,9 +10,16 @@
     "sitemap": "next-sitemap"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.20.0",
+    "@codemirror/commands": "^6.10.0",
+    "@codemirror/lang-markdown": "^6.5.0",
+    "@codemirror/language": "^6.11.3",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/theme-one-dark": "^6.1.3",
     "@codemirror/view": "^6.39.4",
-    "@eldritchtools/limbus-shared-library": "github:eldritchtools/limbus-shared-library#v0.6.4",
+    "@eldritchtools/limbus-shared-library": "github:eldritchtools/limbus-shared-library#v0.7.5",
     "@eldritchtools/shared-components": "github:eldritchtools/shared-components#v1.5.11",
+    "@lezer/highlight": "^1.2.3",
     "@radix-ui/react-select": "^2.2.6",
     "@supabase/supabase-js": "^2.81.1",
     "@tiptap/extension-placeholder": "^3.13.0",
@@ -35,7 +42,9 @@
     "rehype-katex": "^7.0.1",
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.1",
-    "remark-math": "^6.0.0"
+    "remark-math": "^6.0.0",
+    "smooth-auto-scroll": "^0.2.2",
+    "turndown": "^7.2.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -46,5 +55,14 @@
     "eslint-config-next": "15.5.4",
     "source-map-support": "^0.5.21",
     "tailwindcss": "^4"
+  },
+  "resolutions": {
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.39.4",
+    "@codemirror/commands": "^6.10.0",
+    "@codemirror/language": "^6.11.3",
+    "@codemirror/lang-markdown": "^6.5.0",
+    "@codemirror/theme-one-dark": "^6.1.3",
+    "@lezer/highlight": "^1.2.3"
   }
 }

@@ -23,6 +23,7 @@ DECLARE
   _tag_id INT;
   _tag_ids INT[];
   owner_id UUID;
+  was_published BOOLEAN;
 BEGIN
   -- verify ownership
   SELECT user_id INTO owner_id FROM public.builds WHERE id = p_build_id;
@@ -32,6 +33,11 @@ BEGIN
   IF owner_id != p_user_id THEN
     RAISE EXCEPTION 'Unauthorized to edit this build';
   END IF;
+
+  SELECT is_published
+  INTO was_published
+  FROM public.builds
+  WHERE id = p_build_id;
 
   -- update build core fields
   UPDATE public.builds
@@ -47,6 +53,11 @@ BEGIN
     youtube_video_id = p_youtube_video_id,
     extra_opts = p_extra_opts,
     is_published = p_published,
+    published_at = CASE
+      WHEN was_published = FALSE AND p_published = TRUE AND published_at IS NULL
+      THEN NOW()
+      ELSE published_at
+    END,
     updated_at = NOW()
   WHERE id = p_build_id;
 

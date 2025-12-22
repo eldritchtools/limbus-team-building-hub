@@ -8,28 +8,11 @@ import { tabStyle, tooltipStyle } from "../../styles";
 import SkillCard from "@/app/components/SkillCard";
 import PassiveCard from "@/app/components/PassiveCard";
 import UptieSelector from "@/app/components/UptieSelector";
-import MarkdownRenderer from "@/app/components/MarkdownRenderer";
+import MarkdownRenderer from "@/app/components/Markdown/MarkdownRenderer";
 import BuildEntry from "@/app/components/BuildEntry";
 import { getFilteredBuilds } from "@/app/database/builds";
 import NumberInputWithButtons from "@/app/components/NumberInputWithButtons";
-
-function constructHp(data, level) {
-    const hp = Math.floor(data.hp.base + level * data.hp.level);
-    const thresholds = data.breakSection.toReversed().map(x => Math.floor(hp * x / 100)).join(",");
-
-    return `${hp} (${thresholds})`;
-}
-
-function constructPassive(passiveId, passiveData) {
-    const passive = passiveData[passiveId];
-    if ("condition" in passive) return passive;
-    Object.entries(passiveData).forEach(([_, p]) => {
-        if ("condition" in p && p.name === passive.name)
-            passive["condition"] = p.condition;
-    })
-
-    return passive;
-}
+import { constructHp, constructPassive } from "../IdentityUtils";
 
 function NotesTab({ notes }) {
     if (!notes || !notes.main) return <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>;
@@ -89,7 +72,7 @@ export default function Identity({ params }) {
     const supportPassives = skillData.supportPassives.findLast(passives => passives.level <= uptie);
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-        <div style={{ display: "flex", flexDirection: "row", width: "100%" }}>
+        <div style={{ display: "flex", flexDirection: "row", width: "100%", flexWrap: "wrap", justifyContent: "center" }}>
             <div style={{ display: "flex", flexDirection: "column", padding: "1rem", minWidth: "480px", width: "480px", maxWidth: "480px" }}>
                 <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: "100%" }}>
                     <RarityImg rarity={identityData.rank} style={{ display: "inline", height: "2rem" }} />
@@ -174,7 +157,7 @@ export default function Identity({ params }) {
                     }
                 </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "0.5rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", minWidth: "480px", flex: 1, gap: "0.5rem" }}>
                 <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "0.5rem" }}>
                     {[1, 2, 3, 4].map(tier => {
                         const list = identityData.skillTypes.filter(skill => skill.type.tier === tier);

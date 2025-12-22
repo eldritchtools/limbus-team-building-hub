@@ -4,17 +4,13 @@ import { IdentityImg, KeywordIcon, useData } from "@eldritchtools/limbus-shared-
 import { Tooltip } from "react-tooltip";
 import { tooltipStyle } from "../styles";
 
-function TooltipContent({ id }) {
-    const [identities, identitiesLoading] = useData("identities_mini");
-    if (!id || identitiesLoading) return null;
-
-    const identity = identities[id];
-
+function IdentityTooltipContent({ identity }) {
     return <div style={tooltipStyle}>
-        <div style={{ display: "flex", flexDirection: "row", padding: "0.5rem", gap: "0.5rem" }}>
-            <IdentityImg identity={identity} uptie={4} displayName={false} width={128} />
+        <div style={{ display: "flex", flexDirection: "row", padding: "0.5rem", gap: "0.5rem", height: "128px" }}>
+            <div>
+                <IdentityImg identity={identity} uptie={4} displayName={true} displayRarity={true} style={{width: "128px", height: "128px"}} />
+            </div>
             <div style={{ display: "flex", flexDirection: "column", width: "192px" }}>
-                <div style={{ flex: 1 }}>{identity.name}</div>
                 <div style={{ flex: 1, display: "flex" }}>
                     {identity.skillKeywordList.map(x => <KeywordIcon key={x} id={x} />)}
                 </div>
@@ -29,11 +25,20 @@ function TooltipContent({ id }) {
     </div>
 }
 
-export function IdentityTooltip() {
+function TooltipLoader({ id }) {
+    const [identities, identitiesLoading] = useData("identities_mini");
+    if (!id || identitiesLoading) return null;
+
+    return <IdentityTooltipContent identity={identities[id]} />
+}
+
+function IdentityTooltip() {
     return <Tooltip
         id="identity-tooltip"
-        render={({ content }) => <TooltipContent id={content} />}
+        render={({ content }) => <TooltipLoader id={content} />}
         getTooltipContainer={() => document.body}
         style={{ backgroundColor: "transparent", zIndex: "9999" }}
     />
 }
+
+export { IdentityTooltip, IdentityTooltipContent };

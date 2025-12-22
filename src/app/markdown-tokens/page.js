@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { EgoSelector, GiftSelector, IdentitySelector, KeywordSelector, SinnerSelector, StatusSelector } from "../components/Selectors";
-import MarkdownRenderer from "../components/MarkdownRenderer";
+import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
 
 const headerStyle = { fontSize: "1.2rem", fontWeight: "bold" };
 
@@ -12,18 +12,19 @@ export default function MarkdownTokens() {
     const [status, setStatus] = useState(null);
     const [keyword, setKeyword] = useState(null);
     const [gift, setGift] = useState(null);
-    const [buildId, setBuildId] = useState("");
+    const [buildString, setBuildString] = useState("");
     const [buildTestString, setBuildTestString] = useState("");
     const [username, setUsername] = useState("");
     const [usernameTestString, setUsernameTestString] = useState("");
     const [sinner, setSinner] = useState(null);
 
     const handleTestBuild = () => {
-        setBuildTestString(`Sample markdown referencing {build:${buildId}}`);
+        const buildId = buildString.split("/").at(-1);
+        setBuildTestString(`{build:${buildId}}`);
     }
 
     const handleTestUsername = () => {
-        setUsernameTestString(`Sample markdown referencing {user:${username}}`);
+        setUsernameTestString(`{user:${username}}`);
     }
 
     return <div style={{ display: "flex", flexDirection: "column" }}>
@@ -38,9 +39,13 @@ export default function MarkdownTokens() {
 
             {identity ?
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
-                    <code>{`Sample markdown referencing {identity:${identity}}`}</code>
+                    <div>Token:</div>
+                    <code style={{ border: "1px #777 solid", padding: "0.2rem" }}>{`{identity:${identity}}`}</code>
                     <div style={{ fontSize: "1.2rem" }}>→</div>
-                    <MarkdownRenderer content={`Sample markdown referencing {identity:${identity}}`} />
+                    <div>Result:</div>
+                    <div style={{ border: "1px #777 solid", padding: "0.2rem" }}>
+                        <MarkdownRenderer content={`{identity:${identity}}`} />
+                    </div>
                 </div> :
                 null
             }
@@ -55,9 +60,13 @@ export default function MarkdownTokens() {
 
             {ego ?
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
-                    <code>{`Sample markdown referencing {ego:${ego}}`}</code>
+                    <div>Token:</div>
+                    <code style={{ border: "1px #777 solid", padding: "0.2rem" }}>{`{ego:${ego}}`}</code>
                     <div style={{ fontSize: "1.2rem" }}>→</div>
-                    <MarkdownRenderer content={`Sample markdown referencing {ego:${ego}}`} />
+                    <div>Result:</div>
+                    <div style={{ border: "1px #777 solid", padding: "0.2rem" }}>
+                        <MarkdownRenderer content={`{ego:${ego}}`} />
+                    </div>
                 </div> :
                 null
             }
@@ -72,9 +81,13 @@ export default function MarkdownTokens() {
 
             {status ?
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
-                    <code>{`Sample markdown referencing {status:${status}}`}</code>
+                    <div>Token:</div>
+                    <code style={{ border: "1px #777 solid", padding: "0.2rem" }}>{`{status:${status}}`}</code>
                     <div style={{ fontSize: "1.2rem" }}>→</div>
-                    <MarkdownRenderer content={`Sample markdown referencing {status:${status}}`} />
+                    <div>Result:</div>
+                    <div style={{ border: "1px #777 solid", padding: "0.2rem" }}>
+                        <MarkdownRenderer content={`{status:${status}}`} />
+                    </div>
                 </div> :
                 null
             }
@@ -89,9 +102,13 @@ export default function MarkdownTokens() {
 
             {keyword ?
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
-                    <code>{`Sample markdown referencing {keyword:${keyword}}. Lowercase {keyword:${keyword.toLowerCase()}} Uppercase {keyword:${keyword.toUpperCase()}}`}</code>
+                    <div>Sample Tokens:</div>
+                    <code style={{ border: "1px #777 solid", padding: "0.2rem" }}>{`{keyword:${keyword}} {keyword:${keyword.toLowerCase()}} {keyword:${keyword.toUpperCase()}}`}</code>
                     <div style={{ fontSize: "1.2rem" }}>→</div>
-                    <MarkdownRenderer content={`Sample markdown referencing {keyword:${keyword}}. Lowercase {keyword:${keyword.toLowerCase()}} Uppercase {keyword:${keyword.toUpperCase()}}`} />
+                    <div>Result:</div>
+                    <div style={{ border: "1px #777 solid", padding: "0.2rem" }}>
+                        <MarkdownRenderer content={`{keyword:${keyword}} {keyword:${keyword.toLowerCase()}} {keyword:${keyword.toUpperCase()}}`} />
+                    </div>
                 </div> :
                 null
             }
@@ -112,10 +129,20 @@ export default function MarkdownTokens() {
 
             {gift ?
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
-                        <code>{`Sample markdown referencing {giftname:${gift}} {giftname:${gift}|2}`}</code>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <div>Sample Tokens:</div>
+                        <code style={{ border: "1px #777 solid", padding: "0.2rem" }}>{`{giftname:${gift}} {giftname:${gift}|2}`}</code>
                         <div style={{ fontSize: "1.2rem" }}>→</div>
-                        <MarkdownRenderer content={`Sample markdown referencing {giftname:${gift}} {giftname:${gift}|2}`} />
+                        <div>Result:</div>
+                        <div style={{ border: "1px #777 solid", padding: "0.2rem" }}>
+                            <MarkdownRenderer content={`{giftname:${gift}} {giftname:${gift}|2}`} />
+                        </div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <div>Sample Token:</div>
+                        <code style={{ border: "1px #777 solid", padding: "0.2rem" }}>{`{gifticons:${gift}}`}</code>
+                        <div style={{ fontSize: "1.2rem" }}>→</div>
+                        <div>Result:</div>
                     </div>
                     <MarkdownRenderer content={`{gifticons:${gift}}`} />
                 </div> :
@@ -126,18 +153,24 @@ export default function MarkdownTokens() {
         <div>
             Reference a build using <code>{"{build:id}"}</code>, which will show a link to the build&apos;s page consisting of its name. Hovering over the link will show a tooltip for the build.
             <br /> <br />
-            You can find a build&apos;s id in the URL of its respective page. Only published builds will work. You can input the build&apos;s id below to test it.
+            You can find a build&apos;s id in the URL of its respective page or by copying the link given in the share feature. Only published builds will work.
+            <br /> <br />
+            You can input the build&apos;s id below to test it. You can paste the entire url and it will automatically strip out the unnecessary parts.
             <br /> <br />
             <div style={{ display: "flex", gap: "0.5rem" }}>
-                <input value={buildId} onChange={e => setBuildId(e.target.value)} style={{ width: "20rem" }} />
+                <input value={buildString} onChange={e => setBuildString(e.target.value)} style={{ width: "20rem" }} />
                 <button onClick={handleTestBuild}>Test Build</button>
             </div>
 
             {buildTestString.length > 0 ?
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
-                    <code>{buildTestString}</code>
+                    <div>Token:</div>
+                    <code style={{ border: "1px #777 solid", padding: "0.2rem" }}>{buildTestString}</code>
                     <div style={{ fontSize: "1.2rem" }}>→</div>
-                    <MarkdownRenderer content={buildTestString} />
+                    <div>Result:</div>
+                    <div style={{ border: "1px #777 solid", padding: "0.2rem" }}>
+                        <MarkdownRenderer content={buildTestString} />
+                    </div>
                 </div> :
                 null
             }
@@ -155,9 +188,13 @@ export default function MarkdownTokens() {
 
             {usernameTestString.length > 0 ?
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
-                    <code>{usernameTestString}</code>
+                    <div>Token:</div>
+                    <code style={{ border: "1px #777 solid", padding: "0.2rem" }}>{usernameTestString}</code>
                     <div style={{ fontSize: "1.2rem" }}>→</div>
-                    <MarkdownRenderer content={usernameTestString} />
+                    <div>Result:</div>
+                    <div style={{ border: "1px #777 solid", padding: "0.2rem" }}>
+                        <MarkdownRenderer content={usernameTestString} />
+                    </div>
                 </div> :
                 null
             }
@@ -170,9 +207,13 @@ export default function MarkdownTokens() {
 
             {sinner ?
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
-                    <code>{`Sample markdown referencing {sinner:${sinner}}`}</code>
+                    <div>Token:</div>
+                    <code style={{ border: "1px #777 solid", padding: "0.2rem" }}>{`{sinner:${sinner}}`}</code>
                     <div style={{ fontSize: "1.2rem" }}>→</div>
-                    <MarkdownRenderer content={`Sample markdown referencing {sinner:${sinner}}`} />
+                    <div>Result:</div>
+                    <div style={{ border: "1px #777 solid", padding: "0.2rem" }}>
+                        <MarkdownRenderer content={`{sinner:${sinner}}`} />
+                    </div>
                 </div> :
                 null
             }

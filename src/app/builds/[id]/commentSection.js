@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { addComment, deleteComment, getComments, updateComment } from "@/app/database/comments";
 import { Modal } from "@/app/components/Modal";
 import { useAuth } from "@/app/database/authProvider";
-import MarkdownEditorWrapper from "@/app/components/MarkdownEditorWrapper";
+import MarkdownEditorWrapper from "@/app/components/Markdown/MarkdownEditorWrapper";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import "./builds.css";
 import "../../pageButton.css";
-import MarkdownRenderer from "@/app/components/MarkdownRenderer";
+import MarkdownRenderer from "@/app/components/Markdown/MarkdownRenderer";
 import Username from "@/app/components/Username";
 import ReactTimeAgo from "react-time-ago";
 import { pinComment, unpinComment } from "@/app/database/builds";
@@ -86,7 +86,7 @@ function Comment({ comment, buildId, buildOwnerId, pinned, onPost, onEdit, onDel
                             </div>
                         </div> :
                         <div style={{ display: "flex", flexDirection: "column", textAlign: "start", gap: "0.25rem" }}>
-                            <span style={{ fontSize: "0.8rem" }}>Replying to <Username username={comment.parent_author} /></span>
+                            <span style={{ fontSize: "0.8rem" }}>Replying to <Username username={comment.parent_author} flair={comment.parent_flair} /></span>
                             <div style={{ border: "1px #777 solid", borderRadius: "0.5rem", padding: "0.25rem", paddingLeft: "0.5rem" }}>
                                 <MarkdownRenderer content={comment.parent_body} />
                             </div>
@@ -98,7 +98,7 @@ function Comment({ comment, buildId, buildOwnerId, pinned, onPost, onEdit, onDel
                 <CommentInput buildId={buildId} initialValue={comment.body} parentId={comment.parent_id}
                     editId={comment.id} onEdit={(body) => { setEditing(false); onEdit(comment.id, body); }} onCancel={() => setEditing(false)} /> :
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
-                    <div style={{ fontSize: "0.8rem" }}>by <Username username={comment.username} /> • <ReactTimeAgo date={comment.created_at} locale="en-US" timeStyle="mini" /> {comment.edited ? `(edited)` : null}</div>
+                    <div style={{ fontSize: "0.8rem" }}>by <Username username={comment.username} flair={comment.user_flair}/> • <ReactTimeAgo date={comment.created_at} locale="en-US" timeStyle="mini" /> {comment.edited ? `(edited)` : null}</div>
                     <MarkdownRenderer content={comment.body} />
 
                     <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
@@ -121,7 +121,7 @@ function Comment({ comment, buildId, buildOwnerId, pinned, onPost, onEdit, onDel
                             parentId={comment.id}
                             onPost={(newComment) => {
                                 setReplying(false);
-                                onPost({ ...newComment, parent_author: comment.username, parent_body: comment.body, parent_deleted: false });
+                                onPost({ ...newComment, parent_author: comment.username, parent_flair: comment.user_flair, parent_body: comment.body, parent_deleted: false });
                             }}
                         />
                     )}
@@ -160,7 +160,7 @@ function CommentSection({ buildId, ownerId, commentCount, pinnedComment = null }
         loadComments();
     }, [buildId, page]);
 
-    const onPost = (comment) => { setComments(p => [{ ...comment, username: profile.username }, ...p]) };
+    const onPost = (comment) => { setComments(p => [{ ...comment, username: profile.username, flair: profile.flair }, ...p]) };
     const onEdit = (id, body) => setComments(p => p.map(c => c.id === id ? { ...c, body: body, edited: true } : c));
     const onDelete = id => setComments(p => p.filter(c => c.id !== id));
     const onPin = (comment) => setPinned(comment);

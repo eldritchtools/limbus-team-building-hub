@@ -93,3 +93,33 @@ a:visited {
 a:active {
   color: #ffcc66; /* amber for click */
 }
+
+.dark-scrollable::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark-scrollable::-webkit-scrollbar-track {
+  background: #1a1a1a; /* dark track */
+}
+
+.dark-scrollable::-webkit-scrollbar-thumb {
+  background: #444; /* medium-dark thumb */
+  border-radius: 4px;
+}
+
+.dark-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #555; /* slightly lighter on hover */
+}
+
+/* Chrome, Safari, Edge, Opera */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}

@@ -8,7 +8,7 @@ import { tabStyle, tooltipStyle } from "../../styles";
 import SkillCard from "@/app/components/SkillCard";
 import PassiveCard from "@/app/components/PassiveCard";
 import UptieSelector from "@/app/components/UptieSelector";
-import MarkdownRenderer from "@/app/components/MarkdownRenderer";
+import MarkdownRenderer from "@/app/components/Markdown/MarkdownRenderer";
 import BuildEntry from "@/app/components/BuildEntry";
 import { getFilteredBuilds } from "@/app/database/builds";
 
@@ -70,7 +70,7 @@ export default function EgoPage({ params }) {
     const passives = skillData.passiveList;
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-        <div style={{ display: "flex", flexDirection: "row", width: "100%" }}>
+        <div style={{ display: "flex", flexDirection: "row", width: "100%", flexWrap: "wrap", justifyContent: "center" }}>
             <div style={{ display: "flex", flexDirection: "column", padding: "1rem", minWidth: "480px", width: "480px", maxWidth: "480px" }}>
                 <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: "100%" }}>
                     <RarityImg rarity={egoData.rank.toLowerCase()} style={{ display: "inline", height: "2rem" }} />
@@ -143,7 +143,7 @@ export default function EgoPage({ params }) {
                     }
                 </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "0.5rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", minWidth: "480px", flex: 1, gap: "0.5rem" }}>
                 <div style={{ display: "flex" }}>
                     <SkillCard skill={skillData.awakeningSkill} uptie={uptie} type={"awakening"} />
                 </div>

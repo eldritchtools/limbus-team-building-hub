@@ -6,17 +6,19 @@ import { getBuild, insertBuild, updateBuild } from "../database/builds";
 import "./buildSelector.css";
 import { affinityColorMapping, EgoImg, IdentityImg, KeywordIcon, RarityImg, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
 import { keywordIdMapping, keywordToIdMapping } from "../keywordIds";
-import TagSelector, { tagToTagSelectorOption } from "./TagSelector";
+import TagSelector, { tagToTagSelectorOption } from "../components/TagSelector";
 import { useAuth } from "../database/authProvider";
 import { useRouter } from "next/navigation";
-import MarkdownEditorWrapper from "./MarkdownEditorWrapper";
+import MarkdownEditorWrapper from "../components/Markdown/MarkdownEditorWrapper";
 import "./SinnerGrid.css";
 import { extractYouTubeId } from "../YoutubeUtils";
-import NumberInputWithButtons from "./NumberInputWithButtons";
+import NumberInputWithButtons from "../components/NumberInputWithButtons";
 import { LEVEL_CAP } from "../utils";
-import UptieSelector from "./UptieSelector";
-import { generalTooltipProps } from "./GeneralTooltip";
-import { decodeBuildExtraOpts, encodeBuildExtraOpts } from "./BuildExtraOpts";
+import UptieSelector from "../components/UptieSelector";
+import { generalTooltipProps } from "../components/GeneralTooltip";
+import { decodeBuildExtraOpts, encodeBuildExtraOpts } from "../components/BuildExtraOpts";
+import DisplayTypeButton from "./DisplayTypeButton";
+import SinnerGrid from "./SinnerGrid";
 
 const egoRankMapping = {
     "ZAYIN": 0,
@@ -62,7 +64,7 @@ function IdentitySelector({ value, setValue, options, num }) {
             </Select.Trigger>
 
             <Select.Portal>
-                <Select.Content className="identity-select-content" position="popper" style={{width: null, maxWidth: "clamp(450px, 80vw, 900px)"}}>
+                <Select.Content className="identity-select-content" position="popper" style={{ width: null, maxWidth: "clamp(450px, 80vw, 900px)" }}>
                     <div style={{ paddingBottom: "0.2rem" }}>
                         <input
                             type="text"
@@ -73,7 +75,7 @@ function IdentitySelector({ value, setValue, options, num }) {
                     </div>
 
                     <Select.Viewport>
-                        <div className="identity-select-grid" style={{maxWidth: "clamp(450px, 80vw, 900px)"}}>
+                        <div className="identity-select-grid" style={{ maxWidth: "clamp(450px, 80vw, 900px)" }}>
                             {filtered.map((option) =>
                                 <Select.Item key={option.id} value={option.id} className="identity-select-item">
                                     <div className="identity-item-inner" data-tooltip-id="identity-tooltip" data-tooltip-content={option.id}>
@@ -110,10 +112,10 @@ function EgoSelector({ value, setValue, options, rank }) {
             </Select.Trigger>
 
             <Select.Portal>
-                <Select.Content className="ego-select-content" position="popper" style={{maxWidth: "clamp(450px, 80vw, 900px)"}}>
+                <Select.Content className="ego-select-content" position="popper" style={{ maxWidth: "clamp(450px, 80vw, 900px)" }}>
                     {options.length === 0 ? <div style={{ fontSize: "1.2rem", padding: "0.5rem" }}>No Options</div> : null}
                     <Select.Viewport>
-                        <div className="ego-select-grid" style={{maxWidth: "clamp(450px, 80vw, 900px)"}}>
+                        <div className="ego-select-grid" style={{ maxWidth: "clamp(450px, 80vw, 900px)" }}>
                             {options.map((option) =>
                                 <Select.Item key={option.id} value={option.id} className="ego-select-item">
                                     <div className="ego-item-inner" data-tooltip-id="ego-tooltip" data-tooltip-content={option.id}>
@@ -137,23 +139,29 @@ function EgoSelector({ value, setValue, options, rank }) {
 
 const deploymentComponentStyle = {
     flex: 1,
-    fontSize: "1.5rem",
     textAlign: "center",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     padding: 0,
-    margin: 0
+    margin: 0,
+    containerType: "size"
 }
 
 function DeploymentComponent({ order, setOrder, activeSinners, sinnerId }) {
     const index = order.findIndex(x => x === sinnerId);
     if (index === -1) {
-        return <button onClick={() => setOrder(p => [...p, sinnerId])} style={deploymentComponentStyle}>Deploy</button>
+        return <button onClick={() => setOrder(p => [...p, sinnerId])} style={deploymentComponentStyle}>
+            <span style={{ fontSize: `clamp(0.6rem, 20cqw, 1.5rem)` }}>Deploy</span>
+        </button>
     } else if (index < activeSinners) {
-        return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={{ ...deploymentComponentStyle, color: "#fefe3d" }}>Active {index + 1}</button>
+        return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={deploymentComponentStyle}>
+            <span style={{ fontSize: `clamp(0.6rem, 20cqw, 1.5rem)`, color: "#fefe3d" }}>Active {index + 1}</span>
+        </button>
     } else {
-        return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={{ ...deploymentComponentStyle, color: "#29fee9" }}>Backup {index + 1}</button>
+        return <button onClick={() => setOrder(p => p.filter(x => x !== sinnerId))} style={deploymentComponentStyle}>
+            <span style={{ fontSize: `clamp(0.6rem, 20cqw, 1.5rem)`, color: "#29fee9" }}>Backup {index + 1}</span>
+        </button>
     }
 }
 
@@ -176,6 +184,7 @@ export default function BuildEditor({ mode, buildId }) {
     const [loading, setLoading] = useState(mode === "edit");
     const [message, setMessage] = useState("");
     const [saving, setSaving] = useState(false);
+    const [displayType, setDisplayType] = useState("edit");
     const { user } = useAuth();
     const router = useRouter();
 
@@ -279,42 +288,61 @@ export default function BuildEditor({ mode, buildId }) {
     </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", containerType: "inline-size" }}>
         <span style={{ fontSize: "1.2rem" }}>Title</span>
         <input type="text" value={title} style={{ width: "clamp(20ch, 80%, 100ch)" }} onChange={e => setTitle(e.target.value)} />
-        <span style={{ fontSize: "1.2rem" }}>Team Build</span>
-        {identitiesLoading || egosLoading ? null :
-            <div className="sinner-grid" style={{ alignSelf: "center", width: "98%", paddingBottom: "1rem" }}>
-                {Array.from({ length: 12 }, (_, index) =>
-                    <div key={index} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem" }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", boxSizing: "border-box" }}>
-                            <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
-                                <IdentitySelector value={identities[identityIds[index]] || null} setValue={v => setIdentityId(v, index)} options={identityOptions[index + 1]} num={index + 1} />
-                                <DeploymentComponent order={deploymentOrder} setOrder={setDeploymentOrder} activeSinners={activeSinners} sinnerId={index + 1} />
-                            </div>
-                            <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
-                                {Array.from({ length: 5 }, (_, rank) =>
-                                    <EgoSelector key={rank} value={egos[egoIds[index][rank]] || null} setValue={v => setEgoId(v, index, rank)} options={egoOptions[index + 1][rank]} rank={rank} />
-                                )}
-                            </div>
-                        </div>
-                        {uptieLevelToggle ? <>
-                            <div style={{ display: "flex" }}>
-                                <NumberInputWithButtons value={identityLevels[index]} setValue={v => setIdentityLevel(v, index)} max={LEVEL_CAP} allowEmpty={true} />
-                                <UptieSelector value={identityUpties[index]} setValue={v => setIdentityUptie(v, index)} allowEmpty={true} />
-                            </div>
-                            <div style={{ display: "flex" }}>
-                                {Array.from({ length: 5 }, (_, rank) =>
-                                    <UptieSelector
-                                        key={rank}
-                                        value={egoThreadspins[index][rank]}
-                                        setValue={v => setEgoThreadspin(v, index, rank)}
-                                        allowEmpty={true}
-                                        emptyIcon={<RarityImg rarity={egoRankReverseMapping[rank]} alt={true} style={{ width: "100%", height: "auto" }} />}
-                                    />)}
-                            </div>
-                        </> : null}
-                    </div>
-                )}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: "1.2rem" }}>Team Build</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+                <div>Display Type</div>
+                <DisplayTypeButton value={displayType} setValue={setDisplayType} includeEdit={true} />
             </div>
-        }
+        </div>
+        {identitiesLoading || egosLoading ? null :
+            (
+                displayType === "edit" ?
+                    <div className="sinner-grid" style={{ alignSelf: "center", width: "98%", paddingBottom: "1rem" }}>
+                        {Array.from({ length: 12 }, (_, index) =>
+                            <div key={index} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem" }}>
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", boxSizing: "border-box" }}>
+                                    <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
+                                        <IdentitySelector value={identities[identityIds[index]] || null} setValue={v => setIdentityId(v, index)} options={identityOptions[index + 1]} num={index + 1} />
+                                        <DeploymentComponent order={deploymentOrder} setOrder={setDeploymentOrder} activeSinners={activeSinners} sinnerId={index + 1} />
+                                    </div>
+                                    <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
+                                        {Array.from({ length: 5 }, (_, rank) =>
+                                            <EgoSelector key={rank} value={egos[egoIds[index][rank]] || null} setValue={v => setEgoId(v, index, rank)} options={egoOptions[index + 1][rank]} rank={rank} />
+                                        )}
+                                    </div>
+                                </div>
+                                {uptieLevelToggle ? <>
+                                    <div style={{ display: "flex" }}>
+                                        <NumberInputWithButtons value={identityLevels[index]} setValue={v => setIdentityLevel(v, index)} max={LEVEL_CAP} allowEmpty={true} />
+                                        <UptieSelector value={identityUpties[index]} setValue={v => setIdentityUptie(v, index)} allowEmpty={true} />
+                                    </div>
+                                    <div style={{ display: "flex" }}>
+                                        {Array.from({ length: 5 }, (_, rank) =>
+                                            <UptieSelector
+                                                key={rank}
+                                                value={egoThreadspins[index][rank]}
+                                                setValue={v => setEgoThreadspin(v, index, rank)}
+                                                allowEmpty={true}
+                                                emptyIcon={<RarityImg rarity={egoRankReverseMapping[rank]} alt={true} style={{ width: "100%", height: "auto" }} />}
+                                            />)}
+                                    </div>
+                                </> : null}
+                            </div>
+                        )}
+                    </div> :
+                    <SinnerGrid
+                        identityIds={identityIds}
+                        egoIds={egoIds}
+                        identityUpties={identityUpties}
+                        identityLevels={identityLevels}
+                        egoThreadspins={egoThreadspins}
+                        deploymentOrder={deploymentOrder}
+                        activeSinners={activeSinners}
+                        displayType={displayType}
+                    />
+
+            )}
         <div style={{ display: "flex" }}>
             <button className={uptieLevelToggle ? "toggle-button-active" : "toggle-button"} onClick={() => setUptieLevelToggle(p => !p)} {...generalTooltipProps("optionaluptieorlevel")}>Indicate Uptie or Level</button>
         </div>

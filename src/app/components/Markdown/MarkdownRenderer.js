@@ -1,8 +1,8 @@
 "use client";
 
 import { Gift, Icon, Status, useData } from "@eldritchtools/limbus-shared-library";
-import { keywordIconConvert } from "../keywordIds";
-import { sinnerMapping } from "../utils";
+import { keywordIconConvert } from "../../keywordIds";
+import { sinnerMapping } from "../../utils";
 import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
@@ -10,9 +10,9 @@ import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import { visit } from "unist-util-visit";
 import { useEffect, useMemo, useState } from "react";
-import { getFilteredBuilds } from "../database/builds";
-import { tooltipStyle } from "../styles";
-import BuildEntry from "./BuildEntry";
+import { getFilteredBuilds } from "../../database/builds";
+import { tooltipStyle } from "../../styles";
+import BuildEntry from "../BuildEntry";
 import "./MarkdownRenderer.css";
 
 import remarkMath from "remark-math";
@@ -243,8 +243,8 @@ export default function MarkdownRenderer({ content }) {
 
         <Tooltip
             id="markdown-build-tooltip"
-            render={({ content }) => <div style={tooltipStyle}>
-                <BuildEntry build={JSON.parse(decodeURIComponent(content))} />
+            render={({ content }) => <div style={{...tooltipStyle, width: "500px"}}>
+                <BuildEntry build={JSON.parse(decodeURIComponent(content))} minified={true} minifull={true} />
             </div>}
             getTooltipContainer={() => document.body}
             style={{ backgroundColor: "transparent", zIndex: "9999" }}

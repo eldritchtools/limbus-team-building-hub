@@ -6,9 +6,14 @@
 CREATE TABLE public.users (
   id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
   username TEXT UNIQUE,
+  flair TEXT DEFAULT NULL,
+  description TEXT DEFAULT NULL,
   is_admin BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE public.users
+ADD CONSTRAINT flair_length CHECK (char_length(flair) <= 32);
 
 -- ========================
 -- 2. CONTENT
@@ -28,6 +33,7 @@ CREATE TABLE public.builds (
   youtube_video_id TEXT,
   extra_opts TEXT DEFAULT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
+  published_at TIMESTAMPTZ DEFAULT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   like_count INTEGER DEFAULT 0,
   comment_count INTEGER DEFAULT 0,
@@ -162,7 +168,7 @@ BEGIN
   UPDATE public.builds
   SET
     like_count = new_like_count,
-    score = (new_like_count * 2 + comment_count) / POWER( (EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400) + 2, 1.05 )
+    score = (new_like_count * 2 + comment_count) / POWER( (EXTRACT(EPOCH FROM (NOW() - COALESCE(published_at, created_at))) / 86400) + 2, 1.05 )
   WHERE id = build_id_to_update;
 
   RETURN NULL;
@@ -202,7 +208,7 @@ BEGIN
   UPDATE public.builds
   SET
     comment_count = new_comment_count,
-    score = (like_count * 2 + new_comment_count) / POWER( (EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400) + 2, 1.05 )
+    score = (like_count * 2 + new_comment_count) / POWER( (EXTRACT(EPOCH FROM (NOW() - COALESCE(published_at, created_at))) / 86400) + 2, 1.05 )
 
   WHERE id = build_id_to_update;
 

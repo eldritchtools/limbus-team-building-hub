@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useRequestsCache } from "../database/RequestsCacheProvider";
 import { useAuth } from "../database/authProvider";
 
@@ -7,9 +7,9 @@ export default function SaveButton({ buildId }) {
     const { savedMap, toggleSave, fetchUserData } = useRequestsCache();
 
     useEffect(() => { if (user) fetchUserData([buildId]) }, [fetchUserData, buildId, user]);
-    if (!user) return null;
+    const saved = useMemo(() => savedMap[buildId], [savedMap, buildId]);
 
-    const saved = savedMap[buildId];
+    if (!user) return null;
 
     if (saved === undefined || saved === null) return null;
 

@@ -42,7 +42,7 @@ BEGIN
     LEFT JOIN public.build_tags bt ON b.id = bt.build_id
     LEFT JOIN public.tags t ON bt.tag_id = t.id
     WHERE b.id = p_build_id
-    GROUP BY b.id, u.username;
+    GROUP BY b.id, u.username, u.flair;
 
   ELSE
     SELECT jsonb_build_object(

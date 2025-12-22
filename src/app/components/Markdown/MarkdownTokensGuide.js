@@ -65,11 +65,13 @@ function GuideBase({ type, editorRef, onChange, guideValue, children }) {
                 </div> : null
             }
         </div>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
             Token:
             {guideValue ? <code>{`{${type}:${guideValue}}`}</code> : null}
-            <button onClick={handleTokenCopy} disabled={!guideValue}>Copy to clipboard</button>
-            <button onClick={handleTokenInsert} disabled={!guideValue}>Insert to text</button>
+            <div>
+                <button onClick={handleTokenCopy} disabled={!guideValue}>Copy to clipboard</button>
+                <button onClick={handleTokenInsert} disabled={!guideValue}>Insert to text</button>
+            </div>
             <span>{notif}</span>
         </div>
     </div>

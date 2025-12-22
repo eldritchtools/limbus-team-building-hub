@@ -71,7 +71,7 @@ function EgoDetails({ id, ego }) {
 }
 
 function EgoCard({ ego }) {
-    return <div className="clickable-ego-card" style={{ display: "flex", flexDirection: "row", padding: "0.5rem", width: "420px", height: "280px", border: "1px #777 solid", borderRadius: "0.25rem", boxSizing: "border-box" }}>
+    return <div className="clickable-ego-card" style={{ display: "flex", flexDirection: "row", padding: "0.5rem", width: "min(420px, 100%)", height: "280px", border: "1px #777 solid", borderRadius: "0.25rem", boxSizing: "border-box" }}>
         <div style={{ display: "flex", flexDirection: "column", width: "128px" }}>
             <EgoImg ego={ego} type={"awaken"} displayName={false} displayRarity={true} />
             {"corrosionType" in ego ? <EgoImg ego={ego} type={"erosion"} displayName={false} displayRarity={false} /> : null}
@@ -207,7 +207,7 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
             return listToComponents(list);
         }
     } else if (displayType === "card") {
-        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 420px)", width: "100%", gap: "0.5rem", justifyContent: "center" }}>
+        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, min(420px, 100%))", width: "100%", gap: "0.5rem", justifyContent: "center" }}>
             {list.map(([id, ego]) => <div key={id}><Link href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }}><EgoCard key={id} ego={ego} /></Link></div>)}
         </div>
 

@@ -1,3 +1,7 @@
+html {
+  font-size: clamp(12px, 1.5vw, 16px);
+}
+
 body {
   background: #1f1f1f;
   color: #ddd;
@@ -16,6 +20,7 @@ textarea {
   border-radius: 4px;
   margin: 2px;
   transition: background-color 0.2s, border-color 0.2s;
+  font-size: 1rem;
 }
 
 button:hover,
@@ -50,6 +55,7 @@ input[type="checkbox"] {
   margin: 2px;
   transition: background-color 0.2s, border-color 0.2s;
   cursor: pointer;
+  font-size: 1rem;
 }
 
 .toggle-button:hover {
@@ -68,6 +74,7 @@ input[type="checkbox"] {
   color: #fff;
   border-color: #4a4a4a;
   cursor: pointer;
+  font-size: 1rem;
 }
 
 .toggle-button-active:hover {

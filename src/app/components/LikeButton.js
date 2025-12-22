@@ -8,7 +8,7 @@ export default function LikeButton({ buildId, likeCount }) {
     const [count, setCount] = useState(likeCount);
 
     useEffect(() => { if (user) fetchUserData([buildId]) }, [fetchUserData, buildId, user]);
-    const liked = likedMap[buildId];
+    const liked = useMemo(() => likedMap[buildId], [likedMap, buildId]);
 
     if (!user)
         return <button className={liked ? "toggle-button-active" : "toggle-button"} disabled={true} title="Login required">

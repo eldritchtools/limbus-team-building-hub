@@ -18,7 +18,6 @@ export default function RootLayout({ children }) {
             <head>
                 <link rel="manifest" href="/manifest.json" />
                 <link rel="icon" href="/favicon.ico" />
-                <meta name="viewport" content="width=device-width, initial-scale=0.7"/>
                 <Script async src="https://www.googletagmanager.com/gtag/js?id=G-XZJ5KQTJJ9" />
                 <Script id="google-analytics">
                     {`
@@ -30,7 +29,7 @@ export default function RootLayout({ children }) {
                     `}
                 </Script>
             </head>
-            <body style={{ display: "flex", flexDirection: "column" }} className={`antialiased`}>
+            <body style={{ display: "flex", flexDirection: "column" }}>
                 <LayoutComponent>{children}</LayoutComponent>
             </body>
         </html>

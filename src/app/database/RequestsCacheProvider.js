@@ -84,26 +84,26 @@ export function RequestsCacheProvider({ children }) {
         if (!user) return;
         const current = likedMap[buildId];
 
-        setLikedMap((prev) => ({ ...prev, [buildId]: !current }));
-
         if (current) {
             await getSupabase().from("likes").delete().eq("build_id", buildId);
         } else {
             await getSupabase().from("likes").insert({ build_id: buildId });
         }
+
+        setLikedMap((prev) => ({ ...prev, [buildId]: !current }));
     };
 
     const toggleSave = async (buildId) => {
         if (!user) return;
         const current = savedMap[buildId];
 
-        setSavedMap((prev) => ({ ...prev, [buildId]: !current }));
-
         if (current) {
             await getSupabase().from("saves").delete().eq("build_id", buildId);
         } else {
             await getSupabase().from("saves").insert({ build_id: buildId });
         }
+
+        setSavedMap((prev) => ({ ...prev, [buildId]: !current }));
     };
 
     return (

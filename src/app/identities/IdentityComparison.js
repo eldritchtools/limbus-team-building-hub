@@ -11,6 +11,7 @@ import { constructHp, constructPassive } from "./IdentityUtils";
 import RangeInput from "../components/RangeInput";
 import { keywordToIdMapping } from "../keywordIds";
 import { generalTooltipProps } from "../components/GeneralTooltip";
+import { useBreakpoint } from "@eldritchtools/shared-components";
 
 const options = {
     "stats": "Stats",
@@ -246,6 +247,7 @@ function ComparisonRow({ identity, skillList, compareType }) {
 
 function ComparisonList({ items, compareType, displayType, otherOpts }) {
     const [statuses, statusesLoading] = useData("statuses", compareType !== "stats");
+    const { isMobile } = useBreakpoint();
 
     if (statusesLoading && displayType !== "stats" && otherOpts.searchString.trim().length > 0) return null;
 
@@ -460,7 +462,7 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
             {sortedList.map(([identity, skills], i) => <ComparisonCard key={i} identity={identity} skillList={skills} compareType={compareType} />)}
         </div>
     } else if (displayType === "full") {
-        return <div style={{ display: "flex", overflowX: "auto", width: "100%", justifyContent: "center", overflowY: "hidden" }}>
+        return <div style={{ display: "flex", overflowX: "auto", width: "100%", justifyContent: isMobile ? "start" : "center", overflowY: "hidden" }}>
             <table style={{ borderCollapse: "collapse", width: "100%", maxWidth: "1600px" }}>
                 {
                     compareType === "stats" ?
@@ -634,14 +636,18 @@ export default function IdentityComparison({ identities, displayType, separateSi
             Warning: Some combinations of settings may cause the webpage to lag due to the number of things being rendered, especially when using &quot;All Skills&quot;.
             Try using filters if this happens.
         </span>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <span>Compare Target:</span>
-            <DropdownButton value={compareType} setValue={setCompareType} options={options} />
-            <span>Sort:</span>
-            <DropdownButton value={sortType} setValue={setSortType} options={sortOptions} />
-            <button onClick={() => setSortAscending(p => !p)}>
-                {sortAscending ? "ascending" : "descending"}
-            </button>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <span>Compare Target:</span>
+                <DropdownButton value={compareType} setValue={setCompareType} options={options} />
+            </div>
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <span>Sort:</span>
+                <DropdownButton value={sortType} setValue={setSortType} options={sortOptions} />
+                <button onClick={() => setSortAscending(p => !p)}>
+                    {sortAscending ? "ascending" : "descending"}
+                </button>
+            </div>
             {compareType !== "stats" ?
                 <label>
                     <input type="checkbox" checked={grouped} onChange={e => setGrouped(p => !p)} />

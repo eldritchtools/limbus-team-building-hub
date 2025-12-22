@@ -126,7 +126,7 @@ export default function BuildPage({ params }) {
                 <div style={{ fontSize: "0.9rem", marginBottom: "0.5rem", color: "#ddd" }}>
                     by <Username username={build.username} flair={build.user_flair} /> • <ReactTimeAgo date={build.published_at ?? build.created_at} locale="en-US" timeStyle="mini" /> {build.updated_at !== (build.published_at ?? build.created_at) ? <span> • Last edited <ReactTimeAgo date={build.updated_at} locale="en-US" timeStyle="mini" /></span> : null}
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+                <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", justifyContent: "center", gap: "0.2rem" }}>
                     <div>Display Type</div>
                     <DisplayTypeButton value={displayType} setValue={setDisplayType} />
                 </div>
@@ -212,10 +212,10 @@ export default function BuildPage({ params }) {
         }
         <Modal isOpen={shareOpen} onClose={() => setShareOpen(false)}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem", padding: "0.5rem" }}>
-                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", alignSelf: "start" }}>
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", alignSelf: "start", flexWrap: "wrap" }}>
                     Address (click to copy):
                     <div style={{ position: "relative" }}>
-                        <input value={window.location.href} onClick={handleLinkCopy} readOnly={true} style={{ width: "25rem" }} />
+                        <input value={window.location.href} onClick={handleLinkCopy} readOnly={true} style={{ minWidth: "20rem" }} />
                         {linkCopySuccess !== '' ?
                             <div className="copy-popup">
                                 <div className="copy-popup-box">

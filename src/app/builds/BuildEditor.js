@@ -19,6 +19,7 @@ import { generalTooltipProps } from "../components/GeneralTooltip";
 import { decodeBuildExtraOpts, encodeBuildExtraOpts } from "../components/BuildExtraOpts";
 import DisplayTypeButton from "./DisplayTypeButton";
 import SinnerGrid from "./SinnerGrid";
+import { isTouchDevice } from "@eldritchtools/shared-components";
 
 const egoRankMapping = {
     "ZAYIN": 0,
@@ -56,7 +57,10 @@ function IdentitySelector({ value, setValue, options, num }) {
     return (
         <Select.Root value={value ? value.id : null} onValueChange={v => setValue(v)} open={isOpen} onOpenChange={handleOpenChange}>
             <Select.Trigger className="identity-select-trigger" ref={triggerRef} style={{ width: "100%", padding: 0, margin: 0, boxSizing: "border-box" }}>
-                {value ? <div data-tooltip-id="identity-tooltip" data-tooltip-content={value.id} style={{ width: "100%", position: "relative" }}>
+                {value ? <div 
+                    data-tooltip-id={isTouchDevice() ? null : "identity-tooltip"} 
+                    data-tooltip-content={isTouchDevice() ? null : value.id}
+                    style={{ width: "100%", position: "relative" }}>
                     <IdentityImg identity={value} uptie={4} displayName={true} displayRarity={true} />
                 </div> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <SinnerIcon num={num} style={{ height: "75%", width: "75%" }} />
@@ -64,7 +68,7 @@ function IdentitySelector({ value, setValue, options, num }) {
             </Select.Trigger>
 
             <Select.Portal>
-                <Select.Content className="identity-select-content" position="popper" style={{ width: null, maxWidth: "clamp(450px, 80vw, 900px)" }}>
+                <Select.Content className="identity-select-content" position="popper" style={{ width: null, maxWidth: "clamp(300px, 80vw, 900px)" }}>
                     <div style={{ paddingBottom: "0.2rem" }}>
                         <input
                             type="text"
@@ -75,7 +79,7 @@ function IdentitySelector({ value, setValue, options, num }) {
                     </div>
 
                     <Select.Viewport>
-                        <div className="identity-select-grid" style={{ maxWidth: "clamp(450px, 80vw, 900px)" }}>
+                        <div className="identity-select-grid" style={{ maxWidth: "clamp(300px, 80vw, 900px)" }}>
                             {filtered.map((option) =>
                                 <Select.Item key={option.id} value={option.id} className="identity-select-item">
                                     <div className="identity-item-inner" data-tooltip-id="identity-tooltip" data-tooltip-content={option.id}>
@@ -104,7 +108,10 @@ function EgoSelector({ value, setValue, options, rank }) {
     return (
         <Select.Root value={value ? value.id : null} onValueChange={v => setValue(v)} open={isOpen} onOpenChange={setIsOpen}>
             <Select.Trigger className="ego-select-trigger" ref={triggerRef} style={{ borderColor: value ? affinityColorMapping[value.affinity] : "#555", flex: 1, padding: 0, margin: 0, boxSizing: "border-box" }}>
-                {value ? <div data-tooltip-id="ego-tooltip" data-tooltip-content={value.id} style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }}>
+                {value ? <div 
+                    data-tooltip-id={isTouchDevice() ? null : "ego-tooltip"} 
+                    data-tooltip-content={isTouchDevice() ? null : value.id} 
+                    style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }}>
                     <EgoImg ego={value} banner={true} type={"awaken"} displayName={true} displayRarity={false} />
                 </div> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <RarityImg rarity={egoRankReverseMapping[rank]} alt={true} style={{ width: "18%", height: "auto" }} />
@@ -112,10 +119,10 @@ function EgoSelector({ value, setValue, options, rank }) {
             </Select.Trigger>
 
             <Select.Portal>
-                <Select.Content className="ego-select-content" position="popper" style={{ maxWidth: "clamp(450px, 80vw, 900px)" }}>
+                <Select.Content className="ego-select-content" position="popper" style={{ maxWidth: "clamp(300px, 80vw, 900px)" }}>
                     {options.length === 0 ? <div style={{ fontSize: "1.2rem", padding: "0.5rem" }}>No Options</div> : null}
                     <Select.Viewport>
-                        <div className="ego-select-grid" style={{ maxWidth: "clamp(450px, 80vw, 900px)" }}>
+                        <div className="ego-select-grid" style={{ maxWidth: "clamp(300px, 80vw, 900px)" }}>
                             {options.map((option) =>
                                 <Select.Item key={option.id} value={option.id} className="ego-select-item">
                                     <div className="ego-item-inner" data-tooltip-id="ego-tooltip" data-tooltip-content={option.id}>
@@ -346,7 +353,7 @@ export default function BuildEditor({ mode, buildId }) {
         <div style={{ display: "flex" }}>
             <button className={uptieLevelToggle ? "toggle-button-active" : "toggle-button"} onClick={() => setUptieLevelToggle(p => !p)} {...generalTooltipProps("optionaluptieorlevel")}>Indicate Uptie or Level</button>
         </div>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
             <span style={{ fontSize: "1.2rem" }}>Active Sinners</span>
             <NumberInputWithButtons value={activeSinners} setValue={setActiveSinners} min={1} max={12} />
             <button onClick={() => setDeploymentOrder([])} style={{ fontSize: "1.2rem" }}>Reset Deployment Order</button>

@@ -3,6 +3,8 @@
 import { EgoImg, Icon, KeywordIcon, Status, useData } from "@eldritchtools/limbus-shared-library";
 import { Tooltip } from "react-tooltip";
 import { tooltipStyle } from "../styles";
+import Link from "next/link";
+import { isTouchDevice } from "@eldritchtools/shared-components";
 
 function EgoTooltipContent({ ego }) {
     const types = [];
@@ -15,7 +17,7 @@ function EgoTooltipContent({ ego }) {
     if (ego.corrosionType && ego.awakeningType.type !== ego.corrosionType.type)
         types.push(ego.corrosionType.type);
 
-    return <div style={tooltipStyle}>
+    return <div style={{ ...tooltipStyle, display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", flexDirection: "row", padding: "0.5rem", gap: "0.5rem", alignItems: "center" }}>
             <div><EgoImg ego={ego} type={"awaken"} displayName={true} displayRarity={true} style={{ width: "128px", height: "128px" }} /></div>
             <div style={{ display: "flex", flexDirection: "column", width: "192px", minHeight: "128px" }}>
@@ -33,6 +35,7 @@ function EgoTooltipContent({ ego }) {
                 </div>
             </div>
         </div>
+        {isTouchDevice() ? <Link href={`/egos/${ego.id}`} style={{ alignSelf: "center", fontSize: "1.2rem" }}>Go to page</Link> : null}
     </div>
 }
 
@@ -49,6 +52,7 @@ function EgoTooltip() {
         render={({ content }) => <TooltipLoader id={content} />}
         getTooltipContainer={() => document.body}
         style={{ backgroundColor: "transparent", zIndex: "9999" }}
+        clickable={isTouchDevice()}
     />
 }
 

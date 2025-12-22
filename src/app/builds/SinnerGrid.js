@@ -1,11 +1,11 @@
 import { EgoImg, Icon, IdentityImg, KeywordIcon, RarityImg, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
 import { keywordIconConvert } from "@/app/keywordIds";
-import Link from "next/link";
 import "./SinnerGrid.css";
 import { ColorResist, LEVEL_CAP } from "../utils";
 import { constructHp } from "../identities/IdentityUtils";
 import { EgoSkillLoader, IdentitySkillLoader } from "../components/SkillLoader";
 import { useMemo } from "react";
+import TooltipLink from "../components/TooltipLink";
 
 function SkillTypes({ skillType, identityUptie }) {
     const showAffinity = !identityUptie || !("affinityUptie" in skillType) || identityUptie >= skillType.affinityUptie;
@@ -26,11 +26,11 @@ function IdentityProfile({ identity, displayType, sinnerId, uptie, level }) {
     if (uptie) otherProps.displayUptie = true;
     if (level) otherProps.level = level;
 
-    return identity && displayType !== null ? <Link href={`/identities/${identity.id}`}>
-        <div style={{ position: "relative", width: "100%" }} data-tooltip-id="identity-tooltip" data-tooltip-content={identity.id}>
+    return identity && displayType !== null ? <TooltipLink href={`/identities/${identity.id}`} tooltipId={"identity-tooltip"} tooltipContent={identity.id}>
+        <div style={{ position: "relative", width: "100%" }}>
             <IdentityImg identity={identity} uptie={(!uptie || uptie === "") ? 4 : uptie} displayName={displayType === "names"} displayRarity={true} {...otherProps} />
         </div>
-    </Link > : <div style={{ width: "100%", aspectRatio: "1/1", boxSizing: "border-box" }} />
+    </TooltipLink> : <div style={{ width: "100%", aspectRatio: "1/1", boxSizing: "border-box" }} />
 }
 
 const egoRankReverseMapping = {
@@ -49,11 +49,11 @@ function EgoProfile({ ego, displayType, rank, threadspin }) {
     const otherProps = {}
     if (threadspin) otherProps.threadspin = threadspin
 
-    return ego && displayType !== null ? <Link href={`/egos/${ego.id}`}>
-        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }} data-tooltip-id="ego-tooltip" data-tooltip-content={ego.id}>
+    return ego && displayType !== null ? <TooltipLink href={`/egos/${ego.id}`} tooltipId={"ego-tooltip"} tooltipContent={ego.id}>
+        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }}>
             <EgoImg ego={ego} banner={true} type={"awaken"} displayName={displayType === "names"} displayRarity={false} {...otherProps} />
         </div>
-    </Link> : <div style={{ width: "100%", aspectRatio: "4/1", boxSizing: "border-box" }} />
+    </TooltipLink> : <div style={{ width: "100%", aspectRatio: "4/1", boxSizing: "border-box" }} />
 }
 
 const deploymentComponentStyle = {
@@ -93,6 +93,8 @@ function OverlayContainer({ displayType, identity, egos, identityLevel, identity
     }
 
     if (displayType === "stats") {
+        const overlayStyle = { fontSize: "1rem", position: "absolute", left: "50%", bottom: 0, transform: "translateX(-50%)", background: "rgba(0, 0, 0, 0.2)" };
+
         return constructOverlay(children, identity ?
             <div style={{ display: "flex", flexDirection: "column", height: "100%", justifyContent: "center", gap: "0.2rem" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
@@ -107,17 +109,17 @@ function OverlayContainer({ displayType, identity, egos, identityLevel, identity
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", textAlign: "center" }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
-                        <Icon path={"Slash"} style={{ height: "32px" }} />
-                        <ColorResist resist={identity.resists.slash} />
+                    <div style={{ position: "relative", display: "flex", justifyContent: "center", width: "100%" }}>
+                        <Icon path={"Slash"} style={{ width: "32px", height: "32px" }} />
+                        <span style={overlayStyle}><ColorResist resist={identity.resists.slash} /></span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
-                        <Icon path={"Pierce"} style={{ height: "32px" }} />
-                        <ColorResist resist={identity.resists.pierce} />
+                    <div style={{ position: "relative", display: "flex", justifyContent: "center", width: "100%" }}>
+                        <Icon path={"Pierce"} style={{ width: "32px", height: "32px" }} />
+                        <span style={overlayStyle}><ColorResist resist={identity.resists.pierce} /></span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
-                        <Icon path={"Blunt"} style={{ height: "32px" }} />
-                        <ColorResist resist={identity.resists.blunt} />
+                    <div style={{ position: "relative", display: "flex", justifyContent: "center", width: "100%" }}>
+                        <Icon path={"Blunt"} style={{ width: "32px", height: "32px" }} />
+                        <span style={overlayStyle}><ColorResist resist={identity.resists.blunt} /></span>
                     </div>
                 </div>
 
@@ -184,29 +186,41 @@ function OverlayContainer({ displayType, identity, egos, identityLevel, identity
 
     if (displayType === "egocosts" || displayType === "egoresists") {
         const affinities = ["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"];
-        const overlayStyle = { fontSize: "1rem", position: "absolute", left: "50%", bottom: 0, transform: "translateX(-50%)", background: "rgba(0, 0, 0, 0.2)" };
+        const overlayStyle = { fontSize: "clamp(0.8rem, 50cqh, 1rem)", position: "absolute", left: "50%", bottom: 0, transform: "translateX(-50%)", background: "rgba(0, 0, 0, 0.2)" };
 
         return constructOverlay(children,
-            <div style={{ display: "grid", gridTemplateRows: "repeat(5, 1fr)", width: "100%", height: "100%" }}>
-                {egos.map((ego, i) =>
-                    <div key={i} style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center", gap: "0.3rem" }}>
-                        {ego ? <>
-                            {displayType === "egocosts" ?
-                                Object.entries(ego.cost).map(([affinity, cost]) =>
-                                    <div key={affinity} style={{ position: "relative", display: "flex", width: "10%" }}>
-                                        <Icon path={affinity} style={{ width: "100%", height: "auto" }} />
+            <div style={{ display: "grid", gridTemplateRows: "repeat(5, 1fr)", width: "100%", height: "20%", containerType: "size" }}>
+                {egos.map((ego, i) => {
+                    if (!ego) return null;
+
+                    if (displayType === "egocosts")
+                        return <div key={i} style={{
+                                display: "grid", gridTemplateColumns: `repeat(${Object.keys(ego.cost).length}, min(36px, 100cqh))`,
+                                width: "100%", height: "100cqh", gap: "0.2rem", justifyContent: "center"
+                            }}>
+                                {Object.entries(ego.cost).map(([affinity, cost]) =>
+                                    <div key={affinity} style={{ position: "relative", display: "flex", justifyContent: "center", width: "100%", containerType: "size" }}>
+                                        <Icon path={affinity} style={{ width: "clamp(1px, 100cqh, 32px)", height: "clamp(1px, 100cqh, 32px)" }} />
                                         <span style={overlayStyle}>x{cost}</span>
-                                    </div>) :
-                                affinities.map(affinity =>
-                                    <div key={affinity} style={{ position: "relative", display: "flex", width: "10%" }}>
-                                        <Icon path={affinity} style={{ width: "100%", height: "auto" }} />
+                                    </div>)}
+                            </div>
+
+                    if (displayType === "egoresists")
+                        return <div key={i} style={{
+                                display: "grid", gridTemplateColumns: "repeat(7, min(36px, 100cqh))",
+                                width: "100%", height: "100cqh", gap: "0.2rem", justifyContent: "center"
+                            }}>
+                                {affinities.map(affinity =>
+                                    <div key={affinity} style={{ position: "relative", display: "flex", justifyContent: "center", width: "100%", containerType: "size" }}>
+                                        <Icon path={affinity} style={{ width: "clamp(1px, 100cqh, 32px)", height: "clamp(1px, 100cqh, 32px)" }} />
                                         <span style={overlayStyle}>
                                             <ColorResist resist={ego.resists[affinity]} />
                                         </span>
-                                    </div>)
-                            }
-                        </> : null}
-                    </div>
+                                    </div>)}
+                            </div>
+
+                    return null;
+                }
                 )}
             </div>
         )

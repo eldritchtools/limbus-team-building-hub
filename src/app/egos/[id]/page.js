@@ -118,7 +118,7 @@ export default function EgoPage({ params }) {
                         <div data-tooltip-id="ego-notes" style={{ ...tabStyle, fontSize: "1rem", color: activeTab === "notes" ? "#ddd" : "#777" }} onClick={() => setActiveTab("notes")}>Notes/Explanation</div>
                         <div data-tooltip-id="ego-builds" style={{ ...tabStyle, fontSize: "1rem", color: activeTab === "builds" ? "#ddd" : "#777" }} onClick={() => setActiveTab("builds")}>Popular Builds</div>
                     </div>
-                    <Tooltip id="ego-notes" style={{...tooltipStyle, maxWidth: "85%"}}>
+                    <Tooltip id="ego-notes" style={{ ...tooltipStyle, maxWidth: "85%" }}>
                         <div>
                             This section is only meant to contain details about the E.G.O&apos;s mechanics.
                             <br />
@@ -133,7 +133,7 @@ export default function EgoPage({ params }) {
                             </ul>
                         </div>
                     </Tooltip>
-                    <Tooltip id="identity-builds" style={{...tooltipStyle, maxWidth: "85%"}}>
+                    <Tooltip id="identity-builds" style={{ ...tooltipStyle, maxWidth: "85%" }}>
                         <div>Loads the most popular builds that use this identity.</div>
                     </Tooltip>
                     {
@@ -144,10 +144,17 @@ export default function EgoPage({ params }) {
                 </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", minWidth: "min(480px, 100%)", flex: 1, gap: "0.5rem" }}>
-                <div style={{ display: "flex" }}>
-                    <SkillCard skill={skillData.awakeningSkill} uptie={uptie} type={"awakening"} />
+                <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+                    {skillData.awakeningSkills.map(skill => <div key={skill.id} style={{ flex: 1, minWidth: "min(300px, 100%)" }}>
+                        <SkillCard skill={skill} uptie={uptie} type={"awakening"} />
+                    </div>)}
                 </div>
-                {"corrosionSkill" in skillData ? <div style={{ display: "flex" }}><SkillCard skill={skillData.corrosionSkill} uptie={uptie} type={"corrosion"} /></div> : null}
+                {"corrosionSkills" in skillData ?
+                    <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+                        {skillData.corrosionSkills.map(skill => <div key={skill.id} style={{ flex: 1, minWidth: "min(300px, 100%)" }}>
+                            <SkillCard skill={skill} uptie={uptie} type={"corrosion"} />
+                        </div>)}
+                    </div> : null}
                 {uptie >= 2 && passives ?
                     <div style={{ display: "flex", flexDirection: "column" }}>
                         <div style={{ color: "#aaa", fontWeight: "bold", fontSize: "1.25rem" }}>Passives</div>

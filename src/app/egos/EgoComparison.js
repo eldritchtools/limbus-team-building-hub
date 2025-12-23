@@ -440,8 +440,8 @@ const splitBySinner = list => list.reduce((acc, [id, ego]) => {
 }, {});
 
 const getSkillList = (ego, t, skillData) => {
-    if (t === "awa") return [["awa", skillData.awakeningSkill]];
-    if (t === "cor") return ("corrosionSkill" in skillData) ? [["cor", skillData.corrosionSkill]] : [];
+    if (t === "awa") return skillData.awakeningSkills.map(skill => ["awa", skill]);
+    if (t === "cor") return ("corrosionSkills" in skillData) ? skillData.corrosionSkills.map(skill => ["cor", skill]) : [];
     if (t === "skills")
         return [
             ...getSkillList(ego, "awa", skillData),

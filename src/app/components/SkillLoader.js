@@ -72,9 +72,9 @@ function EgoSkillLoader({ egos, type, threadspins, num }) {
             const [ego, threadspin] = chosen[0];
             if (!ego) return [];
             const passives = skillData[`egos/${ego.id}`].passiveList;
-            const list = [["awa", skillData[`egos/${ego.id}`].awakeningSkill, threadspin, null]];
-            if ("corrosionSkill" in skillData[`egos/${ego.id}`])
-                list.push(["cor", skillData[`egos/${ego.id}`].corrosionSkill, threadspin, null]);
+            const list = skillData[`egos/${ego.id}`].awakeningSkills.map(skill => ["awa", skill, threadspin, null]);
+            if ("corrosionSkills" in skillData[`egos/${ego.id}`])
+                skillData[`egos/${ego.id}`].corrosionSkills.forEach(skill => {list.push(["cor", skill, threadspin, null]);})
             if (threadspin >= 2 && passives)
                 passives.forEach(passive => list.push(["pas", passive, threadspin, "Passive"]));
             return list;
@@ -83,12 +83,12 @@ function EgoSkillLoader({ egos, type, threadspins, num }) {
             return chosen
                 .map(([x, t], i) => [x, t, egoRanks[i]])
                 .filter(x => x[0])
-                .map(([ego, threadspin, rank]) => ["awa", skillData[`egos/${ego.id}`].awakeningSkill, threadspin, rank]);
+                .map(([ego, threadspin, rank]) => skillData[`egos/${ego.id}`].awakeningSkills.map(skill => ["awa", skill, threadspin, rank])).flat();
         if (t === "egob")
             return chosen
                 .map(([x, t], i) => [x, t, egoRanks[i]])
                 .filter(x => x[0] && "corrosionSkill" in skillData[`egos/${x[0].id}`])
-                .map(([ego, threadspin, rank]) => ["cor", skillData[`egos/${ego.id}`].corrosionSkill, threadspin, rank]);
+                .map(([ego, threadspin, rank]) => skillData[`egos/${ego.id}`].corrosionSkills.map(skill => ["cor", skill, threadspin, rank])).flat();
         if (t === "egopassives")
             return chosen
                 .map(([x, t], i) => [x, t, egoRanks[i]])

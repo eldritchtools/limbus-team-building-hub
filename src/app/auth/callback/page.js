@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/database/authProvider';
+import { buildsStore, savesStore } from '@/app/database/localDB';
 
 export default function AuthCallback() {
     const router = useRouter();
@@ -25,10 +26,38 @@ export default function AuthCallback() {
             return;
         }
 
-        // Otherwise, existing user → go home
-        const searchParams = new URLSearchParams(window.location.search);
-        const state = searchParams.get('state');
-        router.replace(state || '/');
+        const checkLocalBuilds = async () => {
+            const builds = await buildsStore.getAll();
+            if (builds.length !== 0) {
+                (async () => {
+                    router.replace('/login/setup');
+                })();
+                return;
+            }
+
+            checkLocalSaves();
+        }
+
+        const checkLocalSaves = async () => {
+            const saves = await savesStore.getAll();
+            if (saves.length !== 0) {
+                (async () => {
+                    router.replace('/login/setup');
+                })();
+                return;
+            }
+
+            finishAuth();
+        }
+
+        const finishAuth = () => {
+            // Otherwise, existing user → go home
+            const searchParams = new URLSearchParams(window.location.search);
+            const state = searchParams.get('state');
+            router.replace(state || '/');
+        }
+
+        checkLocalBuilds();
     }, [loading, user, profile, router, refreshProfile]);
 
     return <p style={{ textAlign: 'center', marginTop: '2rem' }}>Authenticating...</p>;

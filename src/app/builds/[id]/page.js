@@ -23,6 +23,12 @@ import { decodeBuildExtraOpts } from "@/app/components/BuildExtraOpts";
 import { generalTooltipProps } from "@/app/components/GeneralTooltip";
 import { useBreakpoint } from "@eldritchtools/shared-components";
 import DisplayTypeButton from "../DisplayTypeButton";
+import { buildsStore } from "@/app/database/localDB";
+
+function isLocalId(id) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return !uuidRegex.test(id);
+}
 
 export default function BuildPage({ params }) {
     const { id } = React.use(params);
@@ -57,8 +63,8 @@ export default function BuildPage({ params }) {
     }, [displayType]);
 
     useEffect(() => {
-        if (loading)
-            getBuild(id).then(x => {
+        if (loading) {
+            const handleBuild = x => {
                 setBuild(x);
                 if (x.extra_opts) {
                     const extraOpts = decodeBuildExtraOpts(x.extra_opts);
@@ -70,7 +76,14 @@ export default function BuildPage({ params }) {
                 setLikeCount(x.like_count);
                 setCommentCount(x.comment_count);
                 document.title = `${x.title} | Limbus Company Team Building Hub`;
-            });
+            }
+
+            if (isLocalId(id)) {
+                buildsStore.get(Number(id)).then(handleBuild);
+            } else {
+                getBuild(id).then(handleBuild);
+            }
+        }
     }, [id, loading]);
 
     const handleTeamCodeCopy = async () => {
@@ -124,7 +137,14 @@ export default function BuildPage({ params }) {
             </h2>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ fontSize: "0.9rem", marginBottom: "0.5rem", color: "#ddd" }}>
-                    by <Username username={build.username} flair={build.user_flair} /> • <ReactTimeAgo date={build.published_at ?? build.created_at} locale="en-US" timeStyle="mini" /> {build.updated_at !== (build.published_at ?? build.created_at) ? <span> • Last edited <ReactTimeAgo date={build.updated_at} locale="en-US" timeStyle="mini" /></span> : null}
+                    {!isLocalId(id) ?
+                        <span>by <Username username={build.username} flair={build.user_flair} /> • </span> :
+                        null
+                    }
+                    <ReactTimeAgo date={build.published_at ?? build.created_at} locale="en-US" timeStyle="mini" />
+                    {build.updated_at !== (build.published_at ?? build.created_at) ?
+                        <span> • Last edited <ReactTimeAgo date={build.updated_at} locale="en-US" timeStyle="mini" /></span> :
+                        null}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", justifyContent: "center", gap: "0.2rem" }}>
                     <div>Display Type</div>
@@ -179,7 +199,7 @@ export default function BuildPage({ params }) {
                 </> : null
                 }
                 <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
-                    Tags: {build.tags.map((t, i) => <Tag key={i} tag={t.name} />)}
+                    Tags: {build.tags.map((t, i) => <Tag key={i} tag={isLocalId(id) ? t : t.name} />)}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                     <LikeButton buildId={id} likeCount={likeCount} />
@@ -188,7 +208,7 @@ export default function BuildPage({ params }) {
                         🔗 Share
                     </button>
                     {
-                        user && user.id === build.user_id ?
+                        (user && user.id === build.user_id) || isLocalId(id) ?
                             <button onClick={editBuild}>
                                 ✎ Edit
                             </button> : null
@@ -212,20 +232,22 @@ export default function BuildPage({ params }) {
         }
         <Modal isOpen={shareOpen} onClose={() => setShareOpen(false)}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem", padding: "0.5rem" }}>
-                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", alignSelf: "start", flexWrap: "wrap" }}>
-                    Address (click to copy):
-                    <div style={{ position: "relative" }}>
-                        <input value={window.location.href} onClick={handleLinkCopy} readOnly={true} style={{ minWidth: "20rem" }} />
-                        {linkCopySuccess !== '' ?
-                            <div className="copy-popup">
-                                <div className="copy-popup-box">
-                                    {linkCopySuccess}
-                                </div>
-                            </div> :
-                            null
-                        }
-                    </div>
-                </div>
+                {!isLocalId(id) ?
+                    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", alignSelf: "start", flexWrap: "wrap" }}>
+                        Address (click to copy):
+                        <div style={{ position: "relative" }}>
+                            <input value={window.location.href} onClick={handleLinkCopy} readOnly={true} style={{ minWidth: "20rem" }} />
+                            {linkCopySuccess !== '' ?
+                                <div className="copy-popup">
+                                    <div className="copy-popup-box">
+                                        {linkCopySuccess}
+                                    </div>
+                                </div> :
+                                null
+                            }
+                        </div>
+                    </div> : null
+                }
                 <ImageStitcher build={build} outputFileName={`${build.id}.png`} />
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                     <button onClick={() => setShareOpen(false)}>Close</button>

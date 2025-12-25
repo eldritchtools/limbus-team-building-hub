@@ -267,7 +267,7 @@ function CalcComponent({ opts, setOpts }) {
     </div>
 
     return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <span>The numbers here are only meant to serve as a guide and are not meant to be 100% accurate. These computations only count the skill in isolation and do not consider other effects such as statuses on the sinner/target, passives, resonance bonuses, and so on.</span>
+        <span style={{textAlign: "center"}}>The numbers here are only meant to serve as a guide and are not meant to be 100% accurate. These computations only count the skill in isolation and do not consider other effects such as statuses on the sinner/target, passives, resonance bonuses, and so on.</span>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", justifyContent: "center" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center" }}>
                 <span>Skill Info:</span>

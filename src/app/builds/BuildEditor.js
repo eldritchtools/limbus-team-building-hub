@@ -20,6 +20,7 @@ import { decodeBuildExtraOpts, encodeBuildExtraOpts } from "../components/BuildE
 import DisplayTypeButton from "./DisplayTypeButton";
 import SinnerGrid from "./SinnerGrid";
 import { isTouchDevice } from "@eldritchtools/shared-components";
+import { buildsStore } from "../database/localDB";
 
 const egoRankMapping = {
     "ZAYIN": 0,
@@ -57,8 +58,8 @@ function IdentitySelector({ value, setValue, options, num }) {
     return (
         <Select.Root value={value ? value.id : null} onValueChange={v => setValue(v)} open={isOpen} onOpenChange={handleOpenChange}>
             <Select.Trigger className="identity-select-trigger" ref={triggerRef} style={{ width: "100%", padding: 0, margin: 0, boxSizing: "border-box" }}>
-                {value ? <div 
-                    data-tooltip-id={isTouchDevice() ? null : "identity-tooltip"} 
+                {value ? <div
+                    data-tooltip-id={isTouchDevice() ? null : "identity-tooltip"}
                     data-tooltip-content={isTouchDevice() ? null : value.id}
                     style={{ width: "100%", position: "relative" }}>
                     <IdentityImg identity={value} uptie={4} displayName={true} displayRarity={true} />
@@ -108,9 +109,9 @@ function EgoSelector({ value, setValue, options, rank }) {
     return (
         <Select.Root value={value ? value.id : null} onValueChange={v => setValue(v)} open={isOpen} onOpenChange={setIsOpen}>
             <Select.Trigger className="ego-select-trigger" ref={triggerRef} style={{ borderColor: value ? affinityColorMapping[value.affinity] : "#555", flex: 1, padding: 0, margin: 0, boxSizing: "border-box" }}>
-                {value ? <div 
-                    data-tooltip-id={isTouchDevice() ? null : "ego-tooltip"} 
-                    data-tooltip-content={isTouchDevice() ? null : value.id} 
+                {value ? <div
+                    data-tooltip-id={isTouchDevice() ? null : "ego-tooltip"}
+                    data-tooltip-content={isTouchDevice() ? null : value.id}
                     style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }}>
                     <EgoImg ego={value} banner={true} type={"awaken"} displayName={true} displayRarity={false} />
                 </div> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -172,6 +173,11 @@ function DeploymentComponent({ order, setOrder, activeSinners, sinnerId }) {
     }
 }
 
+function isLocalId(id) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return !uuidRegex.test(id);
+}
+
 export default function BuildEditor({ mode, buildId }) {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
@@ -192,6 +198,7 @@ export default function BuildEditor({ mode, buildId }) {
     const [message, setMessage] = useState("");
     const [saving, setSaving] = useState(false);
     const [displayType, setDisplayType] = useState("edit");
+    const [createdAt, setCreatedAt] = useState(null);
     const { user } = useAuth();
     const router = useRouter();
 
@@ -200,9 +207,9 @@ export default function BuildEditor({ mode, buildId }) {
 
     useEffect(() => {
         if (mode === "edit") {
-            getBuild(buildId, true).then(build => {
+            const handleBuild = build => {
                 if (!build) router.back();
-                if (build.username) {
+                if (build.username || isLocalId(buildId)) {
                     setTitle(build.title);
                     setBody(build.body);
                     setIdentityIds(build.identity_ids);
@@ -223,12 +230,21 @@ export default function BuildEditor({ mode, buildId }) {
                         if ("identityUpties" in extraOpts) setIdentityUpties(extraOpts.identityUpties);
                         if ("egoThreadspins" in extraOpts) setEgoThreadspins(extraOpts.egoThreadspins);
                     }
+
+                    if (build.created_at) setCreatedAt(build.created_at);
                 }
-            }).catch(_err => {
-                router.push(`/builds/${buildId}`);
-            });
+            }
+
+            if (user)
+                getBuild(buildId, true).then(handleBuild).catch(_err => {
+                    router.push(`/builds/${buildId}`);
+                });
+            else
+                buildsStore.get(Number(buildId)).then(handleBuild).catch(_err => {
+                    router.push(`/builds/${buildId}`);
+                });
         }
-    }, [mode, buildId, router]);
+    }, [mode, buildId, router, user]);
 
     const identityOptions = useMemo(() => identitiesLoading ? null : Object.entries(identities).reverse().reduce((acc, [_, identity]) => {
         acc[identity.sinnerId].push(identity); return acc;
@@ -281,11 +297,37 @@ export default function BuildEditor({ mode, buildId }) {
         const extraOpts = encodeBuildExtraOpts(identityUpties, identityLevels, egoThreadspins);
 
         setSaving(true);
-        if (mode === "edit") {
-            const data = await updateBuild(buildId, user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, extraOpts, isPublished);
-            router.push(`/builds/${data}`);
+        if (user) {
+            if (mode === "edit") {
+                const data = await updateBuild(buildId, user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, extraOpts, isPublished);
+                router.push(`/builds/${data}`);
+            } else {
+                const data = await insertBuild(user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, extraOpts, isPublished);
+                router.push(`/builds/${data}`);
+            }
         } else {
-            const data = await insertBuild(user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, extraOpts, isPublished);
+            const buildData = {
+                title: title,
+                body: body,
+                identity_ids: identityIds,
+                ego_ids: egoIds,
+                keyword_ids: keywordsConverted,
+                deployment_order: deploymentOrder,
+                active_sinners: activeSinners,
+                team_code: teamCode,
+                youtube_video_id: youtubeVideoId,
+                like_count: 0,
+                comment_count: 0,
+                tags: tagsConverted,
+                is_published: false,
+                created_at: createdAt ?? Date.now(),
+                updated_at: Date.now(),
+                extra_opts: encodeBuildExtraOpts(identityUpties, identityLevels, egoThreadspins)
+            }
+
+            if (mode === "edit") buildData.id = Number(buildId);
+
+            const data = await buildsStore.save(buildData)
             router.push(`/builds/${data}`);
         }
     }
@@ -293,6 +335,10 @@ export default function BuildEditor({ mode, buildId }) {
     return loading ? <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontSize: "1.5rem", fontWeight: "bold" }}>
         Loading...
     </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", containerType: "inline-size" }}>
+        {!user ?
+            <div style={{ color: "rgba(255, 99, 71, 0.85)" }}>When not logged in, builds are saved locally on this device. After logging in, you can sync them to your account. Builds that are not synced cannot be accessed while logged in.</div>
+            : null
+        }
         <span style={{ fontSize: "1.2rem" }}>Title</span>
         <input type="text" value={title} style={{ width: "clamp(20ch, 80%, 100ch)" }} onChange={e => setTitle(e.target.value)} />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -411,7 +457,10 @@ export default function BuildEditor({ mode, buildId }) {
             </div> :
             <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                 <button style={{ padding: "0.5rem", fontSize: "1.2rem" }} onClick={() => handleSave(false)} disabled={saving}>Save as Draft</button>
-                <button style={{ padding: "0.5rem", fontSize: "1.2rem" }} onClick={() => handleSave(true)} disabled={saving}>Publish</button>
+                {user ?
+                    <button style={{ padding: "0.5rem", fontSize: "1.2rem" }} onClick={() => handleSave(true)} disabled={saving}>Publish</button> :
+                    null
+                }
                 <span>{message}</span>
             </div>
         }

@@ -106,28 +106,33 @@ function SkillCalc({ skills, opts }) {
             const label = typeof skill.rank[0] === 'number' ? `S${skill.rank[0]}` : (skill.rank[0] === "Defense" ? "Def" : skill.rank[0][0]);
 
             if (!(label in clashes)) clashes[label] = [];
-            if (clashes[label].length !== 0) clashes[label].push(<span key={clashes[label.length]}>, </span>);
-            clashes[label].push(<span key={clashes[label.length]} style={{ color: affinityColorMapping[skill.affinity] ?? "#ddd", fontWeight: "bold" }}>{clash}</span>)
+            if (clashes[label].length !== 0) clashes[label].push(<span key={clashes[label].length}>, </span>);
+            clashes[label].push(<span key={clashes[label].length} style={{ color: affinityColorMapping[skill.affinity] ?? "#ddd", fontWeight: "bold" }}>{clash}</span>)
 
             if (!(label in damages)) damages[label] = [];
-            if (damages[label].length !== 0) damages[label].push(<span key={damages[label.length]}>, </span>);
-            damages[label].push(<span key={damages[label.length]} style={{ color: affinityColorMapping[skill.affinity] ?? "#ddd", fontWeight: "bold" }}>{damage}</span>)
+            if (damages[label].length !== 0) damages[label].push(<span key={damages[label].length}>, </span>);
+            damages[label].push(<span key={damages[label].length} style={{ color: affinityColorMapping[skill.affinity] ?? "#ddd", fontWeight: "bold" }}>{damage}</span>)
         });
+
+        const gridItems = [
+            <div key={-1} />,
+            <div key={"c"} style={{ textAlign: "center" }}>Clash</div>,
+            <div key={"d"} style={{ textAlign: "center" }}>Damage</div>
+        ]
+
+        Object.keys(clashes).forEach((key, i) => {
+            gridItems.push(<div key={i} style={{ textAlign: "center", padding: "0rem 0.25rem", fontWeight: "bold", color: "#aaa" }}>{key}</div>);
+            gridItems.push(<div key={`${i}-c`} style={{ borderLeft: "1px #777 solid", padding: "0rem 0.2rem" }}>
+                {clashes[key]}
+            </div>);
+            gridItems.push(<div key={`${i}-d`} style={{ borderLeft: "1px #777 solid", padding: "0rem 0.2rem" }}>
+                {damages[key]}
+            </div>);
+        })
 
         return <AutoScroller>
             <div style={{ display: "grid", gridTemplateColumns: "auto 2fr 3fr", width: "100%", gap: "0.2rem" }}>
-                <div key={-1} />
-                <div key={"c"} style={{textAlign: "center"}}>Clash</div>
-                <div key={"d"} style={{textAlign: "center"}}>Damage</div>
-                {Object.keys(clashes).map((key, i) => <>
-                    <div key={i} style={{ textAlign: "center", padding: "0rem 0.25rem", fontWeight: "bold", color: "#aaa" }}>{key}</div>
-                    <div key={`${i}-c`} style={{ borderLeft: "1px #777 solid", padding: "0rem 0.2rem" }}>
-                        {clashes[key]}
-                    </div>
-                    <div key={`${i}-d`} style={{ borderLeft: "1px #777 solid", padding: "0rem 0.2rem" }}>
-                        {damages[key]}
-                    </div>
-                </>)}
+                {gridItems}
             </div>
         </AutoScroller>;
     }

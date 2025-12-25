@@ -1,9 +1,9 @@
-CREATE OR REPLACE FUNCTION public.get_filtered_builds_v4(
+CREATE OR REPLACE FUNCTION public.get_filtered_builds_v5(
   title_filter TEXT DEFAULT NULL,
   username_filter TEXT DEFAULT NULL,
   username_exact_filter TEXT DEFAULT NULL,
   user_id_filter UUID DEFAULT NULL,
-  build_id_filter UUID DEFAULT NULL,
+  build_id_filter UUID[] DEFAULT NULL,
   tag_filter TEXT[] DEFAULT NULL,
   identity_filter INT[] DEFAULT NULL,
   ego_filter INT[] DEFAULT NULL,
@@ -60,7 +60,7 @@ BEGIN
     AND (username_filter IS NULL OR u.username ILIKE '%' || username_filter || '%')
     AND (username_exact_filter IS NULL OR u.username = username_exact_filter)
     AND (user_id_filter IS NULL OR b.user_id = user_id_filter)
-    AND (build_id_filter IS NULL OR b.id = build_id_filter)
+    AND (build_id_filter IS NULL OR b.id = ANY(build_id_filter))
     AND b.is_published = p_published
     AND (
       tag_filter IS NULL

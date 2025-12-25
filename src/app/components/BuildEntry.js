@@ -19,6 +19,11 @@ function getSizes(size, isMobile) {
     return null;
 }
 
+function isLocalId(id) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return !uuidRegex.test(id);
+}
+
 export default function BuildEntry({ build, size, complete = true }) {
     const extraProps = {};
     if (build.extra_opts) {
@@ -42,7 +47,10 @@ export default function BuildEntry({ build, size, complete = true }) {
             </h2>
         </Link>
         <div style={{ fontSize: "0.8rem", marginBottom: sizes.margins, color: "#ddd" }}>
-            by <Username username={build.username} flair={build.user_flair} /> •{" "}<ReactTimeAgo date={build.published_at ?? build.created_at} locale="en-US" timeStyle="mini" />
+            {!isLocalId(build.id) ? 
+                <span>by <Username username={build.username} flair={build.user_flair} /> • </span> :
+                null
+            }<ReactTimeAgo date={build.published_at ?? build.created_at} locale="en-US" timeStyle="mini" />
         </div>
         <div style={{ display: "flex", flexDirection: "row", marginBottom: sizes.margins, alignSelf: "center" }}>
             <IdentityImgSpread identityIds={build.identity_ids} scale={sizes.scale} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} {...extraProps} />

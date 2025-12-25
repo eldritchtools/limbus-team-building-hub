@@ -2,7 +2,7 @@ import ProtectedRoute from "@/app/database/ProtectedRoute";
 
 export const metadata = {
     title: "Setup",
-    description: "First time setup of a user's account"
+    description: "Setup steps for a user's account on login"
 };
 
 export default function UsernameSetupLayout({ children }) {

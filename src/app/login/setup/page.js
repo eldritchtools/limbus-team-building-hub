@@ -1,15 +1,36 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/database/authProvider';
+import { buildsStore, savesStore } from '@/app/database/localDB';
+import { useRequestsCache } from '@/app/database/RequestsCacheProvider';
+import { insertBuild } from '@/app/database/builds';
 
 export default function UsernameSetup() {
     const router = useRouter();
     const { user, profile, loading, updateUsername, refreshProfile } = useAuth();
+    const { toggleSave } = useRequestsCache();
 
     const [username, setUsername] = useState('');
     const [error, setError] = useState('');
     const [submitting, setSubmitting] = useState(false);
+
+    const [localBuilds, setLocalBuilds] = useState([]);
+    const [localSaves, setLocalSaves] = useState([]);
+    const [buildSyncCancelled, setBuildSyncCancelled] = useState(false);
+    const [saveSyncCancelled, setSaveSyncCancelled] = useState(false);
+    const [localLoading, setLocalLoading] = useState(true);
+    const [syncing, setSyncing] = useState(false);
+
+    const fetchLocal = async () => {
+        setLocalBuilds(await buildsStore.getAll());
+        setLocalSaves(await savesStore.getAll());
+        setLocalLoading(false);
+    }
+
+    useEffect(() => {
+        fetchLocal();
+    }, []);
 
     if (loading) {
         return <p style={{ textAlign: 'center', marginTop: '2rem' }}>Loading user...</p>;
@@ -20,12 +41,7 @@ export default function UsernameSetup() {
         return null;
     }
 
-    if (profile.username) {
-        router.replace("/");
-        return null;
-    }
-
-    const handleSubmit = async (e) => {
+    const handleSubmitUsername = async (e) => {
         e.preventDefault();
         setError('');
 
@@ -47,13 +63,12 @@ export default function UsernameSetup() {
         }
 
         await refreshProfile();
-        router.replace('/');
     };
 
-    return (
-        <main style={{ textAlign: 'center', marginTop: '3rem' }}>
+    if (!profile.username) {
+        return <main style={{ textAlign: 'center', marginTop: '3rem' }}>
             <h2>Set up your username</h2>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmitUsername}>
                 <input
                     type="text"
                     value={username}
@@ -66,6 +81,87 @@ export default function UsernameSetup() {
                 </button>
             </form>
             {error && <p style={{ color: 'red' }}>{error}</p>}
-        </main>
-    );
+        </main>;
+    }
+
+    if (localLoading) {
+        return <p style={{ textAlign: 'center', marginTop: '2rem' }}>Checking for local data...</p>;
+    }
+
+    if (localBuilds.length !== 0 && !buildSyncCancelled) {
+        const handleSyncBuilds = async () => {
+            setSyncing(true);
+            setError("");
+            for (const build of localBuilds) {
+                const { id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, extra_opts } = build;
+                try {
+                    const data = await insertBuild(user.id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, extra_opts, false);
+                    if (data) await buildsStore.remove(id);
+                } catch (err) {
+                    setError("Failed to sync a build, try again or cancel syncing.");
+                    setSyncing(false);
+                    break;
+                }
+            }
+            setSyncing(false);
+            await fetchLocal();
+        }
+
+        return <main style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", textAlign: 'center', marginTop: '3rem' }}>
+            <span style={{ fontSize: "1.2rem"}}>
+                Some local drafts were found on your device. Would you like to sync them to your account?
+                <br />
+                Local drafts that are not synced cannot be accessed while logged in.
+            </span>
+            <div style={{ display: "flex", gap: "2rem", justifyContent: "center" }}>
+                <button onClick={handleSyncBuilds} disabled={syncing}>
+                    Sync Builds
+                </button>
+                <button onClick={() => setBuildSyncCancelled(true)} disabled={syncing}>
+                    Don&apos;t Sync
+                </button>
+            </div>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+        </main>;
+    }
+
+    if (localSaves.length !== 0 && !saveSyncCancelled) {
+        const handleSyncSaves = async () => {
+            setSyncing(true);
+            setError("");
+            for (const save of localSaves) {
+                const { id } = save;
+                try {
+                    await toggleSave(id)
+                    await savesStore.remove(id);
+                } catch (err) {
+                    setError("Failed to sync a save, try again or cancel syncing.");
+                    setSyncing(false);
+                    break;
+                }
+            }
+            setSyncing(false);
+            await fetchLocal();
+        }
+
+        return <main style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", textAlign: 'center', marginTop: '3rem' }}>
+            <span style={{ fontSize: "1.2rem" }}>
+                Some local saved builds were found on your device. Would you like to sync them to your account?
+                <br />
+                Local saved builds that are not synced cannot be accessed while logged in.
+            </span>
+            <div style={{ display: "flex", gap: "2rem" }}>
+                <button onClick={handleSyncSaves} disabled={syncing}>
+                    Sync Saved Builds
+                </button>
+                <button onClick={() => setSaveSyncCancelled(true)} disabled={syncing}>
+                    Don&apos;t Sync
+                </button>
+            </div>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+        </main>;
+    }
+
+    router.replace("/");
+    return null;
 }

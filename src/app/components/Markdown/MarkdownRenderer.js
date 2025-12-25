@@ -162,7 +162,7 @@ function BuildItem({ id }) {
 
     useEffect(() => {
         setLoading(true);
-        getFilteredBuilds({ "build_id": id }, true).then(x => {
+        getFilteredBuilds({ "build_ids": [id] }, true).then(x => {
             if (x.length > 0) setBuild(x[0]);
             else setInvalid(true);
             setLoading(false);

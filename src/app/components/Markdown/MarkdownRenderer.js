@@ -20,6 +20,7 @@ import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { isTouchDevice } from "@eldritchtools/shared-components";
 import TooltipLink from "../TooltipLink";
+import { convertMarkdownAlias } from "./MarkdownAliases";
 
 function tokenExtractionPlugin() {
     return (tree) => {
@@ -189,7 +190,7 @@ export default function MarkdownRenderer({ content }) {
                 tokenNode: ({ node }) => {
                     const { tokenType, tokenValues } = node.properties;
 
-                    switch (tokenType) {
+                    switch (convertMarkdownAlias(tokenType)) {
                         case "identity":
                             return <IdentityItem id={tokenValues[0]} />;
                         case "ego":

@@ -18,12 +18,12 @@ const options = {
 }
 
 const desc = {
-    "identity": "Reference an identity with {identity:id}. This will show a link to its page and a tooltip with its keywords and skill types on hover.",
+    "identity": "Reference an identity with {identity:id} or {id:id}. This will show a link to its page and a tooltip with its keywords and skill types on hover.",
     "ego": "Reference an E.G.O with {ego:id}. This will show a link to its page and a tooltip with its attack types, statuses, and cost on hover.",
-    "status": "Reference a status with {status:id}. This will show a tooltip with its description on hover.",
-    "keyword": "Reference a keyword with {keyword:id}. This will show an icon corresponding to that keyword.",
-    "giftname": "Reference an E.G.O Gift with {giftname:id}. This will show the name of the gift and a tooltip with its description on hover. Clicking on the gift name will show a modal with more details on the gift. Gifts can be assigned enhancement levels by attaching it to the end of the id after a pipe e.g. {giftname:9001|2}. The token will fail to parse if the gift does not have that enhancement level.",
-    "gifticons": "Reference E.G.O Gifts with {gifticons:id}. This will show an icon of the gift and a tooltip with its description on hover. Clicking on the gift icon will show a modal with more details on the gift. This token supports multiple gifts by inputting {gifticons:id1:id2:...} (Insert to text will not automatically handle this). Gifts can be assigned enhancement levels by attaching it to the end of the id after a pipe e.g. {giftname:9001|2}. The token will fail to parse if the gift does not have that enhancement level.",
+    "status": "Reference a status with {status:id} or {st:id}. This will show a tooltip with its description on hover.",
+    "keyword": "Reference a keyword with {keyword:id} or {kw:id}. This will show an icon corresponding to that keyword.",
+    "giftname": "Reference an E.G.O Gift with {giftname:id} or {gn:id}. This will show the name of the gift and a tooltip with its description on hover. Clicking on the gift name will show a modal with more details on the gift. Gifts can be assigned enhancement levels by attaching it to the end of the id after a pipe e.g. {giftname:9001|2}. The token will fail to parse if the gift does not have that enhancement level.",
+    "gifticons": "Reference E.G.O Gifts with {gifticons:id} or {gi:id}. This will show an icon of the gift and a tooltip with its description on hover. Clicking on the gift icon will show a modal with more details on the gift. This token supports multiple gifts by inputting {gifticons:id1:id2:...} (Insert to text will not automatically handle this). Gifts can be assigned enhancement levels by attaching it to the end of the id after a pipe e.g. {giftname:9001|2}. The token will fail to parse if the gift does not have that enhancement level.",
     "build": "Reference a build with {build:id}. This will show the name of the build and a tooltip with its search overview on hover. You can find the id of a build on its url or using the share feature on its page. Copying the full url below will automatically isolate the id.",
     "user": "Reference a user with {user:username}. This will show a link to the user's profile. Note that if the user changes their username, this will break. Usernames are also case-sensitive.",
     "sinner": "Reference a sinner with {sinner:id}. This will show the name of the sinner. Useful if you want to accurately type Ryōshū."

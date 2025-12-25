@@ -28,7 +28,7 @@ const seasonMapping = {
     8000: "Pilgrimage of Compassion"
 }
 
-const LEVEL_CAP = 55;
+const LEVEL_CAP = 60;
 
 function getSeasonString(season) {
     if (season > 9100) return `Walpurgisnacht ${season - 9100}`;

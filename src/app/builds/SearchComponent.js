@@ -68,9 +68,9 @@ export default function SearchComponent({ options = {} }) {
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
         <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "0.5rem" }}>
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Title</span>
-            <div style={{ display: "flex" }}><input value={title} onChange={e => setTitle(e.target.value)} style={{ minWidth: "15rem", maxWidth: "100%" }} /></div>
+            <div style={{ display: "flex" }}><input value={title} onChange={e => setTitle(e.target.value)} style={{ minWidth: "clamp(15rem, 90%, 25rem)", maxWidth: "100%" }} /></div>
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>User</span>
-            <div style={{ display: "flex" }}><input value={username} onChange={e => setUsername(e.target.value)} style={{ minWidth: "15rem", maxWidth: "100%" }} /></div>
+            <div style={{ display: "flex" }}><input value={username} onChange={e => setUsername(e.target.value)} style={{ minWidth: "clamp(15rem, 90%, 25rem)", maxWidth: "100%" }} /></div>
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Tags</span>
             <TagSelector selected={tags} onChange={setTags} creatable={false} styles={selectStyleVariable} />
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Identities</span>

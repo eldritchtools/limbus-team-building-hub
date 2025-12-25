@@ -52,11 +52,11 @@ export default function ProfilePage({ params }) {
         </div>
     }
 
-    return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center" }}>
-        <h2 style={{ marginBottom: "0" }}>{parsedUsername}&apos;s Builds</h2>
-        <div ><em>{flair}</em></div>
-        <div style={{ width: isDesktop ? "70%" : "90%" }}> <MarkdownRenderer content={description} /></div>
-        <div style={{ border: "1px #777 solid", width: "90%" }} />
+    return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        <h2 style={{ alignSelf: "center", marginBottom: "0" }}>{parsedUsername}&apos;s Builds</h2>
+        <div style={{ alignSelf: "center" }}><em>{flair}</em></div>
+        <div style={{ alignSelf: "center", width: isDesktop ? "70%" : "90%" }}> <MarkdownRenderer content={description} /></div>
+        <div style={{ alignSelf: "center", border: "1px #777 solid", width: "90%" }} />
         {buildsLoading ?
             <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading...</p> :
             builds.length === 0 ?

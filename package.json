@@ -27,7 +27,6 @@
     "@tiptap/starter-kit": "^3.13.0",
     "@tiptap/suggestion": "^3.13.0",
     "dexie": "^4.2.1",
-    "dexie-react-hooks": "^4.2.0",
     "easymde": "^2.20.0",
     "javascript-time-ago": "^2.5.12",
     "katex": "^0.16.27",

@@ -1,5 +1,4 @@
 import Dexie from "dexie";
-import { useLiveQuery } from "dexie-react-hooks";
 
 export const db = new Dexie("limbus-team-building-hub");
 

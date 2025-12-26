@@ -7,6 +7,7 @@ import { createAutocompleteLabel } from "./MarkdownEditorAutocompleteLabel";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { keymap } from "@codemirror/view";
 import constructMarkdownEditorAutocompleteTooltip from "./MarkdownEditorAutocompleteTooltip";
+import { convertMarkdownAlias } from "./MarkdownAliases";
 
 const autocompleteDataFacet = Facet.define();
 
@@ -79,7 +80,7 @@ function useAutocompleteDataFacetExtension(viewRef) {
                 gifts, giftsLoading
             } = dataRef.current;
 
-            switch (type) {
+            switch (convertMarkdownAlias(type)) {
                 case "identity":
                     return !identitiesLoading && identities;
                 case "ego":
@@ -98,7 +99,7 @@ function useAutocompleteDataFacetExtension(viewRef) {
         },
 
         load(type) {
-            setRequestedTypes(prev => new Set(prev).add(type));
+            setRequestedTypes(prev => new Set(prev).add(convertMarkdownAlias(type)));
         },
 
         get(type) {
@@ -109,21 +110,24 @@ function useAutocompleteDataFacetExtension(viewRef) {
                 gifts
             } = dataRef.current;
 
-            if (type === "identity")
-                return { entries: Object.entries(identities).map(([id, identity]) => ({ id: id, label: identity.name, item: identity })) || [], multi: false };
-            if (type === "ego")
-                return { entries: Object.entries(egos).map(([id, ego]) => ({ id: id, label: ego.name, item: ego })) || [], multi: false };
-            if (type === "status")
-                return { entries: Object.entries(statuses).map(([id, status]) => ({ id: id, label: status.name, item: status })) || [], multi: false };
-            if (type === "giftname")
-                return { entries: Object.entries(gifts).map(([id, gift]) => ({ id: id, label: gift.names[0], item: gift })) || [], multi: false };
-            if (type === "gifticons")
-                return { entries: Object.entries(gifts).map(([id, gift]) => ({ id: id, label: gift.names[0], item: gift })) || [], multi: true };
-            if (type === "keyword")
-                return { entries: Object.keys(keywordToIdMapping).map(kw => ({ id: kw, label: kw, item: kw })) || [], multi: false };
-            if (type === "sinner")
-                return { entries: Object.entries(sinnerMapping).map(([id, name]) => ({ id: id, label: name, item: name })) || [], multi: false };
-            return { entries: [], multi: false };
+            switch (convertMarkdownAlias(type)) {
+                case "identity":
+                    return { entries: Object.entries(identities).map(([id, identity]) => ({ id: id, label: identity.name, item: identity })) || [], multi: false };
+                case "ego":
+                    return { entries: Object.entries(egos).map(([id, ego]) => ({ id: id, label: ego.name, item: ego })) || [], multi: false };
+                case "status":
+                    return { entries: Object.entries(statuses).map(([id, status]) => ({ id: id, label: status.name, item: status })) || [], multi: false };
+                case "giftname":
+                    return { entries: Object.entries(gifts).map(([id, gift]) => ({ id: id, label: gift.names[0], item: gift })) || [], multi: false };
+                case "gifticons":
+                    return { entries: Object.entries(gifts).map(([id, gift]) => ({ id: id, label: gift.names[0], item: gift })) || [], multi: true };
+                case "keyword":
+                    return { entries: Object.keys(keywordToIdMapping).map(kw => ({ id: kw, label: kw, item: kw })) || [], multi: false };
+                case "sinner":
+                    return { entries: Object.entries(sinnerMapping).map(([id, name]) => ({ id: id, label: name, item: name })) || [], multi: false };
+                default:
+                    return { entries: [], multi: false };
+            }
         },
 
         getOriginalData(type) {
@@ -134,12 +138,14 @@ function useAutocompleteDataFacetExtension(viewRef) {
                 gifts
             } = dataRef.current;
 
-            if (type === "identity") return identities;
-            if (type === "ego") return egos;
-            if (type === "status") return statuses;
-            if (type === "giftname") return gifts;
-            if (type === "gifticons") return gifts;
-            return {};
+            switch (convertMarkdownAlias(type)) {
+                case "identity": return identities;
+                case "ego": return egos;
+                case "status": return statuses;
+                case "giftname": return gifts;
+                case "gifticons": return gifts;
+                default: return {};
+            }
         }
     }), [setRequestedTypes]);
 
@@ -158,7 +164,7 @@ async function tokenCompletionSource(context) {
     const inside = word.text.slice(1);
     const parts = inside.split(":");
 
-    const type = parts[0];
+    const type = convertMarkdownAlias(parts[0]);
     if (!type) return null;
     if (!["identity", "ego", "status", "giftname", "gifticons", "keyword", "sinner"].includes(type)) return null;
 

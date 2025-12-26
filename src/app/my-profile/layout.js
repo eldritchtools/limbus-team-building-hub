@@ -1,4 +1,4 @@
-import ProtectedRoute from "../database/ProtectedRoute";
+import { Suspense } from "react";
 
 export const metadata = {
     title: "My Profile | Limbus Company Team Building Hub",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function ProfileLayout({ children }) {
-  return <ProtectedRoute>{children}</ProtectedRoute>;
+  return <Suspense fallback={null}>{children}</Suspense>;
 }

@@ -7,7 +7,9 @@ import { selectStyle } from "../styles";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import "./egos.css";
-import EgoComparison from "./EgoComparison";
+import EgoComparisonAdvanced from "./EgoComparisonAdvanced";
+import DropdownButton from "../components/DropdownButton";
+import EgoComparisonBasic from "./EgoComparisonBasic";
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const mainFilters = {
@@ -71,7 +73,7 @@ function EgoDetails({ id, ego }) {
 }
 
 function EgoCard({ ego }) {
-    return <div className="clickable-ego-card" style={{ display: "flex", flexDirection: "row", padding: "0.5rem", width: "420px", height: "280px", border: "1px #777 solid", borderRadius: "0.25rem", boxSizing: "border-box" }}>
+    return <div className="clickable-ego-card" style={{ display: "flex", flexDirection: "row", padding: "0.5rem", width: "min(420px, 100%)", height: "280px", border: "1px #777 solid", borderRadius: "0.25rem", boxSizing: "border-box" }}>
         <div style={{ display: "flex", flexDirection: "column", width: "128px" }}>
             <EgoImg ego={ego} type={"awaken"} displayName={false} displayRarity={true} />
             {"corrosionType" in ego ? <EgoImg ego={ego} type={"erosion"} displayName={false} displayRarity={false} /> : null}
@@ -79,7 +81,7 @@ function EgoCard({ ego }) {
         <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "0.5rem", alignItems: "center", textAlign: "center" }}>
             <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
                 {/* <RarityImg rarity={ego.rank.toLowerCase()} style={{ height: "32px" }} /> */}
-                <span style={{flex: 1}}>{ego.name}</span>
+                <span style={{ flex: 1 }}>{ego.name}</span>
             </div>
             <div style={{ display: "flex", gap: "2rem" }}>
                 <SkillTypeIcons skill={ego.awakeningType} />
@@ -168,8 +170,12 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
         return true;
     }), [searchString, filters, egos, selectedKeywords, selectedSeasons, strictFiltering]);
 
-    if (compareMode) {
-        return <EgoComparison
+    if (compareMode === "basic") {
+        return <EgoComparisonBasic />
+    }
+
+    if (compareMode === "adv") {
+        return <EgoComparisonAdvanced
             egos={list}
             displayType={displayType}
             separateSinners={separateSinners}
@@ -207,7 +213,7 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
             return listToComponents(list);
         }
     } else if (displayType === "card") {
-        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 420px)", width: "100%", gap: "0.5rem", justifyContent: "center" }}>
+        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, min(420px, 100%))", width: "100%", gap: "0.5rem", justifyContent: "center" }}>
             {list.map(([id, ego]) => <div key={id}><Link href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }}><EgoCard key={id} ego={ego} /></Link></div>)}
         </div>
 
@@ -334,7 +340,7 @@ export default function EgosPage() {
     const [displayType, setDisplayType] = useState(null);
     const [strictFiltering, setStrictFiltering] = useState(false);
     const [separateSinners, setSeparateSinners] = useState(false);
-    const [compareMode, setCompareMode] = useState(false);
+    const [compareMode, setCompareMode] = useState("off");
 
     useEffect(() => {
         const savedDisplayType = localStorage.getItem("idEgoDisplayType");
@@ -396,15 +402,15 @@ export default function EgosPage() {
                 <span style={{ textAlign: "end" }}>Display Type:</span>
                 <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
                     <label>
-                        <input type="radio" name="displayType" value={"icon"} checked={displayType === "icon"} onChange={e => setDisplayType(e.target.value)} disabled={compareMode} />
+                        <input type="radio" name="displayType" value={"icon"} checked={displayType === "icon"} onChange={e => setDisplayType(e.target.value)} disabled={compareMode !== "off"} />
                         Icons Only
                     </label>
                     <label>
-                        <input type="radio" name="displayType" value={"card"} checked={displayType === "card"} onChange={e => setDisplayType(e.target.value)} />
+                        <input type="radio" name="displayType" value={"card"} checked={displayType === "card"} onChange={e => setDisplayType(e.target.value)} disabled={compareMode === "basic"} />
                         Cards
                     </label>
                     <label>
-                        <input type="radio" name="displayType" value={"full"} checked={displayType === "full"} onChange={e => setDisplayType(e.target.value)} />
+                        <input type="radio" name="displayType" value={"full"} checked={displayType === "full"} onChange={e => setDisplayType(e.target.value)} disabled={compareMode === "basic"} />
                         Full Details
                     </label>
                 </div>
@@ -425,16 +431,12 @@ export default function EgosPage() {
                 </div>
                 <div />
                 <div>
-                    <label style={{ display: "flex", alignItems: "center", gap: "0.2rem", flexWrap: "wrap" }}>
-                        <input type="checkbox" checked={compareMode} onChange={e => setCompareMode(p => !p)} />
-                        Advanced Compare Mode
-                        <span style={{ fontSize: "0.8rem", color: "#aaa" }}>(May not work well on mobile)</span>
-                    </label>
+                    <DropdownButton value={compareMode} setValue={setCompareMode} options={{ "off": "Compare Mode Disabled", "basic": "Basic Compare Mode", "adv": "Advanced Compare Mode" }} />
                 </div>
             </div>
             <MainFilterSelector selectedMainFilters={selectedMainFilters} setSelectedMainFilters={setSelectedMainFilters} />
         </div>
-        <div style={{border: "1px #777 solid", width: "100%"}} />
+        <div style={{ border: "1px #777 solid", width: "100%" }} />
         {egosLoading ? null :
             <EgoList
                 egos={egos}

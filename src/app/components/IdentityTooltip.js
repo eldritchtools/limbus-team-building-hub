@@ -3,9 +3,11 @@
 import { IdentityImg, KeywordIcon, useData } from "@eldritchtools/limbus-shared-library";
 import { Tooltip } from "react-tooltip";
 import { tooltipStyle } from "../styles";
+import Link from "next/link";
+import { isTouchDevice } from "@eldritchtools/shared-components";
 
 function IdentityTooltipContent({ identity }) {
-    return <div style={tooltipStyle}>
+    return <div style={{...tooltipStyle, display: "flex", flexDirection: "column"}}>
         <div style={{ display: "flex", flexDirection: "row", padding: "0.5rem", gap: "0.5rem", height: "128px" }}>
             <div>
                 <IdentityImg identity={identity} uptie={4} displayName={true} displayRarity={true} style={{width: "128px", height: "128px"}} />
@@ -22,6 +24,7 @@ function IdentityTooltipContent({ identity }) {
                 </div>
             </div>
         </div>
+        {isTouchDevice() ? <Link href={`/identities/${identity.id}`} style={{alignSelf: "center", fontSize: "1.2rem"}} >Go to page</Link> : null}
     </div>
 }
 
@@ -38,6 +41,7 @@ function IdentityTooltip() {
         render={({ content }) => <TooltipLoader id={content} />}
         getTooltipContainer={() => document.body}
         style={{ backgroundColor: "transparent", zIndex: "9999" }}
+        clickable={isTouchDevice()}
     />
 }
 

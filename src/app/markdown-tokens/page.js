@@ -31,7 +31,7 @@ export default function MarkdownTokens() {
         <div>This is a list of things that can be referenced in builds and comments.</div>
         <h2 style={headerStyle}>Identities</h2>
         <div>
-            Reference an identity using <code>{"{identity:id}"}</code>, which will show a link to the identity&apos;s page consisting of the sinner and identity names. Hovering over the link will show a tooltip for the identity.
+            Reference an identity using <code>{"{identity:id}"}</code> or <code>{"{id:id}"}</code>, which will show a link to the identity&apos;s page consisting of the sinner and identity names. Hovering over the link will show a tooltip for the identity.
             <br /> <br />
             You can find an identity&apos;s id in the URL of its respective page or search for it below.
             <br /> <br />
@@ -73,7 +73,7 @@ export default function MarkdownTokens() {
         </div>
         <h2 style={headerStyle}>Statuses</h2>
         <div>
-            Reference a status using <code>{"{status:id}"}</code>, which will show the icon of the status and its name. Hovering over it will show a tooltip with the status&apos; description.
+            Reference a status using <code>{"{status:id}"}</code> or <code>{"{st:id}"}</code>, which will show the icon of the status and its name. Hovering over it will show a tooltip with the status&apos; description.
             <br /> <br />
             You can search for a status&apos; id below. Note that this list may include statuses that are not normally shown in-game and the icons for some statuses that are only used by some enemies or in some fights might be missing.
             <br /> <br />
@@ -94,7 +94,7 @@ export default function MarkdownTokens() {
         </div>
         <h2 style={headerStyle}>Keywords</h2>
         <div>
-            Reference a keyword using <code>{"{keyword:name}"}</code>, which will show the icon of the keyword.
+            Reference a keyword using <code>{"{keyword:name}"}</code> or <code>{"{kw:name}"}</code>, which will show the icon of the keyword.
             <br /> <br />
             Keywords can be referenced by their respective names. Keyword names are case-insensitive.
             <br /> <br />
@@ -115,7 +115,7 @@ export default function MarkdownTokens() {
         </div>
         <h2 style={headerStyle}>E.G.O. Gifts</h2>
         <div>
-            Reference E.G.O Gifts using <code>{"{giftname:id}"}</code> or <code>{"{gifticons:id1:id2:...}"}</code>. The former will show the name of the gift while the latter will show the icons of all the gifts included in the list.
+            Reference E.G.O Gifts using <code>{"{giftname:id}"}</code> or <code>{"{gifticons:id1:id2:...}"}</code>. <code>{"{gn:id}"}</code> and <code>{"{gi:id1:id2:...}"}</code> respectively can also be used. The former will show the name of the gift while the latter will show the icons of all the gifts included in the list.
             <br /> <br />
             Both the name and icons versions will show the description of the gift on hover and can be clicked to show a modal with more details (the modal may break on mobile or other thin screens). This uses the same logic as my MD site (link in the header).
             <br /> <br />

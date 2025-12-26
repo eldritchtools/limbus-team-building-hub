@@ -40,7 +40,7 @@ function BuildsTab({ builds }) {
     if (!builds) return <div style={{ color: "#777", textAlign: "center" }}>Loading builds...</div>;
     if (builds.length === 0) return <div style={{ color: "#777", textAlign: "center" }}>No builds found.</div>;
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-        {builds.map(build => <BuildEntry key={build.id} build={build} minified={true} />)}
+        {builds.map(build => <BuildEntry key={build.id} build={build} size={"M"} complete={false} />)}
     </div>
 }
 
@@ -70,8 +70,8 @@ export default function EgoPage({ params }) {
     const passives = skillData.passiveList;
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-        <div style={{ display: "flex", flexDirection: "row", width: "100%", flexWrap: "wrap", justifyContent: "center" }}>
-            <div style={{ display: "flex", flexDirection: "column", padding: "1rem", minWidth: "480px", width: "480px", maxWidth: "480px" }}>
+        <div style={{ display: "flex", flexDirection: "row", width: "100%", flexWrap: "wrap", justifyContent: "center", gap: "1rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", padding: "0.5rem", width: "min(480px, 100%)" }}>
                 <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: "100%" }}>
                     <RarityImg rarity={egoData.rank.toLowerCase()} style={{ display: "inline", height: "2rem" }} />
                     <div style={{ display: "flex", flexDirection: "column", fontSize: "1.2rem", fontWeight: "bold", alignItems: "center" }}>
@@ -84,8 +84,8 @@ export default function EgoPage({ params }) {
                     Threadspin: <UptieSelector value={uptie} setValue={setUptie} />
                 </div>
                 <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                    <EgoImg ego={egoData} type={"awaken"} scale={0.75} />
-                    {"corrosionType" in egoData ? <EgoImg ego={egoData} type={"erosion"} scale={0.75} /> : null}
+                    <EgoImg ego={egoData} type={"awaken"} style={{ width: "50%", maxWidth: "192px", height: "auto" }} />
+                    {"corrosionType" in egoData ? <EgoImg ego={egoData} type={"erosion"} style={{ width: "50%", maxWidth: "192px", height: "auto" }} /> : null}
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", textAlign: "center" }}>
                     <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.2rem" }}>
@@ -115,10 +115,10 @@ export default function EgoPage({ params }) {
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.5rem", gap: "0.2rem" }}>
                     <div style={{ display: "flex", gap: "1rem", alignSelf: "center" }}>
-                        <div data-tooltip-id="identity-notes" style={{ ...tabStyle, fontSize: "1rem", color: activeTab === "notes" ? "#ddd" : "#777" }} onClick={() => setActiveTab("notes")}>Notes/Explanation</div>
-                        <div data-tooltip-id="identity-builds" style={{ ...tabStyle, fontSize: "1rem", color: activeTab === "builds" ? "#ddd" : "#777" }} onClick={() => setActiveTab("builds")}>Popular Builds</div>
+                        <div data-tooltip-id="ego-notes" style={{ ...tabStyle, fontSize: "1rem", color: activeTab === "notes" ? "#ddd" : "#777" }} onClick={() => setActiveTab("notes")}>Notes/Explanation</div>
+                        <div data-tooltip-id="ego-builds" style={{ ...tabStyle, fontSize: "1rem", color: activeTab === "builds" ? "#ddd" : "#777" }} onClick={() => setActiveTab("builds")}>Popular Builds</div>
                     </div>
-                    <Tooltip id="ego-notes" style={tooltipStyle}>
+                    <Tooltip id="ego-notes" style={{ ...tooltipStyle, maxWidth: "85%" }}>
                         <div>
                             This section is only meant to contain details about the E.G.O&apos;s mechanics.
                             <br />
@@ -133,7 +133,7 @@ export default function EgoPage({ params }) {
                             </ul>
                         </div>
                     </Tooltip>
-                    <Tooltip id="identity-builds" style={tooltipStyle}>
+                    <Tooltip id="identity-builds" style={{ ...tooltipStyle, maxWidth: "85%" }}>
                         <div>Loads the most popular builds that use this identity.</div>
                     </Tooltip>
                     {
@@ -143,11 +143,18 @@ export default function EgoPage({ params }) {
                     }
                 </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", minWidth: "480px", flex: 1, gap: "0.5rem" }}>
-                <div style={{ display: "flex" }}>
-                    <SkillCard skill={skillData.awakeningSkill} uptie={uptie} type={"awakening"} />
+            <div style={{ display: "flex", flexDirection: "column", minWidth: "min(480px, 100%)", flex: 1, gap: "0.5rem" }}>
+                <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+                    {skillData.awakeningSkills.map(skill => <div key={skill.id} style={{ flex: 1, minWidth: "min(300px, 100%)" }}>
+                        <SkillCard skill={skill} uptie={uptie} type={"awakening"} />
+                    </div>)}
                 </div>
-                {"corrosionSkill" in skillData ? <div style={{ display: "flex" }}><SkillCard skill={skillData.corrosionSkill} uptie={uptie} type={"corrosion"} /></div> : null}
+                {"corrosionSkills" in skillData ?
+                    <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+                        {skillData.corrosionSkills.map(skill => <div key={skill.id} style={{ flex: 1, minWidth: "min(300px, 100%)" }}>
+                            <SkillCard skill={skill} uptie={uptie} type={"corrosion"} />
+                        </div>)}
+                    </div> : null}
                 {uptie >= 2 && passives ?
                     <div style={{ display: "flex", flexDirection: "column" }}>
                         <div style={{ color: "#aaa", fontWeight: "bold", fontSize: "1.25rem" }}>Passives</div>

@@ -18,6 +18,9 @@ import "./MarkdownRenderer.css";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
+import { isTouchDevice } from "@eldritchtools/shared-components";
+import TooltipLink from "../TooltipLink";
+import { convertMarkdownAlias } from "./MarkdownAliases";
 
 function tokenExtractionPlugin() {
     return (tree) => {
@@ -70,9 +73,9 @@ function IdentityItem({ id }) {
         return <span>{"{Loading...}"}</span>
     } else {
         if (id in identities)
-            return <Link href={`/identities/${id}`} data-tooltip-id="identity-tooltip" data-tooltip-content={id}>
+            return <TooltipLink href={`/identities/${id}`} tooltipId={"identity-tooltip"} tooltipContent={id}>
                 [{sinnerMapping[identities[id].sinnerId]}] {identities[id].name}
-            </Link>;
+            </TooltipLink>;
         else
             return <span>{`{identity:${id}}`}</span>;
     }
@@ -84,9 +87,9 @@ function EgoItem({ id }) {
         return <span>{"{Loading...}"}</span>
     } else {
         if (id in egos)
-            return <Link href={`/egos/${id}`} data-tooltip-id="ego-tooltip" data-tooltip-content={id}>
+            return <TooltipLink href={`/egos/${id}`} tooltipId="ego-tooltip" tooltipContent={id}>
                 [{sinnerMapping[egos[id].sinnerId]}] {egos[id].name}
-            </Link>;
+            </TooltipLink>;
         else
             return <span>{`{ego:${id}}`}</span>;
     }
@@ -136,7 +139,7 @@ function GiftIconsItem({ vals }) {
     if (giftsLoading) {
         return <span>{"{Loading...}"}</span>
     } else {
-        return <div style={{display: "flex", flexWrap: "wrap", justifyContent: "center"}}>
+        return <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>
             {vals.map((val, i) => {
                 const split = val.split("|");
                 const id = split[0];
@@ -159,7 +162,7 @@ function BuildItem({ id }) {
 
     useEffect(() => {
         setLoading(true);
-        getFilteredBuilds({ "build_id": id }, true).then(x => {
+        getFilteredBuilds({ "build_ids": [id] }, true).then(x => {
             if (x.length > 0) setBuild(x[0]);
             else setInvalid(true);
             setLoading(false);
@@ -171,9 +174,9 @@ function BuildItem({ id }) {
         invalid ?
             <span>{`{build:${id}}`}</span> :
             <span>
-                <Link href={`/builds/${id}`} data-tooltip-id={`markdown-build-tooltip`} data-tooltip-content={encodeURIComponent(JSON.stringify(build))}>
+                <TooltipLink href={`/builds/${id}`} tooltipId={`markdown-build-tooltip`} tooltipContent={encodeURIComponent(JSON.stringify(build))}>
                     {build.title}
-                </Link>
+                </TooltipLink>
             </span>
 }
 
@@ -187,7 +190,7 @@ export default function MarkdownRenderer({ content }) {
                 tokenNode: ({ node }) => {
                     const { tokenType, tokenValues } = node.properties;
 
-                    switch (tokenType) {
+                    switch (convertMarkdownAlias(tokenType)) {
                         case "identity":
                             return <IdentityItem id={tokenValues[0]} />;
                         case "ego":
@@ -243,11 +246,17 @@ export default function MarkdownRenderer({ content }) {
 
         <Tooltip
             id="markdown-build-tooltip"
-            render={({ content }) => <div style={{...tooltipStyle, width: "500px"}}>
-                <BuildEntry build={JSON.parse(decodeURIComponent(content))} minified={true} minifull={true} />
-            </div>}
+            render={({ content }) => {
+                const build = JSON.parse(decodeURIComponent(content));
+                if (build)
+                    return <div style={{ ...tooltipStyle, width: isTouchDevice() ? "332px" : "500px" }}>
+                        <BuildEntry build={build} size={"M"} />
+                    </div>
+                return null;
+            }}
             getTooltipContainer={() => document.body}
             style={{ backgroundColor: "transparent", zIndex: "9999" }}
+            clickable={isTouchDevice()}
         />
     </div>
 

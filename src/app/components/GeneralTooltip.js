@@ -1,5 +1,6 @@
 import { Tooltip } from "react-tooltip";
 import { tooltipStyle } from "../styles";
+import { useBreakpoint } from "@eldritchtools/shared-components";
 
 const tooltipContent = {
     "teamcode": "Limbus Company allows quickly copying teams using team codes. This feature can be found beside the team name in the sinner selection menu.",
@@ -16,10 +17,12 @@ function generalTooltipProps(typeOrString) {
 }
 
 function GeneralTooltip() {
+    const {isMobile} = useBreakpoint();
+
     return <Tooltip
         id="general-tooltip"
-        getTooltipContainer={() => document.body}
-        render={({ content }) => <div style={{ ...tooltipStyle, padding: "0.5rem", maxWidth: "60ch" }}>
+        // getTooltipContainer={() => document.body}
+        render={({ content }) => <div style={{ ...tooltipStyle, padding: "0.5rem", display: "block", maxWidth: isMobile ? "40ch": "60ch" }}>
             {content}
         </div>}
         style={{ backgroundColor: "transparent", zIndex: "9999" }}

@@ -16,7 +16,7 @@ async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", 
 
     const options = {};
     if ("title" in filters) options["title_filter"] = filters["title"];
-    if ("build_id" in filters) options["build_id_filter"] = filters["build_id"];
+    if ("build_ids" in filters) options["build_id_filter"] = filters["build_ids"];
     if ("user_id" in filters) options["user_id_filter"] = filters["user_id"];
     if ("username" in filters) options["username_filter"] = filters["username"];
     if ("username_exact" in filters) options["username_exact_filter"] = filters["username_exact"];
@@ -30,7 +30,7 @@ async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", 
     options.limit_count = pageSize;
     options.offset_count = start;
 
-    const { data, error } = await getSupabase().rpc('get_filtered_builds_v4', options);
+    const { data, error } = await getSupabase().rpc('get_filtered_builds_v5', options);
 
     if (error) throw (error);
     return data;

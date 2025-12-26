@@ -8,8 +8,9 @@ import Link from "next/link";
 import "./identities.css";
 
 import dynamic from "next/dynamic";
-import IdentityComparison from "./IdentityComparison";
-import { generalTooltipProps } from "../components/GeneralTooltip";
+import IdentityComparisonAdvanced from "./IdentityComparisonAdvanced";
+import DropdownButton from "../components/DropdownButton";
+import IdentityComparisonBasic from "./IdentityComparisonBasic";
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const mainFilters = {
@@ -84,7 +85,7 @@ function IdentityDetails({ id, identity }) {
 }
 
 function IdentityCard({ identity }) {
-    return <div className="clickable-id-card" style={{ display: "flex", flexDirection: "row", padding: "0.5rem", width: "420px", height: "280px", border: "1px #777 solid", borderRadius: "0.25rem", boxSizing: "border-box" }}>
+    return <div className="clickable-id-card" style={{ display: "flex", flexDirection: "row", padding: "0.5rem", width: "min(420px, 100%)", height: "280px", border: "1px #777 solid", borderRadius: "0.25rem", boxSizing: "border-box" }}>
         <div style={{ display: "flex", flexDirection: "column", width: "128px" }}>
             <IdentityImg identity={identity} uptie={2} displayName={false} displayRarity={true} />
             {identity.tags.includes("Base Identity") ? null : <IdentityImg identity={identity} uptie={4} displayName={false} displayRarity={false} />}
@@ -176,8 +177,12 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
         return true;
     }), [searchString, filters, identities, selectedKeywords, selectedFactionTags, selectedSeasons, strictFiltering]);
 
-    if (compareMode) {
-        return <IdentityComparison
+    if (compareMode === "basic") {
+        return <IdentityComparisonBasic />
+    }
+
+    if (compareMode === "adv") {
+        return <IdentityComparisonAdvanced
             identities={list}
             displayType={displayType}
             separateSinners={separateSinners}
@@ -215,7 +220,7 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
             return listToComponents(list);
         }
     } else if (displayType === "card") {
-        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 420px)", width: "100%", gap: "0.5rem", justifyContent: "center" }}>
+        const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, min(420px, 100%))", width: "100%", gap: "0.5rem", justifyContent: "center" }}>
             {list.map(([id, identity]) => <div key={id}><Link href={`/identities/${id}`} style={{ color: "#ddd", textDecoration: "none" }}><IdentityCard key={id} identity={identity} /></Link></div>)}
         </div>
 
@@ -333,7 +338,7 @@ export default function Identities() {
     const [displayType, setDisplayType] = useState(null);
     const [strictFiltering, setStrictFiltering] = useState(false);
     const [separateSinners, setSeparateSinners] = useState(false);
-    const [compareMode, setCompareMode] = useState(false);
+    const [compareMode, setCompareMode] = useState("off");
 
     useEffect(() => {
         const savedDisplayType = localStorage.getItem("idEgoDisplayType");
@@ -404,15 +409,15 @@ export default function Identities() {
                 <span style={{ textAlign: "end" }}>Display Type:</span>
                 <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
                     <label>
-                        <input type="radio" name="displayType" value={"icon"} checked={displayType === "icon"} onChange={e => setDisplayType(e.target.value)} disabled={compareMode} />
+                        <input type="radio" name="displayType" value={"icon"} checked={displayType === "icon"} onChange={e => setDisplayType(e.target.value)} disabled={compareMode !== "off"} />
                         Icons Only
                     </label>
                     <label>
-                        <input type="radio" name="displayType" value={"card"} checked={displayType === "card"} onChange={e => setDisplayType(e.target.value)} />
+                        <input type="radio" name="displayType" value={"card"} checked={displayType === "card"} onChange={e => setDisplayType(e.target.value)} disabled={compareMode === "basic"} />
                         Cards
                     </label>
                     <label>
-                        <input type="radio" name="displayType" value={"full"} checked={displayType === "full"} onChange={e => setDisplayType(e.target.value)} />
+                        <input type="radio" name="displayType" value={"full"} checked={displayType === "full"} onChange={e => setDisplayType(e.target.value)} disabled={compareMode === "basic"} />
                         Full Details
                     </label>
                 </div>
@@ -433,11 +438,7 @@ export default function Identities() {
                 </div>
                 <div />
                 <div>
-                    <label style={{ display: "flex", alignItems: "center", gap: "0.2rem", flexWrap: "wrap" }}>
-                        <input type="checkbox" checked={compareMode} onChange={e => setCompareMode(p => !p)} />
-                        Advanced Compare Mode
-                        <span style={{ fontSize: "0.8rem", color: "#aaa" }}>(May not work well on mobile)</span>
-                    </label>
+                    <DropdownButton value={compareMode} setValue={setCompareMode} options={{ "off": "Compare Mode Disabled", "basic": "Basic Compare Mode", "adv": "Advanced Compare Mode" }} />
                 </div>
             </div>
             <MainFilterSelector selectedMainFilters={selectedMainFilters} setSelectedMainFilters={setSelectedMainFilters} />

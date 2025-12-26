@@ -18,12 +18,14 @@ TimeAgo.addDefaultLocale(en)
 
 const paths = [
     { path: "/builds", title: "Explore Team Builds" },
-    { path: "/my-profile", title: "My Profile", subpaths: [
-        {path: "/builds/new", title: "New Build"},
-        {path: "/my-profile?tab=builds", title: "My Builds"},
-        {path: "/my-profile?tab=drafts", title: "My Drafts"},
-        {path: "/my-profile?tab=saved", title: "Saved Builds"},
-    ] },
+    {
+        path: "/my-profile", title: "My Profile", subpaths: [
+            { path: "/builds/new", title: "New Build" },
+            { path: "/my-profile?tab=builds", title: "My Builds" },
+            { path: "/my-profile?tab=drafts", title: "My Drafts" },
+            { path: "/my-profile?tab=saved", title: "Saved Builds" },
+        ]
+    },
     { path: "/identities", title: "Identities" },
     { path: "/egos", title: "E.G.Os" },
 ]
@@ -35,10 +37,9 @@ const description = <span>
 
 export default function LayoutComponent({ children }) {
     const [lastUpdated, setLastUpdated] = useState(process.env.NEXT_PUBLIC_LAST_UPDATED);
-
     useEffect(() => {
         getMeta().then(meta => setLastUpdated(p => p > meta.datetime ? p : meta.datetime));
-    }, [])
+    }, []);
 
     return <AuthProvider>
         <RequestsCacheProvider>

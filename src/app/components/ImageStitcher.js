@@ -94,20 +94,21 @@ const ImageStitcher = ({ build, outputFileName = "stitched_image.png" }) => {
     };
 
     const sizeStr = baseSize => `${baseSize * 6}x${baseSize * 2}`;
+    const scale = Math.min(0.5, window.innerWidth / 7 / 256);
     return (
         <div style={{ display: "flex", flexDirection: "column", width: "100%", alignItems: "center", gap: "0.2rem" }}>
             <div style={{ alignSelf: "start" }}>Download team build image</div>
             {
                 includeOrder ?
-                    <IdentityImgSpread identityIds={identitiesList} scale={0.5} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} identityUpties={identityUpties} /> :
-                    <IdentityImgSpread identityIds={identitiesList} scale={0.5} identityUpties={identityUpties} />
+                    <IdentityImgSpread identityIds={identitiesList} scale={scale} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} identityUpties={identityUpties} /> :
+                    <IdentityImgSpread identityIds={identitiesList} scale={scale} identityUpties={identityUpties} />
             }
             <br />
 
             {identitiesLoading ?
                 <div>Loading options</div> :
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center", flexWrap: "wrap" }}>
                         Recommended size:
                         <button onClick={() => downloadImage(128)}>{sizeStr(128)}</button>
                         &nbsp;| Other sizes:

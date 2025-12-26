@@ -6,6 +6,7 @@ const options = {
     "icons": "Icons Only",
     "stats": "Stats",
     "types": "Skill Types",
+    "calc": "Clash/Damage Calc",
     "s1": "Skill 1",
     "s2": "Skill 2",
     "s3": "Skill 3",

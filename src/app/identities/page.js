@@ -8,8 +8,9 @@ import Link from "next/link";
 import "./identities.css";
 
 import dynamic from "next/dynamic";
-import IdentityComparison from "./IdentityComparison";
-import { generalTooltipProps } from "../components/GeneralTooltip";
+import IdentityComparisonAdvanced from "./IdentityComparisonAdvanced";
+import DropdownButton from "../components/DropdownButton";
+import IdentityComparisonBasic from "./IdentityComparisonBasic";
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const mainFilters = {
@@ -176,8 +177,12 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
         return true;
     }), [searchString, filters, identities, selectedKeywords, selectedFactionTags, selectedSeasons, strictFiltering]);
 
-    if (compareMode) {
-        return <IdentityComparison
+    if (compareMode === "basic") {
+        return <IdentityComparisonBasic />
+    }
+
+    if (compareMode === "adv") {
+        return <IdentityComparisonAdvanced
             identities={list}
             displayType={displayType}
             separateSinners={separateSinners}
@@ -333,7 +338,7 @@ export default function Identities() {
     const [displayType, setDisplayType] = useState(null);
     const [strictFiltering, setStrictFiltering] = useState(false);
     const [separateSinners, setSeparateSinners] = useState(false);
-    const [compareMode, setCompareMode] = useState(false);
+    const [compareMode, setCompareMode] = useState("off");
 
     useEffect(() => {
         const savedDisplayType = localStorage.getItem("idEgoDisplayType");
@@ -404,15 +409,15 @@ export default function Identities() {
                 <span style={{ textAlign: "end" }}>Display Type:</span>
                 <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
                     <label>
-                        <input type="radio" name="displayType" value={"icon"} checked={displayType === "icon"} onChange={e => setDisplayType(e.target.value)} disabled={compareMode} />
+                        <input type="radio" name="displayType" value={"icon"} checked={displayType === "icon"} onChange={e => setDisplayType(e.target.value)} disabled={compareMode !== "off"} />
                         Icons Only
                     </label>
                     <label>
-                        <input type="radio" name="displayType" value={"card"} checked={displayType === "card"} onChange={e => setDisplayType(e.target.value)} />
+                        <input type="radio" name="displayType" value={"card"} checked={displayType === "card"} onChange={e => setDisplayType(e.target.value)} disabled={compareMode === "basic"} />
                         Cards
                     </label>
                     <label>
-                        <input type="radio" name="displayType" value={"full"} checked={displayType === "full"} onChange={e => setDisplayType(e.target.value)} />
+                        <input type="radio" name="displayType" value={"full"} checked={displayType === "full"} onChange={e => setDisplayType(e.target.value)} disabled={compareMode === "basic"} />
                         Full Details
                     </label>
                 </div>
@@ -433,11 +438,7 @@ export default function Identities() {
                 </div>
                 <div />
                 <div>
-                    <label style={{ display: "flex", alignItems: "center", gap: "0.2rem", flexWrap: "wrap" }}>
-                        <input type="checkbox" checked={compareMode} onChange={e => setCompareMode(p => !p)} />
-                        Advanced Compare Mode
-                        <span style={{ fontSize: "0.8rem", color: "#aaa" }}>(May not work well on mobile)</span>
-                    </label>
+                    <DropdownButton value={compareMode} setValue={setCompareMode} options={{ "off": "Compare Mode Disabled", "basic": "Basic Compare Mode", "adv": "Advanced Compare Mode" }} />
                 </div>
             </div>
             <MainFilterSelector selectedMainFilters={selectedMainFilters} setSelectedMainFilters={setSelectedMainFilters} />

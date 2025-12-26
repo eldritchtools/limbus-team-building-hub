@@ -54,7 +54,6 @@ export default function Identity({ params }) {
     const [level, setLevel] = useState(LEVEL_CAP);
     const [activeTab, setActiveTab] = useState("notes");
     const [builds, setBuilds] = useState(null);
-    const { isMobile } = useBreakpoint();
 
     useEffect(() => {
         const fetchBuilds = async () => {
@@ -78,7 +77,7 @@ export default function Identity({ params }) {
             <div style={{ display: "flex", flexDirection: "column", padding: "0.5rem", width: "min(480px, 100%)" }}>
                 <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: "100%" }}>
                     <RarityImg rarity={identityData.rank} style={{ display: "inline", height: "2rem" }} />
-                    <div style={{ display: "flex", flexDirection: "column", fontSize: "1.2rem", fontWeight: "bold", alignItems: "center" }}>
+                    <div style={{ display: "flex", flexDirection: "column", fontSize: "1.2rem", fontWeight: "bold", alignItems: "center", textAlign: "center" }}>
                         <span>{sinnerMapping[identityData.sinnerId]}</span>
                         <span>{identityData.name}</span>
                     </div>

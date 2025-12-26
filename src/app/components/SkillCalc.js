@@ -165,7 +165,7 @@ function IdentitySkillCalc({ identity, uptie = 4, level = LEVEL_CAP, opts }) {
     const [atkskills] = identity.skillTypes.reduce(([skills, counts], skill) => {
         const tier = skillData.skills[skill.id].tier;
 
-        if (skill.tier in counts) {
+        if (tier in counts) {
             return [
                 [...skills, extractSkillData(skillData.skills[skill.id], uptie, level, [tier, counts[tier] + 1])],
                 { ...counts, [tier]: counts[tier] + 1 }

@@ -1,13 +1,12 @@
-import { affinityColorMapping, Icon, IdentityImg, KeywordIcon, replaceStatusVariablesTextOnly, SinnerIcon, useData, useDataMultiple } from "@eldritchtools/limbus-shared-library";
+import { affinityColorMapping, EgoImg, Icon, replaceStatusVariablesTextOnly, SinnerIcon, useData, useDataMultiple } from "@eldritchtools/limbus-shared-library";
 import DropdownButton from "../components/DropdownButton";
 import { useState } from "react";
 import Link from "next/link";
 import AutoScroller from "../components/AutoScroller";
-import { capitalizeFirstLetter, ColorResist, LEVEL_CAP, paragraphScore, ProcessedText, sinnerMapping } from "../utils";
+import { capitalizeFirstLetter, ColorResist, paragraphScore, ProcessedText, sinnerMapping } from "../utils";
 import SkillCard from "../components/SkillCard";
 import PassiveCard, { PassiveCost } from "../components/PassiveCard";
 import Coin from "../components/Coin";
-import { constructHp, constructPassive } from "./IdentityUtils";
 import RangeInput from "../components/RangeInput";
 import { keywordToIdMapping } from "../keywordIds";
 import { generalTooltipProps } from "../components/GeneralTooltip";
@@ -15,20 +14,17 @@ import { useBreakpoint } from "@eldritchtools/shared-components";
 
 const options = {
     "stats": "Stats",
-    "s1": "Skill 1",
-    "s2": "Skill 2",
-    "s3": "Skill 3",
-    "def": "Defense",
+    "awa": "Awakening",
+    "cor": "Corrosion",
     "skills": "All Skills",
-    "passives1": "Combat Passives",
-    "passives2": "Support Passives"
+    "pas": "Passive",
 }
 
-function ComparisonCardBase({ identity, content }) {
+function ComparisonCardBase({ ego, content }) {
     return <div style={{ display: "flex", flexDirection: "column", padding: "0.5rem", width: "320px", maxHeight: "480px", border: "1px #777 solid", borderRadius: "0.25rem", boxSizing: "border-box", alignItems: "center", gap: "0.2rem" }}>
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", height: "128px" }}>
-            <Link href={`/identities/${identity.id}`}>
-                <IdentityImg identity={identity} uptie={4} displayName={true} displayRarity={true} size={128} />
+            <Link href={`/egos/${ego.id}`}>
+                <EgoImg ego={ego} type={"awaken"} displayName={true} displayRarity={true} size={128} />
             </Link>
         </div>
         <div style={{ border: "1px #777 solid", width: "90%" }} />
@@ -38,14 +34,14 @@ function ComparisonCardBase({ identity, content }) {
     </div >
 }
 
-function ComparisonRowBase({ identity, content }) {
+function ComparisonRowBase({ ego, content }) {
     return <>
         {content.map((line, i) => <tr key={i} style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid", verticalAlign: "middle" }}>
             {i === 0 ?
                 <td key={0} rowSpan={content.length} style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid", verticalAlign: "middle" }}>
                     <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", padding: "0.2rem" }}>
-                        <Link href={`/identities/${identity.id}`}>
-                            <IdentityImg identity={identity} uptie={4} displayName={true} displayRarity={true} size={128} />
+                        <Link href={`/egos/${ego.id}`}>
+                            <EgoImg ego={ego} type={"awaken"} displayName={true} displayRarity={true} size={128} />
                         </Link>
                     </div>
                 </td> :
@@ -62,87 +58,77 @@ function ComparisonRowBase({ identity, content }) {
     </>
 }
 
-function ComparisonCard({ identity, skillList, compareType }) {
+function ComparisonCard({ ego, skillList, compareType }) {
     if (compareType === "stats") {
-        const content = <div style={{ display: "flex", flexDirection: "column", height: "auto", justifyContent: "center", gap: "0.2rem" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
-                    <Icon path={"hp"} style={{ height: "32px" }} />
-                    {constructHp(identity, LEVEL_CAP)}
+        const content = <div style={{ display: "grid", gridTemplateColumns: "repeat(8, max-content)", gap: "0.2rem", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+            <div />
+            {["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"].map((affinity, i) =>
+                <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Icon path={affinity} style={{ width: "32px" }} />
                 </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
-                    <Icon path={"speed"} style={{ height: "32px" }} />
-                    {identity.speedList[3].join(" - ")}
-                </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", textAlign: "center" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
-                    <Icon path={"Slash"} style={{ height: "32px" }} />
-                    <ColorResist resist={identity.resists.slash} />
-                </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
-                    <Icon path={"Pierce"} style={{ height: "32px" }} />
-                    <ColorResist resist={identity.resists.pierce} />
-                </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
-                    <Icon path={"Blunt"} style={{ height: "32px" }} />
-                    <ColorResist resist={identity.resists.blunt} />
-                </div>
-            </div>
-
-            <div style={{ display: "flex", gap: "0.25rem", justifyContent: "center" }}>
-                {identity.skillKeywordList.map(x => <KeywordIcon key={x} id={x} />)}
-            </div>
+            )}
+            <div style={{ textAlign: "end" }}>Cost:</div>
+            {["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"].map((affinity, i) =>
+                !ego.cost[affinity] ?
+                    <span key={i + 7} style={{ color: "#777" }}>x0</span> :
+                    <span key={i + 7}>x{ego.cost[affinity]}</span>
+            )}
+            <div style={{ textAlign: "end" }}>Res:</div>
+            {["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"].map((affinity, i) =>
+                <span key={i + 14}><ColorResist resist={ego.resists[affinity]} /></span>
+            )}
         </div>
 
-        return <ComparisonCardBase identity={identity} content={content} />
+        return <ComparisonCardBase ego={ego} content={content} />
     }
 
     const contentComponent = <AutoScroller fade={false}>
         <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "0.1rem" }}>
-            {skillList.map(([type, skill, i], ind) => <div key={ind}>
-                {type === "atk" ?
-                    <SkillCard skill={skill} mini={true} count={skill.num} index={i} /> :
-                    type === "def" ?
-                        <SkillCard skill={skill} mini={true} count={skill.num} type={"defense"} /> :
-                        type === "pasa" ?
-                            <PassiveCard passive={skill} mini={true} /> :
-                            <PassiveCard passive={skill} mini={true} />
+            {skillList.map(([type, skill], ind) => <div key={ind}>
+                {type === "awa" ?
+                    <SkillCard skill={skill} mini={true} type={"awakening"} /> :
+                    type === "cor" ?
+                        <SkillCard skill={skill} mini={true} type={"corrosion"} /> :
+                        <PassiveCard passive={skill} mini={true} />
                 }
             </div>)}
         </div>
     </AutoScroller>
 
-    return <ComparisonCardBase identity={identity} content={contentComponent} />
+    return <ComparisonCardBase ego={ego} content={contentComponent} />
 }
 
-function ComparisonRow({ identity, skillList, compareType }) {
+function ComparisonRow({ ego, skillList, compareType }) {
     if (compareType === "stats") {
         const content = [
-            <div key={1} style={{ display: "grid", gridTemplateColumns: "auto auto", gap: "0.5rem", alignItems: "center", justifyContent: "center" }}>
-                <Icon path={"hp"} style={{ height: "32px" }} />
-                {constructHp(identity, LEVEL_CAP)}
-                <Icon path={"speed"} style={{ height: "32px" }} />
-                {identity.speedList[3].join(" - ")}
+            <div key={1} style={{ display: "grid", gridTemplateColumns: "repeat(7, max-content)", gap: "0.5rem", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+                {["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"].map((affinity, i) =>
+                    <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Icon path={affinity} style={{ width: "32px" }} />
+                    </div>
+                )}
+                {["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"].map((affinity, i) =>
+                    !ego.cost[affinity] ?
+                        <span key={i + 7} style={{ color: "#777" }}>x0</span> :
+                        <span key={i + 7}>x{ego.cost[affinity]}</span>
+                )}
             </div>,
-            <div key={2} style={{ display: "grid", gridTemplateColumns: "auto auto auto", justifyContent: "center", textAlign: "center", gap: "0.2rem" }}>
-                <Icon path={"Slash"} style={{ height: "32px" }} />
-                <Icon path={"Pierce"} style={{ height: "32px" }} />
-                <Icon path={"Blunt"} style={{ height: "32px" }} />
-                <ColorResist resist={identity.resists.slash} />
-                <ColorResist resist={identity.resists.pierce} />
-                <ColorResist resist={identity.resists.blunt} />
-            </div>,
-            <div key={3} style={{ display: "flex", gap: "0.25rem", justifyContent: "center" }}>
-                {identity.skillKeywordList.map(x => <KeywordIcon key={x} id={x} />)}
+            <div key={2} style={{ display: "grid", gridTemplateColumns: "repeat(7, max-content)", gap: "0.5rem", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+                {["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"].map((affinity, i) =>
+                    <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Icon path={affinity} style={{ width: "32px" }} />
+                    </div>
+                )}
+                {["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"].map((affinity, i) =>
+                    <span key={i + 7}><ColorResist resist={ego.resists[affinity]} /></span>
+                )}
             </div>
         ]
 
-        return <ComparisonRowBase identity={identity} content={[content]} />
+        return <ComparisonRowBase ego={ego} content={[content]} />
     }
 
-    if (["s1", "s2", "s3", "def", "skills"].includes(compareType)) {
+    if (["awa", "cor", "skills"].includes(compareType)) {
         const iconSize = "32px";
         const coinSize = "24px";
 
@@ -153,11 +139,7 @@ function ComparisonRow({ identity, skillList, compareType }) {
             return [
                 <div key={i} style={{ display: "flex", flexDirection: "column", gap: "0.2rem", alignItems: "center", maxWidth: "40ch", textAlign: "center" }}>
                     <div style={{ color: "#aaa", fontWeight: "bold" }}>
-                        {type === "atk" ?
-                            (ind === 0 ?
-                                `Skill ${skill.tier}` :
-                                `Skill ${skill.tier}-${ind}`) :
-                            `Defense`}
+                        {type === "awa" ? "Awakening" : "Corrosion"}
                     </div>
                     <div style={{ borderRadius: "5px", backgroundColor: affinityColorMapping[skillData.affinity], padding: "5px", color: "#ddd", textShadow: "black 1px 1px 5px", fontWeight: "bold" }}>
                         {skillText.name}
@@ -211,10 +193,10 @@ function ComparisonRow({ identity, skillList, compareType }) {
             ]
         }
 
-        return <ComparisonRowBase identity={identity} content={skillList.map((skill, i) => constructCells(skill, i))} />
+        return <ComparisonRowBase ego={ego} content={skillList.map((skill, i) => constructCells(skill, i))} />
     }
 
-    if (["passives1", "passives2"].includes(compareType)) {
+    if (compareType === "pas") {
         const iconSize = "32px";
 
         const constructCells = ([type, passive, ind], i) => {
@@ -239,7 +221,7 @@ function ComparisonRow({ identity, skillList, compareType }) {
             ]
         }
 
-        return <ComparisonRowBase identity={identity} content={skillList.map((skill, i) => constructCells(skill, i))} />
+        return <ComparisonRowBase ego={ego} content={skillList.map((skill, i) => constructCells(skill, i))} />
     }
 
     return null;
@@ -252,10 +234,10 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
     if (statusesLoading && displayType !== "stats" && otherOpts.searchString.trim().length > 0) return null;
 
     const attachSearchScores = (list) =>
-        list.map(([identity, skills]) => {
+        list.map(([ego, skills]) => {
             const pieces = [];
             skills.forEach(([t, skill, i]) => {
-                if (t === "atk") {
+                if (t === "awa" || t === "cor") {
                     let skillText = skill.text.reduce((acc, textTier) => ({ ...acc, ...textTier }), {});
                     pieces.push(replaceStatusVariablesTextOnly(skillText.desc, statuses));
                     if (skillText.coinDescs) {
@@ -265,39 +247,33 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
                             )
                         )
                     }
-                } else if (t === "pasa" || t === "pasb") {
+                } else if (t === "pas") {
                     pieces.push(replaceStatusVariablesTextOnly(skill.desc, statuses));
                 }
             })
 
             const score = paragraphScore(otherOpts.searchString, pieces.join(" | "))
 
-            return [identity, skills, score];
+            return [ego, skills, score];
         })
 
     const outsideInterval = (val, [min, max]) => val < min || val > max;
 
     const filterList = (list) => {
         if (compareType === "stats")
-            return list.filter(([identity, skills]) => {
-                const maxHp = Math.floor(identity.hp.base + LEVEL_CAP * identity.hp.level);
-                if (outsideInterval(maxHp, otherOpts.maxHp)) return false;
-                if (outsideInterval(identity.breakSection.length, otherOpts.staggers)) return false;
-                const [speedMin, speedMax] = identity.speedList[3];
-                if (otherOpts.speedType === "overlap") {
-                    if (speedMax < otherOpts.speed[0] || speedMin > otherOpts.speed[1]) return false;
-                } else if (otherOpts.speedType === "contains") {
-                    if (speedMin < otherOpts.speed[0] || speedMax > otherOpts.speed[1]) return false;
-                } else if (otherOpts.speedType === "contained") {
-                    if (speedMin > otherOpts.speed[0] || speedMax < otherOpts.speed[1]) return false;
-                }
-                if (outsideInterval(identity.resists.slash, otherOpts.slashRes)) return false;
-                if (outsideInterval(identity.resists.pierce, otherOpts.pierceRes)) return false;
-                if (outsideInterval(identity.resists.blunt, otherOpts.bluntRes)) return false;
+            return list.filter(([ego, skills]) => {
+                if (Object.entries(ego.cost).some(([affinity, value]) =>
+                    otherOpts.maxCost[keywordToIdMapping[affinity] - 8] < value
+                )) return false;
+
+                if (Object.entries(ego.resists).some(([affinity, value]) =>
+                    otherOpts.maxRes[keywordToIdMapping[affinity] - 8] < value
+                )) return false;
+
                 return true;
             })
 
-        if (["s1", "s2", "s3", "def", "skills"].includes(compareType))
+        if (["awa", "cor", "skills"].includes(compareType))
             return list.filter(x => {
                 if (x.length === 3 && otherOpts.searchString.trim().length > 0 && x[2] === 0) return false;
 
@@ -312,34 +288,10 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
                 });
             })
 
-        if (["passives1", "passives2"].includes(compareType))
+        if (compareType === "pas")
             return list.filter(x => {
                 if (x.length === 3 && otherOpts.searchString.trim().length > 0 && x[2] === 0) return false;
-
-                return x[1].some(([type, skill, i]) => {
-                    if (otherOpts.costType === "owned") {
-                        if (!("condition" in skill) || skill.condition.type !== "owned") return false;
-
-                        return skill.condition.requirement.every(cost =>
-                            otherOpts.maxCost[keywordToIdMapping[cost.type] - 8] >= cost.value
-                        );
-                    } else if (otherOpts.costType === "res") {
-                        if (!("condition" in skill) || skill.condition.type !== "res") return false;
-
-                        return skill.condition.requirement.every(cost =>
-                            otherOpts.maxCost[keywordToIdMapping[cost.type] - 8] >= cost.value
-                        );
-                    } else if (otherOpts.costType === "none") {
-                        if ("condition" in skill) return false;
-                    } else {
-                        if (!("condition" in skill)) return true;
-
-                        return skill.condition.requirement.every(cost =>
-                            otherOpts.maxCost[keywordToIdMapping[cost.type] - 8] >= cost.value
-                        );
-                    }
-                    return true;
-                });
+                return true;
             })
 
         return [];
@@ -353,42 +305,23 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
     const sortList = (list) => {
         if (compareType === "stats") {
             let sorted = list;
-            switch (otherOpts.sortType) {
-                case "max hp":
-                    sorted = list
-                        .map(([x, s]) => [[x, s], Math.floor(x.hp.base + LEVEL_CAP * x.hp.level)])
-                        .sort((a, b) => a[1] - b[1])
-                        .map(([x, hp]) => x)
-                    break;
-                case "max speed":
-                    sorted = list.sort(([a], [b]) => {
-                        const [amin, amax] = a.speedList[3];
-                        const [bmin, bmax] = b.speedList[3];
-                        return amax === bmax ? amin - bmin : amax - bmax;
-                    })
-                    break;
-                case "min speed":
-                    sorted = list.sort(([a], [b]) => {
-                        const [amin, amax] = a.speedList[3];
-                        const [bmin, bmax] = b.speedList[3];
-                        return amin === bmin ? amax - bmax : amin - bmin;
-                    })
-                    break;
-                case "slash resist":
-                    sorted = list.sort(([a], [b]) => a.resists.slash - b.resists.slash);
-                    break;
-                case "pierce resist":
-                    sorted = list.sort(([a], [b]) => a.resists.pierce - b.resists.pierce);
-                    break;
-                case "blunt resist":
-                    sorted = list.sort(([a], [b]) => a.resists.blunt - b.resists.blunt);
-                    break;
-                default: break;
+            if (otherOpts.sortType === "total cost") {
+                sorted = list
+                    .map(([x, s]) => [[x, s], Object.values(x.cost).reduce((acc, cost) => acc + cost, 0)])
+                    .sort((a, b) => a[1] - b[1])
+                    .map(([x, cost]) => x)
+            } else if (otherOpts.sortType.includes("cost")) {
+                const [affinity] = otherOpts.sortType.split(" ");
+                sorted = list.sort(([ax, as], [bx, bs]) => (ax.cost[affinity] ?? 0) - (bx.cost[affinity] ?? 0))
+            } else if (otherOpts.sortType.includes("resist")) {
+                const [affinity] = otherOpts.sortType.split(" ");
+                sorted = list.sort(([ax, as], [bx, bs]) => (ax.resists[affinity] ?? 0) - (bx.resists[affinity] ?? 0))
             }
+
             return otherOpts.sortAscending ? sorted : sorted.reverse();
         }
 
-        if (["s1", "s2", "s3", "def", "skills"].includes(compareType)) {
+        if (["awa", "cor", "skills"].includes(compareType)) {
             let sorted = list;
 
             const attachData = ([id, sks]) => {
@@ -440,7 +373,7 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
             return otherOpts.sortAscending ? sorted : sorted.reverse();
         }
 
-        if (["passives1", "passives2"].includes(compareType)) {
+        if (compareType === "pas") {
             let sorted = list;
 
             switch (otherOpts.sortType) {
@@ -459,32 +392,39 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
 
     if (displayType === "card") {
         return <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 320px)", width: "100%", gap: "0.2rem", justifyContent: "center" }}>
-            {sortedList.map(([identity, skills], i) => <ComparisonCard key={i} identity={identity} skillList={skills} compareType={compareType} />)}
+            {sortedList.map(([ego, skills], i) => <ComparisonCard key={i} ego={ego} skillList={skills} compareType={compareType} />)}
         </div>
     } else if (displayType === "full") {
         return <div style={{ display: "flex", overflowX: "auto", width: "100%", justifyContent: isMobile ? "start" : "center", overflowY: "hidden" }}>
-            <table style={{ borderCollapse: "collapse", width: "100%", maxWidth: "1600px" }}>
+            <table style={{ borderCollapse: "collapse", width: "100%", maxWidth: compareType === "stats" ? "800px" : "1600px" }}>
                 {
                     compareType === "stats" ?
                         <thead>
                             <tr style={{ height: "1.25rem" }}>
-                                <th>Identity</th>
-                                <th>Hp, Speed</th>
+                                <th>E.G.O</th>
+                                <th>Costs</th>
                                 <th>Resists</th>
-                                <th>Keywords</th>
                             </tr>
                         </thead> :
-                        <thead>
-                            <tr style={{ height: "1.25rem" }}>
-                                <th>Identity</th>
-                                <th>Info</th>
-                                <th>{compareType === "passives1" || compareType === "passives2" ? "Cost" : "Details"}</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
+                        ["awa", "cor", "skills"].includes(compareType) ?
+                            <thead>
+                                <tr style={{ height: "1.25rem" }}>
+                                    <th>E.G.O</th>
+                                    <th>Info</th>
+                                    <th>Details</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead> :
+                            <thead>
+                                <tr style={{ height: "1.25rem" }}>
+                                    <th>E.G.O</th>
+                                    <th>Info</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
                 }
                 <tbody>
-                    {sortedList.map(([identity, skills], i) => <ComparisonRow key={i} identity={identity} skillList={skills} compareType={compareType} />)}
+                    {sortedList.map(([ego, skills], i) => <ComparisonRow key={i} ego={ego} skillList={skills} compareType={compareType} />)}
                 </tbody>
             </table>
         </div>
@@ -493,61 +433,39 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
     }
 }
 
-const splitBySinner = list => list.reduce((acc, [id, identity]) => {
-    if (identity.sinnerId in acc) acc[identity.sinnerId].push([id, identity]);
-    else acc[identity.sinnerId] = [[id, identity]];
+const splitBySinner = list => list.reduce((acc, [id, ego]) => {
+    if (ego.sinnerId in acc) acc[ego.sinnerId].push([id, ego]);
+    else acc[ego.sinnerId] = [[id, ego]];
     return acc;
 }, {});
 
-const getSkillList = (identity, t, skillData) => {
-    if (t === "s1") return identity.skillTypes.filter(skill => skill.type.tier === 1).map((s, i) => ["atk", { ...skillData.skills[s.id], num: s.num }, i]);
-    if (t === "s2") return identity.skillTypes.filter(skill => skill.type.tier === 2).map((s, i) => ["atk", { ...skillData.skills[s.id], num: s.num }, i]);
-    if (t === "s3") return identity.skillTypes.filter(skill => skill.type.tier === 3).map((s, i) => ["atk", { ...skillData.skills[s.id], num: s.num }, i]);
-    if (t === "def") return identity.defenseSkillTypes.map(s => ["def", skillData.skills[s.id], -1]);
+const getSkillList = (ego, t, skillData) => {
+    if (t === "awa") return skillData.awakeningSkills.map(skill => ["awa", skill]);
+    if (t === "cor") return ("corrosionSkills" in skillData) ? skillData.corrosionSkills.map(skill => ["cor", skill]) : [];
     if (t === "skills")
         return [
-            ...getSkillList(identity, "s1", skillData),
-            ...getSkillList(identity, "s2", skillData),
-            ...getSkillList(identity, "s3", skillData),
-            ...identity.skillTypes.filter(skill => skill.type.tier === 4).map((s, i) => ["atk", { ...skillData.skills[s.id], num: s.num }, i]),
-            ...getSkillList(identity, "def", skillData)
+            ...getSkillList(ego, "awa", skillData),
+            ...getSkillList(ego, "cor", skillData)
         ]
-    if (t === "passives1") {
-        return skillData.combatPassives.at(-1).passives.map(passive =>
-            ["pasa", constructPassive(passive, skillData.passiveData), -1]
-        );
-    }
-    if (t === "passives2") {
-        return skillData.supportPassives.at(-1).passives.map(passive =>
-            ["pasb", skillData.passiveData[passive], -1]
-        );
-    }
-
-    return [];
+    if (t === "pas") return skillData.passiveList.map(passive => ["pas", passive])
+    return []
 }
 
-export default function IdentityComparison({ identities, displayType, separateSinners }) {
+export default function EgoComparisonAdvanced({ egos, displayType, separateSinners }) {
     const [compareType, setCompareType] = useState("stats");
     const [searchString, setSearchString] = useState("");
-    const [maxHp, setMaxHp] = useState([0, 500]);
-    const [staggers, setStaggers] = useState([0, 5]);
-    const [speed, setSpeed] = useState([0, 9]);
-    const [speedType, setSpeedType] = useState("overlap");
-    const [slashRes, setSlashRes] = useState([0, 2]);
-    const [pierceRes, setPierceRes] = useState([0, 2]);
-    const [bluntRes, setBluntRes] = useState([0, 2]);
+    const [maxCost, setMaxCost] = useState([9, 9, 9, 9, 9, 9, 9]);
+    const [maxRes, setMaxRes] = useState([2, 2, 2, 2, 2, 2, 2]);
     const [basePower, setBasePower] = useState([0, 99]);
     const [coinPower, setCoinPower] = useState([-99, 99]);
     const [coins, setCoins] = useState([0, 9]);
     const [levelOffset, setLevelOffset] = useState([-9, 9]);
     const [atkWeight, setAtkWeight] = useState([1, 9]);
-    const [maxCost, setMaxCost] = useState([9, 9, 9, 9, 9, 9, 9]);
-    const [costType, setCostType] = useState("any");
     const [sortType, setSortType] = useState("default");
     const [sortAscending, setSortAscending] = useState(true);
     const [grouped, setGrouped] = useState(true);
 
-    const paths = useMemo(() => identities.map(([id, _]) => `identities/${id}`), [identities]);
+    const paths = useMemo(() => egos.map(([id, _]) => `egos/${id}`), [egos]);
     const [skillData, skillDataLoading] = useDataMultiple(paths);
 
     if (skillDataLoading)
@@ -555,46 +473,39 @@ export default function IdentityComparison({ identities, displayType, separateSi
             <h2>Loading data...</h2>
         </div>;
 
-    const identityListToItems = list => list.reduce((acc, [id, identity]) => {
+    const egoListToItems = list => list.reduce((acc, [id, ego]) => {
         if (compareType === "stats") {
-            acc.push([identity, []]);
+            acc.push([ego, []]);
             return acc;
         }
 
-        const list = getSkillList(identity, compareType, skillData[`identities/${id}`]);
-        if (grouped) acc.push([identity, list]);
-        else list.forEach(skill => acc.push([identity, [skill]]));
+        const list = getSkillList(ego, compareType, skillData[`egos/${id}`]);
+        if (grouped) acc.push([ego, list]);
+        else list.forEach(skill => acc.push([ego, [skill]]));
         return acc;
     }, [])
 
     const listComponents = separateSinners ?
-        Object.entries(splitBySinner(identities)).map(([sinnerId, identityList]) => {
+        Object.entries(splitBySinner(egos)).map(([sinnerId, egoList]) => {
             return [
                 <div key={sinnerId} style={{ display: "flex", flexDirection: "row", alignItems: "center", fontSize: "1.2rem", fontWeight: "bold", padding: "0.5rem 0rem" }}>
                     <SinnerIcon num={sinnerId} style={{ height: "48px" }} />
                     {sinnerMapping[sinnerId]}
                 </div>,
-                identityListToItems(identityList)
+                egoListToItems(egoList)
             ]
         }) :
-        identityListToItems(identities);
+        egoListToItems(egos);
 
     const otherOpts = {
         searchString: searchString,
-        maxHp: maxHp,
-        staggers: staggers,
-        speed: speed,
-        speedType: speedType,
-        slashRes: slashRes,
-        pierceRes: pierceRes,
-        bluntRes: bluntRes,
+        maxCost: maxCost,
+        maxRes: maxRes,
         basePower: basePower,
         coinPower: coinPower,
         coins: coins,
         levelOffset: levelOffset,
         atkWeight: atkWeight,
-        maxCost: maxCost,
-        costType: costType,
         sortType: sortType,
         sortAscending: sortAscending
     }
@@ -603,14 +514,23 @@ export default function IdentityComparison({ identities, displayType, separateSi
         compareType === "stats" ?
             {
                 "default": "default",
-                "max hp": "max hp",
-                "max speed": "max speed",
-                "min speed": "min speed",
-                "slash resist": "slash resist",
-                "pierce resist": "pierce resist",
-                "blunt resist": "blunt resist"
+                "total cost": "total cost",
+                "wrath cost": "wrath cost",
+                "lust cost": "lust cost",
+                "sloth cost": "sloth cost",
+                "gluttony cost": "gluttony cost",
+                "gloom cost": "gloom cost",
+                "pride cost": "pride cost",
+                "envy cost": "envy cost",
+                "wrath resist": "wrath resist",
+                "lust resist": "lust resist",
+                "sloth resist": "sloth resist",
+                "gluttony resist": "gluttony resist",
+                "gloom resist": "gloom resist",
+                "pride resist": "pride resist",
+                "envy resist": "envy resist",
             } :
-            ["s1", "s2", "s3", "def", "skills"].includes(compareType) ?
+            ["awa", "cor", "skills"].includes(compareType) ?
                 {
                     "default": "default",
                     "search match score": "search match score",
@@ -620,7 +540,7 @@ export default function IdentityComparison({ identities, displayType, separateSi
                     "level offset": "level offset",
                     "atk weight": "atk weight"
                 } :
-                ["passives1", "passives2"].includes(compareType) ?
+                ["pas"].includes(compareType) ?
                     {
                         "default": "default",
                         "search match score": "search match score"
@@ -632,7 +552,9 @@ export default function IdentityComparison({ identities, displayType, separateSi
     const filterStyle = { display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem" }
 
     return <div style={{ display: "flex", flexDirection: "column", width: "100%", alignItems: "center", gap: "0.2rem" }}>
-        <span style={{ fontSize: "0.9rem", wordWrap: "wrap" }}>
+        <span style={{ fontSize: "0.9rem", wordWrap: "wrap", textAlign: "center" }}>
+            Use more precise filters and sorting options to compare details across all E.G.Os and their skills.
+            <br />
             Warning: Some combinations of settings may cause the webpage to lag due to the number of things being rendered, especially when using &quot;All Skills&quot;.
             Try using filters if this happens.
         </span>
@@ -651,52 +573,50 @@ export default function IdentityComparison({ identities, displayType, separateSi
             {compareType !== "stats" ?
                 <label>
                     <input type="checkbox" checked={grouped} onChange={e => setGrouped(p => !p)} />
-                    <span {...generalTooltipProps("groupedComp")} style={{ borderBottom: "1px #777 dotted" }}>Grouped by Identity</span>
+                    <span {...generalTooltipProps("groupedComp")} style={{ borderBottom: "1px #777 dotted" }}>Grouped by E.G.O</span>
                 </label> : null
             }
         </div>
         <div style={{ display: "flex", alignItems: "start", flexWrap: "wrap", justifyContent: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
             {compareType === "stats" ? <>
-                <div style={{ display: "flex", gap: "0.5rem", }}>
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", justifyContent: "center"}}>
                     <div style={filterStyle}>
-                        <Icon path={"hp"} style={{ width: "32px", height: "32px" }} />
-                        <RangeInput min={0} max={500} value={maxHp} onChange={setMaxHp} />
-                    </div>
-                    <div style={filterStyle}>
-                        <span style={{ display: "flex", height: "32px", alignItems: "center" }}>Staggers:</span>
-                        <RangeInput min={0} max={5} value={staggers} onChange={setStaggers} />
-                    </div>
-                    <div style={filterStyle}>
-                        <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-                            <Icon path={"speed"} style={{ width: "32px", height: "32px" }} />
-
-                            <button onClick={() => {
-                                if (speedType === "overlap") setSpeedType("contains");
-                                else if (speedType === "contains") setSpeedType("contained");
-                                else setSpeedType("overlap");
-                            }}>
-                                {speedType}
-                            </button>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+                            <span>Max Cost:</span>
+                            <button onClick={() => setMaxCost([0, 0, 0, 0, 0, 0, 0])}>Set all 0</button>
+                            <button onClick={() => setMaxCost([9, 9, 9, 9, 9, 9, 9])}>Set all 9</button>
                         </div>
-                        <RangeInput min={0} max={9} value={speed} onChange={setSpeed} />
+                        <div style={{ display: "flex" }}>
+                            {["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"].map((affinity, i) =>
+                                <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                    <Icon path={affinity} style={{ width: "32px" }} />
+                                    <input type="number" min={0} max={9} value={maxCost[i]}
+                                        onChange={e => setMaxCost(p => p.map((x, ind) => ind === i ? Number(e.target.value) : x))}
+                                        style={{ width: "3ch", textAlign: "center" }}
+                                    />
+                                </div>)}
+                        </div>
                     </div>
-                </div>
-                <div style={{ display: "flex", gap: "0.5rem", }}>
                     <div style={filterStyle}>
-                        <Icon path={"Slash"} style={{ width: "32px", height: "32px" }} />
-                        <RangeInput min={0} max={2} value={slashRes} onChange={setSlashRes} />
-                    </div>
-                    <div style={filterStyle}>
-                        <Icon path={"Pierce"} style={{ width: "32px", height: "32px" }} />
-                        <RangeInput min={0} max={2} value={pierceRes} onChange={setPierceRes} />
-                    </div>
-                    <div style={filterStyle}>
-                        <Icon path={"Blunt"} style={{ width: "32px", height: "32px" }} />
-                        <RangeInput min={0} max={2} value={bluntRes} onChange={setBluntRes} />
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+                            <span>Max Resists:</span>
+                            <button onClick={() => setMaxRes([1, 1, 1, 1, 1, 1, 1])}>Set all 1</button>
+                            <button onClick={() => setMaxRes([2, 2, 2, 2, 2, 2, 2])}>Set all 2</button>
+                        </div>
+                        <div style={{ display: "flex" }}>
+                            {["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"].map((affinity, i) =>
+                                <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                    <Icon path={affinity} style={{ width: "32px" }} />
+                                    <input type="number" min={0} max={2} value={maxRes[i]}
+                                        onChange={e => setMaxRes(p => p.map((x, ind) => ind === i ? Number(e.target.value) : x))}
+                                        style={{ width: "3ch", textAlign: "center" }}
+                                    />
+                                </div>)}
+                        </div>
                     </div>
                 </div>
             </> :
-                ["s1", "s2", "s3", "def", "skills"].includes(compareType) ?
+                ["awa", "cor", "skills"].includes(compareType) ?
                     <>
                         <div style={filterStyle}>
                             <div style={{ display: "flex", height: "32px", alignItems: "center" }}>
@@ -735,34 +655,6 @@ export default function IdentityComparison({ identities, displayType, separateSi
                                 Search in Description:
                             </span>
                             <input value={searchString} onChange={e => setSearchString(e.target.value)} />
-                        </div>
-                        <div style={filterStyle}>
-                            <span>Cost Type:</span>
-                            <button onClick={() => {
-                                if (costType === "any") setCostType("owned");
-                                else if (costType === "owned") setCostType("res");
-                                else if (costType === "res") setCostType("none");
-                                else setCostType("any");
-                            }}>
-                                {costType}
-                            </button>
-                        </div>
-                        <div style={filterStyle}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
-                                <span>Max Cost:</span>
-                                <button onClick={() => setMaxCost([0, 0, 0, 0, 0, 0, 0])}>Set all 0</button>
-                                <button onClick={() => setMaxCost([9, 9, 9, 9, 9, 9, 9])}>Set all 9</button>
-                            </div>
-                            <div style={{ display: "flex" }}>
-                                {["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"].map((affinity, i) =>
-                                    <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                        <Icon path={affinity} style={{ width: "32px" }} />
-                                        <input type="number" min={0} max={9} value={maxCost[i]}
-                                            onChange={e => setMaxCost(p => p.map((x, ind) => ind === i ? Number(e.target.value) : x))}
-                                            style={{ width: "3ch", textAlign: "center" }}
-                                        />
-                                    </div>)}
-                            </div>
                         </div>
                     </>
             }

@@ -19,7 +19,7 @@ function ComparisonCard({ identity }) {
     identity.skillTypes.forEach(s => {
         const data = skillData.skills[s.id];
         if (data.tier in counts) {
-            skills.push(<SkillCard key={skills.length} skill={data} mini={true} index={counts[data.tier] + 1} />)
+            skills.push(<SkillCard key={skills.length} skill={data} mini={true} index={counts[data.tier]} />)
             counts[data.tier] += 1;
         } else {
             skills.push(<SkillCard key={skills.length} skill={data} mini={true} />)
@@ -29,13 +29,7 @@ function ComparisonCard({ identity }) {
 
     identity.defenseSkillTypes.forEach(s => {
         const data = skillData.skills[s.id];
-        if (data.tier in counts) {
-            skills.push(<SkillCard key={skills.length} skill={data} mini={true} index={counts[data.tier] + 1} />)
-            counts[data.tier] += 1;
-        } else {
-            skills.push(<SkillCard key={skills.length} skill={data} mini={true} />)
-            counts[data.tier] = 1;
-        }
+        skills.push(<SkillCard key={skills.length} skill={data} mini={true} type={"defense"} />)
     })
 
     skillData.combatPassives.at(-1).passives.forEach(passive => {

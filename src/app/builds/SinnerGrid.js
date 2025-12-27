@@ -314,7 +314,7 @@ function CalcComponent({ opts, setOpts }) {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center" }}>
                 <span>Target Levels and Resists:</span>
-                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", justifyContent: "center" }}>
                     {valueComponent("offense level", "off", LEVEL_CAP)}
                     {valueComponent("defense level", "def", LEVEL_CAP)}
                     {valueComponent("Slash", "slash", 1)}

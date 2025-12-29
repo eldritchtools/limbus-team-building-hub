@@ -20,9 +20,8 @@ function SkillLabel({ skill, type, index }) {
 
 export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "attack", index = 0, mini = false }) {
     let skillData = skill.data.reduce((acc, dataTier) => dataTier.uptie <= uptie ? { ...acc, ...dataTier } : acc, {});
-    let skillText = skill.text.reduce((acc, textTier) => textTier.uptie <= uptie ? { ...acc, ...textTier } : acc, {});
 
-    if (Object.keys(skillData).length === 0 || Object.keys(skillText).length === 0) return null;
+    if (Object.keys(skillData).length === 0) return null;
 
     let iconSize = mini ? "24px" : "32px";
     let coinSize = mini ? "18px" : "24px";
@@ -40,7 +39,7 @@ export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "
                 {skillData.defType !== "attack" ? <Icon path={capitalizeFirstLetter(skillData.defType)} style={{ width: iconSize }} /> : null}
                 {skillData.defType === "attack" || skillData.defType === "counter" ? <Icon path={capitalizeFirstLetter(skillData.atkType)} style={{ width: iconSize }} /> : null}
                 <div style={{ borderRadius: "5px", backgroundColor: affinityColorMapping[skillData.affinity], padding: "5px", color: "#ddd", textShadow: "black 1px 1px 5px", fontWeight: "bold" }}>
-                    {skillText.name}
+                    {skillData.name}
                 </div>
                 {count > 0 ? <div style={{ color: "#aaa", fontWeight: "bold", fontSize: mini ? "1rem" : "1.25rem" }}>x{count}</div> : null}
             </div>
@@ -54,7 +53,7 @@ export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "
                     Power: {skillData.baseValue} {skillData.coinValue < 0 ? skillData.coinValue : `+${skillData.coinValue}`}
                 </span>
                 <span style={{ gap: "0" }}>
-                    {skillData.coinTypes.map((coin, i) => <Icon key={i} path={coin === "unbreakable" ? "unbreakable coin" : "coin"} style={{ height: coinSize }} />)}
+                    {skillData.coins.map((coin, i) => <Icon key={i} path={coin["type"] === "unbreakable" ? "unbreakable coin" : "coin"} style={{ height: coinSize }} />)}
                 </span>
             </span>
             <span style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
@@ -72,20 +71,20 @@ export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "
             </span>
         </div>
         <div style={{ whiteSpace: "pre-wrap", lineHeight: "1.2", marginBottom: "0.25rem" }}>
-            {skillText.desc ?
-                <ProcessedText text={skillText.desc} iconStyleOverride={iconStyleOverride} nameStyleOverride={nameStyleOverride} /> :
+            {skillData.desc ?
+                <ProcessedText text={skillData.desc} iconStyleOverride={iconStyleOverride} nameStyleOverride={nameStyleOverride} /> :
                 null
             }
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-            {skillText.coinDescs ? skillText.coinDescs.map((coinDescs, index) => coinDescs.length > 0 ?
+            {skillData.coins.map((coin, index) => "descs" in coin && coin["descs"].length > 0 ?
                 <div key={index} style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
                     <Coin num={index + 1} mini={mini} />
                     <div style={{ display: "flex", flex: 1, flexDirection: "column", whiteSpace: "pre-wrap", gap: "0.1rem" }}>
-                        {coinDescs.map((desc, innerIndex) => <ProcessedText key={`${innerIndex}-text`} text={desc} iconStyleOverride={iconStyleOverride} nameStyleOverride={nameStyleOverride} />)}
+                        {coin["descs"].map((desc, innerIndex) => <ProcessedText key={`${innerIndex}-text`} text={desc} iconStyleOverride={iconStyleOverride} nameStyleOverride={nameStyleOverride} />)}
                     </div>
                 </div> : null
-            ) : null}
+            )}
         </div>
     </div>
 }

@@ -142,15 +142,14 @@ function SkillCalc({ skills, opts }) {
 
 function extractSkillData(skill, uptie, level, rank) {
     const data = skill.data.reduce((acc, dataTier) => dataTier.uptie <= uptie ? { ...acc, ...dataTier } : acc, {});
-    const text = skill.text.reduce((acc, textTier) => textTier.uptie <= uptie ? { ...acc, ...textTier } : acc, {});
 
     return {
-        name: text.name,
+        name: data.name,
         rank: rank,
         atkType: data.atkType,
         defType: data.defType,
         affinity: data.affinity,
-        coins: data.coinTypes,
+        coins: data.coins.map(coin => coin["type"]),
         basePower: data.baseValue,
         coinPower: data.coinValue,
         offDefLevel: data.levelCorrection + level
@@ -158,7 +157,7 @@ function extractSkillData(skill, uptie, level, rank) {
 }
 
 function IdentitySkillCalc({ identity, uptie = 4, level = LEVEL_CAP, opts }) {
-    const [skillData, skillDataLoading] = useData(`identities/${identity.id}`);
+    const [skillData, skillDataLoading] = useData(`identitiesv2/${identity.id}`);
 
     if (skillDataLoading) return null;
 
@@ -192,14 +191,14 @@ const egoRanks = ["ZAYIN", "TETH", "HE", "WAW", "ALEPH"];
 function EgoSkillCalc({ egos, threadspins, level = LEVEL_CAP, opts }) {
     const egosList = useMemo(() => egos.map((ego, i) => [ego, threadspins ? threadspins[i] : 4, egoRanks[i]]), [egos, threadspins]);
 
-    const [skillData, skillDataLoading] = useDataMultiple(egosList.filter(([ego]) => ego).map(([ego]) => `egos/${ego.id}`));
+    const [skillData, skillDataLoading] = useDataMultiple(egosList.filter(([ego]) => ego).map(([ego]) => `egosv2/${ego.id}`));
 
     if (skillDataLoading) return null;
 
     const list = egosList
         .filter(([ego]) => ego)
         .map(([ego, ts, rank]) => {
-            const data = skillData[`egos/${ego.id}`];
+            const data = skillData[`egosv2/${ego.id}`];
             const skillList = [...data.awakeningSkills, ...(data.corrosionSkills ?? [])];
 
             return skillList.map(skill => extractSkillData(skill, ts, level, [rank]));

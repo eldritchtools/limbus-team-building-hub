@@ -14,7 +14,7 @@ function IdentityTooltipContent({ identity }) {
             </div>
             <div style={{ display: "flex", flexDirection: "column", width: "192px" }}>
                 <div style={{ flex: 1, display: "flex" }}>
-                    {identity.skillKeywordList.map(x => <KeywordIcon key={x} id={x} />)}
+                    {(identity.skillKeywordList || []).map(x => <KeywordIcon key={x} id={x} />)}
                 </div>
                 <div style={{ flex: 1, display: "flex" }}>
                     {identity.affinities.map(x => <KeywordIcon key={x} id={x} />)}

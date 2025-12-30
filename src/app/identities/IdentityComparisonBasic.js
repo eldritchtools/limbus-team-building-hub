@@ -8,7 +8,7 @@ import { IdentitySelector } from "../components/Selectors";
 import { selectStyleVariable } from "../styles";
 
 function ComparisonCard({ identity }) {
-    const [skillData, skillDataLoading] = useData(`identities/${identity.id}`);
+    const [skillData, skillDataLoading] = useData(`identitiesv2/${identity.id}`);
     if (skillDataLoading)
         return <div style={{ display: "flex", flexDirection: "column", flex: "1", minWidth: "320px", border: "1px #aaa solid", borderRadius: "1rem", padding: "0.5rem", gap: "0.5rem" }}>
             <span style={{ fontSize: "1.2rem", textAlign: "center" }}>Loading...</span>
@@ -19,7 +19,7 @@ function ComparisonCard({ identity }) {
     identity.skillTypes.forEach(s => {
         const data = skillData.skills[s.id];
         if (data.tier in counts) {
-            skills.push(<SkillCard key={skills.length} skill={data} mini={true} index={counts[data.tier] + 1} />)
+            skills.push(<SkillCard key={skills.length} skill={data} mini={true} index={counts[data.tier]} />)
             counts[data.tier] += 1;
         } else {
             skills.push(<SkillCard key={skills.length} skill={data} mini={true} />)
@@ -29,13 +29,7 @@ function ComparisonCard({ identity }) {
 
     identity.defenseSkillTypes.forEach(s => {
         const data = skillData.skills[s.id];
-        if (data.tier in counts) {
-            skills.push(<SkillCard key={skills.length} skill={data} mini={true} index={counts[data.tier] + 1} />)
-            counts[data.tier] += 1;
-        } else {
-            skills.push(<SkillCard key={skills.length} skill={data} mini={true} />)
-            counts[data.tier] = 1;
-        }
+        skills.push(<SkillCard key={skills.length} skill={data} mini={true} type={"defense"} />)
     })
 
     skillData.combatPassives.at(-1).passives.forEach(passive => {
@@ -86,7 +80,7 @@ function ComparisonCard({ identity }) {
             </div>
 
             <div style={{ display: "flex", gap: "0.25rem", justifyContent: "center" }}>
-                {identity.skillKeywordList.map(x => <KeywordIcon key={x} id={x} />)}
+                {(identity.skillKeywordList || []).map(x => <KeywordIcon key={x} id={x} />)}
             </div>
         </div>
         <div style={{ border: "1px #aaa solid", width: "100%" }} />

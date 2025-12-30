@@ -48,7 +48,7 @@ function BuildsTab({ builds }) {
 export default function Identity({ params }) {
     const { id } = React.use(params);
     const [identities, identitiesLoading] = useData("identities");
-    const [skillData, skillDataLoading] = useData(`identities/${id}`);
+    const [skillData, skillDataLoading] = useData(`identitiesv2/${id}`);
     const identityData = identitiesLoading ? null : identities[id];
     const [uptie, setUptie] = useState(4);
     const [level, setLevel] = useState(LEVEL_CAP);
@@ -69,8 +69,8 @@ export default function Identity({ params }) {
 
     if (identitiesLoading || skillDataLoading) return null;
 
-    const combatPassives = skillData.combatPassives.findLast(passives => passives.level <= uptie);
-    const supportPassives = skillData.supportPassives.findLast(passives => passives.level <= uptie);
+    const combatPassives = skillData.combatPassives.findLast(passives => passives.uptie <= uptie);
+    const supportPassives = skillData.supportPassives.findLast(passives => passives.uptie <= uptie);
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
         <div style={{ display: "flex", flexDirection: "row", width: "100%", flexWrap: "wrap", justifyContent: "center", gap: "1rem" }}>
@@ -126,7 +126,7 @@ export default function Identity({ params }) {
                 </div>
                 <div style={{ border: "1px #777 dotted", padding: "0.2rem", textAlign: "center", display: "flex", flexDirection: "column" }}>
                     <div style={{ borderBottom: "1px #777 dotted" }}>Keywords</div>
-                    <div style={{ marginTop: "0.2rem" }}>{identityData.skillKeywordList.map(x => <KeywordIcon key={x} id={x} />)}</div>
+                    <div style={{ marginTop: "0.2rem" }}>{(identityData.skillKeywordList || []).map(x => <KeywordIcon key={x} id={x} />)}</div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.5rem", gap: "0.2rem" }}>
                     <div style={{ display: "flex", gap: "1rem", alignSelf: "center" }}>

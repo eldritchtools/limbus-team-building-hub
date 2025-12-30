@@ -76,7 +76,7 @@ function IdentityDetails({ id, identity }) {
         </div>)}
         {wrapCell(<SkillSpread identity={identity} />)}
         {wrapCell(<div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", padding: "0.5rem" }}>
-            {identity.skillKeywordList.map(keyword => <Icon key={keyword} path={keyword} style={{ height: "32px" }} />)}
+            {(identity.skillKeywordList || []).map(keyword => <Icon key={keyword} path={keyword} style={{ height: "32px" }} />)}
         </div>)}
         {wrapCell(<div style={{ display: "flex", flexDirection: "column", textAlign: "center", gap: "0.2rem" }}>
             {identity.tags.map(tag => <div key={tag}>{processTag(tag)}</div>)}
@@ -106,7 +106,7 @@ function checkSearchMatch(searchString, identity) {
     return false;
 }
 
-function IdentityList({ identities, searchString, selectedMainFilters, displayType, separateSinners, strictFiltering, selectedKeywords, selectedFactionTags, selectedSeasons, compareMode }) {
+function IdentityList({ identities, searchString, selectedMainFilters, displayType, separateSinners, strictFiltering, selectedStatuses, selectedFactionTags, selectedSeasons, compareMode }) {
     const filters = useMemo(() => selectedMainFilters.reduce((acc, filter) => {
         if (mainFiltersMapping[filter] in acc) acc[mainFiltersMapping[filter]].push(filter);
         else acc[mainFiltersMapping[filter]] = [filter];
@@ -137,9 +137,9 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
                 }
             } else if (type === "keyword") {
                 if (strictFiltering) {
-                    if (!filters[type].every(x => identity.skillKeywordList.includes(x))) return false;
+                    if (!filters[type].every(x => (identity.skillKeywordList || []).includes(x))) return false;
                 } else {
-                    if (!filters[type].some(x => identity.skillKeywordList.includes(x))) return false;
+                    if (!filters[type].some(x => (identity.skillKeywordList || []).includes(x))) return false;
                 }
             } else if (type === "sinner") {
                 if (strictFiltering) {
@@ -150,11 +150,11 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
             }
         }
 
-        if (selectedKeywords.length !== 0) {
+        if (selectedStatuses.length !== 0) {
             if (strictFiltering) {
-                if (!selectedKeywords.every(keywordOption => identity.keywordTags.includes(keywordOption.value))) return false;
+                if (!selectedStatuses.every(statusOption => (identity.keywordTags || identity.statuses).includes(statusOption.value))) return false;
             } else {
-                if (!selectedKeywords.some(keywordOption => identity.keywordTags.includes(keywordOption.value))) return false;
+                if (!selectedStatuses.some(statusOption => (identity.keywordTags || identity.statuses).includes(statusOption.value))) return false;
             }
         }
 
@@ -175,7 +175,7 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
         }
 
         return true;
-    }), [searchString, filters, identities, selectedKeywords, selectedFactionTags, selectedSeasons, strictFiltering]);
+    }), [searchString, filters, identities, selectedStatuses, selectedFactionTags, selectedSeasons, strictFiltering]);
 
     if (compareMode === "basic") {
         return <IdentityComparisonBasic />
@@ -363,24 +363,24 @@ export default function Identities() {
         setSeparateSinners(checked);
     }
 
-    const [selectedKeywords, setSelectedKeywords] = useState([]);
+    const [selectedStatuses, setSelectedStatuses] = useState([]);
     const [selectedFactionTags, setSelectedFactionTags] = useState([]);
     const [selectedSeasons, setSelectedSeasons] = useState([]);
 
-    const [keywordOptions, tagOptions, seasonOptions] = useMemo(() => {
+    const [statusOptions, tagOptions, seasonOptions] = useMemo(() => {
         if (identitiesLoading || statusesLoading) return [];
-        const keywordList = new Set();
+        const statusList = new Set();
         const tagList = new Set();
         const seasonList = new Set();
         seasonList.add(9100);
 
         Object.entries(identities).forEach(([_id, identity]) => {
-            identity.keywordTags.forEach(keyword => keywordList.add(keyword));
+            (identity.keywordTags || identity.statuses).forEach(status => statusList.add(status));
             identity.tags.forEach(tag => tagList.add(tag));
             seasonList.add(identity.season);
         });
 
-        return [[...keywordList].map(id => ({
+        return [[...statusList].map(id => ({
             value: id,
             label: <Status status={statuses[id]} includeTooltip={false} />,
             name: statuses[id].name
@@ -401,7 +401,7 @@ export default function Identities() {
                 <span style={{ textAlign: 'end' }}>Search:</span>
                 <input value={searchString} onChange={e => setSearchString(e.target.value)} placeholder="Identity Name" />
                 <span style={{ textAlign: "end" }}>Filter Statuses:</span>
-                <MultiSelector options={keywordOptions} selected={selectedKeywords} setSelected={setSelectedKeywords} placeholder={"Select Statuses..."} />
+                <MultiSelector options={statusOptions} selected={selectedStatuses} setSelected={setSelectedStatuses} placeholder={"Select Statuses..."} />
                 <span style={{ textAlign: "end" }}>Filter Factions:</span>
                 <MultiSelector options={tagOptions} selected={selectedFactionTags} setSelected={setSelectedFactionTags} placeholder={"Select Factions/Tags..."} />
                 <span style={{ textAlign: "end" }}>Filter Season:</span>
@@ -452,7 +452,7 @@ export default function Identities() {
                 displayType={displayType}
                 separateSinners={separateSinners}
                 strictFiltering={strictFiltering}
-                selectedKeywords={selectedKeywords}
+                selectedStatuses={selectedStatuses}
                 selectedFactionTags={selectedFactionTags}
                 selectedSeasons={selectedSeasons}
                 compareMode={compareMode}

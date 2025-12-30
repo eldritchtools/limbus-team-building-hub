@@ -67,7 +67,7 @@ function EgoDetails({ id, ego }) {
             </div>)}
         </div>)}
         {wrapCell(<div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", maxWidth: "75ch", padding: "0.5rem", gap: "0.5rem", textAlign: "center" }}>
-            {ego.keywordTags.sort().map(keyword => <Status key={keyword} id={keyword} style={{ height: "32px" }} />)}
+            {(ego.keywordTags || ego.statuses).sort().map(keyword => <Status key={keyword} id={keyword} style={{ height: "32px" }} />)}
         </div>)}
     </tr>
 }
@@ -107,7 +107,7 @@ function checkSearchMatch(searchString, ego) {
     return false;
 }
 
-function EgoList({ egos, searchString, selectedMainFilters, displayType, separateSinners, strictFiltering, selectedKeywords, selectedSeasons, compareMode }) {
+function EgoList({ egos, searchString, selectedMainFilters, displayType, separateSinners, strictFiltering, selectedStatuses, selectedSeasons, compareMode }) {
     const filters = useMemo(() => selectedMainFilters.reduce((acc, filter) => {
         if (mainFiltersMapping[filter] in acc) acc[mainFiltersMapping[filter]].push(filter);
         else acc[mainFiltersMapping[filter]] = [filter];
@@ -138,9 +138,9 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
                 }
             } else if (type === "keyword") {
                 if (strictFiltering) {
-                    if (!filters[type].every(x => ego.keywordTags.includes(keywordMapping[x]))) return false;
+                    if (!filters[type].every(x => (ego.keywordTags || ego.statuses).includes(keywordMapping[x]))) return false;
                 } else {
-                    if (!filters[type].some(x => ego.keywordTags.includes(keywordMapping[x]))) return false;
+                    if (!filters[type].some(x => (ego.keywordTags || ego.statuses).includes(keywordMapping[x]))) return false;
                 }
             } else if (type === "sinner") {
                 if (strictFiltering) {
@@ -151,11 +151,11 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
             }
         }
 
-        if (selectedKeywords.length !== 0) {
+        if (selectedStatuses.length !== 0) {
             if (strictFiltering) {
-                if (!selectedKeywords.every(keywordOption => ego.keywordTags.includes(keywordOption.value))) return false;
+                if (!selectedStatuses.every(statusOption => (ego.keywordTags || ego.statuses).includes(statusOption.value))) return false;
             } else {
-                if (!selectedKeywords.some(keywordOption => ego.keywordTags.includes(keywordOption.value))) return false;
+                if (!selectedStatuses.some(statusOption => (ego.keywordTags || ego.statuses).includes(statusOption.value))) return false;
             }
         }
 
@@ -168,7 +168,7 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
         }
 
         return true;
-    }), [searchString, filters, egos, selectedKeywords, selectedSeasons, strictFiltering]);
+    }), [searchString, filters, egos, selectedStatuses, selectedSeasons, strictFiltering]);
 
     if (compareMode === "basic") {
         return <EgoComparisonBasic />
@@ -365,21 +365,21 @@ export default function EgosPage() {
         setSeparateSinners(checked);
     }
 
-    const [selectedKeywords, setSelectedKeywords] = useState([]);
+    const [selectedStatuses, setSelectedStatuses] = useState([]);
     const [selectedSeasons, setSelectedSeasons] = useState([]);
 
-    const [keywordOptions, seasonOptions] = useMemo(() => {
+    const [statusOptions, seasonOptions] = useMemo(() => {
         if (egosLoading) return [];
-        const keywordList = new Set();
+        const statusList = new Set();
         const seasonList = new Set();
         seasonList.add(9100);
 
         Object.entries(egos).forEach(([_id, ego]) => {
-            ego.keywordTags.forEach(keyword => keywordList.add(keyword))
+            (ego.keywordTags || ego.statuses).forEach(status => statusList.add(status))
             seasonList.add(ego.season);
         })
 
-        return [[...keywordList].map(id => ({
+        return [[...statusList].map(id => ({
             value: id,
             label: <Status id={id} includeTooltip={false} />,
             name: statuses[id].name
@@ -396,7 +396,7 @@ export default function EgosPage() {
                 <span style={{ textAlign: 'end' }}>Search:</span>
                 <input value={searchString} onChange={e => setSearchString(e.target.value)} placeholder={"E.G.O Name"} />
                 <span style={{ textAlign: "end" }}>Filter Statuses:</span>
-                <MultiSelector options={keywordOptions} selected={selectedKeywords} setSelected={setSelectedKeywords} placeholder={"Select Statuses..."} />
+                <MultiSelector options={statusOptions} selected={selectedStatuses} setSelected={setSelectedStatuses} placeholder={"Select Statuses..."} />
                 <span style={{ textAlign: "end" }}>Filter Season:</span>
                 <MultiSelector options={seasonOptions} selected={selectedSeasons} setSelected={setSelectedSeasons} placeholder={"Select Seasons..."} />
                 <span style={{ textAlign: "end" }}>Display Type:</span>
@@ -445,7 +445,7 @@ export default function EgosPage() {
                 displayType={displayType}
                 separateSinners={separateSinners}
                 strictFiltering={strictFiltering}
-                selectedKeywords={selectedKeywords}
+                selectedStatuses={selectedStatuses}
                 selectedSeasons={selectedSeasons}
                 compareMode={compareMode}
             />}

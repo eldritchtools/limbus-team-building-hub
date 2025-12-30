@@ -9,32 +9,110 @@ const formatter = new Intl.NumberFormat(undefined, {
 });
 
 function computeSkill(skill, opts) {
+    if ((opts.cond === "skill" || opts.cond === "all") && !skill.bonusesEnabled)
+        return ["--", "--"];
+
+    let basePower = skill.basePower;
+    let coinPowerBonus = 0;
+    let damageMultiplier = 1;
+    let critMultiplier = 0; // Added to damage multiplier, so no need to start at 1
+    let damageAdder = 0;
+    let clashBonus = 0;
+
+    if (skill.bonusesEnabled && opts.cond !== "default")
+        skill.bonuses?.forEach(bonus => {
+            switch (bonus.type) {
+                case "base": case "final":
+                    basePower += bonus.value;
+                    break;
+                case "clash":
+                    clashBonus += bonus.value;
+                    break;
+                case "coin":
+                    coinPowerBonus += bonus.value;
+                    break;
+                case "damage":
+                    if (bonus.extra.op === "mul")
+                        damageMultiplier += bonus.value;
+                    else if (bonus.extra.op === "add")
+                        damageAdder += bonus.value;
+                    break;
+                case "critdamage":
+                    critMultiplier += bonus.value;
+                    break;
+                default:
+                    break;
+            }
+        })
+
+
     let [clash, damage] = skill.coins.reduce(([clash, damage, roll], coin) => {
-        let coinPower = skill.coinPower;
-        // if (opts.cond === "skill" || opts.cond === "all") coinPower += 0;
+        let coinPower = skill.coinPower + coinPowerBonus;
+        let coinDamageMultiplier = damageMultiplier;
+        let coinCritMultiplier = critMultiplier;
+        let coinDamageAdder = 0;
+        let coinReuses = 0;
+
+        if (skill.bonusesEnabled && opts.cond === "all")
+            coin.bonuses?.forEach(bonus => {
+                switch (bonus.type) {
+                    case "coin":
+                        coinPower += bonus.value;
+                        break;
+                    case "damage":
+                        if (bonus.extra.op === "mul")
+                            coinDamageMultiplier += bonus.value;
+                        else if (bonus.extra.op === "add") {
+                            if ("type" in bonus.extra.op)
+                                coinDamageAdder += bonus.value * opts.target[bonus.extra.op["type"]];
+                            else
+                                coinDamageAdder += bonus.value;
+                        }
+                        break;
+                    case "critdamage":
+                        coinCritMultiplier += bonus.value;
+                        break;
+                    case "reuse":
+                        coinReuses += bonus.value;
+                        break;
+                    default:
+                        break;
+                }
+            })
 
         let p = 0;
         if (opts.type === "max") p = coinPower < 0 ? 0 : 1;
         else if (opts.type === "min") p = coinPower < 0 ? 1 : 0;
         else if (opts.type === "avg") p = 0.5 + (opts.sp / 100);
 
-        let newRoll = roll + (p * coinPower);
         let resistMultiplier = 1;
         if (skill.atkType) resistMultiplier += (opts.target[skill.atkType] ?? 1) - 1;
         if (skill.affinity !== "none") resistMultiplier += (opts.target[skill.affinity] ?? 1) - 1;
         resistMultiplier += (skill.offDefLevel - (opts.target.def ?? LEVEL_CAP)) / (Math.abs(skill.offDefLevel - (opts.target.def ?? LEVEL_CAP)) + 25);
 
-        let newDamage = newRoll * resistMultiplier;
+        let newRoll = roll;
+        let newDamage = 0;
+        for (let i = 0; i < 1 + coinReuses; i++) {
+            newRoll += (p * coinPower);
+            if (skill.applyCrits) {
+                newDamage += newRoll * (resistMultiplier + 0.2) * (coinDamageMultiplier + coinCritMultiplier) + coinDamageAdder;
+            } else {
+                newDamage += newRoll * resistMultiplier * coinDamageMultiplier + coinDamageAdder;
+            }
+        }
+
         if (newDamage < 1) newDamage = 1;
 
         return [clash + (p * coinPower), damage + newDamage, newRoll];
-    }, [skill.basePower, 0, skill.basePower]);
+    }, [basePower, 0, basePower]);
 
     if (skill.atkType) {
         if (skill.offDefLevel > (opts.target.off ?? LEVEL_CAP)) clash += Math.floor((skill.offDefLevel - (opts.target.off ?? LEVEL_CAP)) / 3);
     } else {
         if (skill.offDefLevel > (opts.target.def ?? LEVEL_CAP)) clash += Math.floor((skill.offDefLevel - (opts.target.def ?? LEVEL_CAP)) / 3);
     }
+
+    clash += clashBonus;
 
     return [formatter.format(clash), skill.atkType ? formatter.format(damage) : "0"];
 }
@@ -140,45 +218,52 @@ function SkillCalc({ skills, opts }) {
     return null;
 }
 
-function extractSkillData(skill, uptie, level, rank) {
+function extractSkillData(skill, uptie, level, rank, applyCrits = false) {
     const data = skill.data.reduce((acc, dataTier) => dataTier.uptie <= uptie ? { ...acc, ...dataTier } : acc, {});
-    const text = skill.text.reduce((acc, textTier) => textTier.uptie <= uptie ? { ...acc, ...textTier } : acc, {});
 
     return {
-        name: text.name,
+        name: data.name,
         rank: rank,
         atkType: data.atkType,
         defType: data.defType,
         affinity: data.affinity,
-        coins: data.coinTypes,
+        coins: data.coins,
         basePower: data.baseValue,
         coinPower: data.coinValue,
-        offDefLevel: data.levelCorrection + level
+        offDefLevel: data.levelCorrection + level,
+        bonusesEnabled: skill.bonusesEnabled,
+        bonuses: data.bonuses,
+        applyCrits: applyCrits
     };
 }
 
 function IdentitySkillCalc({ identity, uptie = 4, level = LEVEL_CAP, opts }) {
-    const [skillData, skillDataLoading] = useData(`identities/${identity.id}`);
+    const [skillData, skillDataLoading] = useData(`identitiesv2/${identity.id}`);
 
-    if (skillDataLoading) return null;
+    if (skillDataLoading) 
+        return <div style={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center", textAlign: "center"}}>
+            Loading...
+        </div>;
+
+    const applyCrits = opts.crit === "all" || (opts.crit === "poise" && identity.skillKeywordList.includes("Poise"))
 
     const [atkskills] = identity.skillTypes.reduce(([skills, counts], skill) => {
         const tier = skillData.skills[skill.id].tier;
 
         if (tier in counts) {
             return [
-                [...skills, extractSkillData(skillData.skills[skill.id], uptie, level, [tier, counts[tier] + 1])],
+                [...skills, extractSkillData(skillData.skills[skill.id], uptie, level, [tier, counts[tier] + 1], applyCrits)],
                 { ...counts, [tier]: counts[tier] + 1 }
             ]
         } else {
             return [
-                [...skills, extractSkillData(skillData.skills[skill.id], uptie, level, [tier])],
+                [...skills, extractSkillData(skillData.skills[skill.id], uptie, level, [tier], applyCrits)],
                 { ...counts, [tier]: 1 }
             ]
         }
     }, [[], {}]);
 
-    const defskills = identity.defenseSkillTypes.map(s => extractSkillData(skillData.skills[s.id], uptie, level, ["Defense"]));
+    const defskills = identity.defenseSkillTypes.map(s => extractSkillData(skillData.skills[s.id], uptie, level, ["Defense"], applyCrits));
 
     const list = [...atkskills, ...defskills];
 
@@ -190,16 +275,16 @@ function IdentitySkillCalc({ identity, uptie = 4, level = LEVEL_CAP, opts }) {
 const egoRanks = ["ZAYIN", "TETH", "HE", "WAW", "ALEPH"];
 
 function EgoSkillCalc({ egos, threadspins, level = LEVEL_CAP, opts }) {
-    const egosList = useMemo(() => egos.map((ego, i) => [ego, threadspins ? threadspins[i] : 4, egoRanks[i]]), [egos, threadspins]);
+    const egosList = useMemo(() => egos.map((ego, i) => [ego, threadspins ? (threadspins[i] ?? 4) : 4, egoRanks[i]]), [egos, threadspins]);
 
-    const [skillData, skillDataLoading] = useDataMultiple(egosList.filter(([ego]) => ego).map(([ego]) => `egos/${ego.id}`));
+    const [skillData, skillDataLoading] = useDataMultiple(egosList.filter(([ego]) => ego).map(([ego]) => `egosv2/${ego.id}`));
 
     if (skillDataLoading) return null;
 
     const list = egosList
         .filter(([ego]) => ego)
         .map(([ego, ts, rank]) => {
-            const data = skillData[`egos/${ego.id}`];
+            const data = skillData[`egosv2/${ego.id}`];
             const skillList = [...data.awakeningSkills, ...(data.corrosionSkills ?? [])];
 
             return skillList.map(skill => extractSkillData(skill, ts, level, [rank]));

@@ -134,7 +134,6 @@ function ComparisonRow({ ego, skillList, compareType }) {
 
         const constructCells = ([type, skill, ind], i) => {
             let skillData = skill.data.reduce((acc, dataTier) => ({ ...acc, ...dataTier }), {});
-            let skillText = skill.text.reduce((acc, textTier) => ({ ...acc, ...textTier }), {});
 
             return [
                 <div key={i} style={{ display: "flex", flexDirection: "column", gap: "0.2rem", alignItems: "center", maxWidth: "40ch", textAlign: "center" }}>
@@ -142,7 +141,7 @@ function ComparisonRow({ ego, skillList, compareType }) {
                         {type === "awa" ? "Awakening" : "Corrosion"}
                     </div>
                     <div style={{ borderRadius: "5px", backgroundColor: affinityColorMapping[skillData.affinity], padding: "5px", color: "#ddd", textShadow: "black 1px 1px 5px", fontWeight: "bold" }}>
-                        {skillText.name}
+                        {skillData.name}
                     </div>
                     <div style={{ display: "flex", flexDirection: "row", gap: "0.25rem", alignItems: "center" }}>
                         {skillData.affinity !== "none" ? <Icon path={skillData.affinity} style={{ width: iconSize }} /> : null}
@@ -157,7 +156,7 @@ function ComparisonRow({ ego, skillList, compareType }) {
                             Power: {skillData.baseValue} {skillData.coinValue < 0 ? skillData.coinValue : `+${skillData.coinValue}`}
                         </span>
                         <span style={{ gap: "0" }}>
-                            {skillData.coinTypes.map((coin, i) => <Icon key={i} path={coin === "unbreakable" ? "unbreakable coin" : "coin"} style={{ height: coinSize }} />)}
+                            {skillData.coins.map((coin, i) => <Icon key={i} path={coin["type"] === "unbreakable" ? "unbreakable coin" : "coin"} style={{ height: coinSize }} />)}
                         </span>
                     </span>
                     <span style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
@@ -174,20 +173,20 @@ function ComparisonRow({ ego, skillList, compareType }) {
 
                 <div key={i} style={{ display: "flex", flexDirection: "column", maxWidth: "100ch" }}>
                     <div style={{ whiteSpace: "pre-wrap", lineHeight: "1.2", marginBottom: "0.25rem" }}>
-                        {skillText.desc ?
-                            <ProcessedText text={skillText.desc} /> :
+                        {skillData.desc ?
+                            <ProcessedText text={skillData.desc} /> :
                             null
                         }
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                        {skillText.coinDescs ? skillText.coinDescs.map((coinDescs, index) => coinDescs.length > 0 ?
+                        {skillData.coins.map((coin, index) => "descs" in coin && coin["descs"].length > 0 ?
                             <div key={index} style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
                                 <Coin num={index + 1} />
                                 <div style={{ display: "flex", flex: 1, flexDirection: "column", whiteSpace: "pre-wrap", gap: "0.1rem" }}>
-                                    {coinDescs.map((desc, innerIndex) => <ProcessedText key={`${innerIndex}-text`} text={desc} />)}
+                                    {coin["descs"].map((desc, innerIndex) => <ProcessedText key={`${innerIndex}-text`} text={desc} />)}
                                 </div>
                             </div> : null
-                        ) : null}
+                        )}
                     </div>
                 </div>
             ]
@@ -238,14 +237,15 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
             const pieces = [];
             skills.forEach(([t, skill, i]) => {
                 if (t === "awa" || t === "cor") {
-                    let skillText = skill.text.reduce((acc, textTier) => ({ ...acc, ...textTier }), {});
-                    pieces.push(replaceStatusVariablesTextOnly(skillText.desc, statuses));
-                    if (skillText.coinDescs) {
-                        skillText.coinDescs.forEach(coinDescs =>
-                            coinDescs.forEach(desc =>
+                    let skillData = skill.data.reduce((acc, dataTier) => ({ ...acc, ...dataTier }), {});
+                    pieces.push(replaceStatusVariablesTextOnly(skillData.desc, statuses));
+                    if (skillData.coins) {
+                        skillData.coins.forEach(coin => {
+                            if (!("descs" in coin)) return; 
+                            coin["descs"].forEach(desc =>
                                 pieces.push(replaceStatusVariablesTextOnly(desc, statuses))
                             )
-                        )
+                        })
                     }
                 } else if (t === "pas") {
                     pieces.push(replaceStatusVariablesTextOnly(skill.desc, statuses));
@@ -281,7 +281,7 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
                     let skillData = skill.data.reduce((acc, dataTier) => ({ ...acc, ...dataTier }), {});
                     if (outsideInterval(skillData.baseValue, otherOpts.basePower)) return false;
                     if (outsideInterval(skillData.coinValue, otherOpts.coinPower)) return false;
-                    if (outsideInterval(skillData.coinTypes.length, otherOpts.coins)) return false;
+                    if (outsideInterval(skillData.coins.length, otherOpts.coins)) return false;
                     if (outsideInterval(skillData.levelCorrection, otherOpts.levelOffset)) return false;
                     if (outsideInterval(skillData.atkWeight, otherOpts.atkWeight)) return false;
                     return true;
@@ -349,8 +349,8 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
                     break;
                 case "coins":
                     sorted = list.map(x => attachData(x)).sort(([a, as], [b, bs]) => {
-                        const at = as.reduce((acc, [t, sk, i, skd]) => acc + skd.coinTypes.length, 0);
-                        const bt = bs.reduce((acc, [t, sk, i, skd]) => acc + skd.coinTypes.length, 0);
+                        const at = as.reduce((acc, [t, sk, i, skd]) => acc + skd.coins.length, 0);
+                        const bt = bs.reduce((acc, [t, sk, i, skd]) => acc + skd.coins.length, 0);
                         return at - bt;
                     })
                     break;
@@ -465,7 +465,7 @@ export default function EgoComparisonAdvanced({ egos, displayType, separateSinne
     const [sortAscending, setSortAscending] = useState(true);
     const [grouped, setGrouped] = useState(true);
 
-    const paths = useMemo(() => egos.map(([id, _]) => `egos/${id}`), [egos]);
+    const paths = useMemo(() => egos.map(([id, _]) => `egosv2/${id}`), [egos]);
     const [skillData, skillDataLoading] = useDataMultiple(paths);
 
     if (skillDataLoading)
@@ -479,7 +479,7 @@ export default function EgoComparisonAdvanced({ egos, displayType, separateSinne
             return acc;
         }
 
-        const list = getSkillList(ego, compareType, skillData[`egos/${id}`]);
+        const list = getSkillList(ego, compareType, skillData[`egosv2/${id}`]);
         if (grouped) acc.push([ego, list]);
         else list.forEach(skill => acc.push([ego, [skill]]));
         return acc;

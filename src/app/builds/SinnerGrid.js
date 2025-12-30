@@ -267,7 +267,7 @@ function CalcComponent({ opts, setOpts }) {
     </div>
 
     return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <span style={{textAlign: "center"}}>The numbers here are only meant to serve as a guide and are not meant to be 100% accurate. These computations only count the skill in isolation and do not consider other effects such as statuses on the sinner/target, passives, resonance bonuses, and so on.</span>
+        <span style={{textAlign: "center"}}>The numbers here are only meant to serve as a guide and may not be 100% accurate. These computations only count the skill in isolation and do not consider other effects such as statuses on the sinner/target, passives, resonance bonuses, and so on. Please report any errors in the discord.</span>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", justifyContent: "center" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center" }}>
                 <span>Skill Info:</span>
@@ -301,13 +301,18 @@ function CalcComponent({ opts, setOpts }) {
                             />
                         </div> :
                         null}
+                    <DropdownButton
+                        value={opts.crit ?? "poise"}
+                        setValue={(x) => setOpts(p => ({ ...p, crit: x }))}
+                        options={{ "all": "Apply Crits to All", "poise": "Apply Crits to Poise Ids", "none": "Ignore Crits" }}
+                    />
                 </div>
                 {<span style={{ whiteSpace: "pre-wrap", textAlign: "center" }}>
                     {opts.cond === "default" ?
                         "Using the skills' default base and coin power" :
                         opts.cond === "skill" ?
-                            "Applying power and damage conditionals on the skill (excluding coin-specific effects)\nCurrently incomplete but will be implemented soon" :
-                            "Applying all power and damage conditionals on the skill and its coins\nCurrently incomplete but will be implemented soon"
+                            "Applying power and damage conditionals on the skill (excluding coin-specific effects)\nSkills marked with -- are not yet implemented and will be added over time." :
+                            "Applying all power and damage conditionals on the skill and its coins\nSkills marked with -- are not yet implemented and will be added over time."
                     }
                 </span>}
             </div>

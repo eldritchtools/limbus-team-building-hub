@@ -152,9 +152,9 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
 
         if (selectedStatuses.length !== 0) {
             if (strictFiltering) {
-                if (!selectedStatuses.every(statusOption => (identity.keywordTags || identity.statuses).includes(statusOption.value))) return false;
+                if (!selectedStatuses.every(statusOption => identity.statuses.includes(statusOption.value))) return false;
             } else {
-                if (!selectedStatuses.some(statusOption => (identity.keywordTags || identity.statuses).includes(statusOption.value))) return false;
+                if (!selectedStatuses.some(statusOption => identity.statuses.includes(statusOption.value))) return false;
             }
         }
 
@@ -375,7 +375,7 @@ export default function Identities() {
         seasonList.add(9100);
 
         Object.entries(identities).forEach(([_id, identity]) => {
-            (identity.keywordTags || identity.statuses).forEach(status => statusList.add(status));
+            identity.statuses.forEach(status => statusList.add(status));
             identity.tags.forEach(tag => tagList.add(tag));
             seasonList.add(identity.season);
         });

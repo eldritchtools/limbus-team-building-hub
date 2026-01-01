@@ -25,7 +25,7 @@ function EgoTooltipContent({ ego }) {
                     {types.map(x => <KeywordIcon key={x} id={x} />)}
                 </div>
                 <div style={{ flex: 1, display: "flex", flexWrap: "wrap" }}>
-                    {ego.keywordTags.sort().map(x => <Status key={x} id={x} includeTooltip={false} includeName={false} />)}
+                    {ego.statuses.sort().map(x => <Status key={x} id={x} includeTooltip={false} includeName={false} />)}
                 </div>
                 <div style={{ flex: 1, display: "flex", flexWrap: "wrap" }}>
                     {Object.entries(ego.cost).map(([affinity, cost]) => <div key={affinity} style={{ display: "flex", alignItems: "center" }}>

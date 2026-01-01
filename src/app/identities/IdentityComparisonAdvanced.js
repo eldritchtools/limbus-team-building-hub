@@ -548,7 +548,7 @@ export default function IdentityComparisonAdvanced({ identities, displayType, se
     const [sortAscending, setSortAscending] = useState(true);
     const [grouped, setGrouped] = useState(true);
 
-    const paths = useMemo(() => identities.map(([id, _]) => `identitiesv2/${id}`), [identities]);
+    const paths = useMemo(() => identities.map(([id, _]) => `identities/${id}`), [identities]);
     const [skillData, skillDataLoading] = useDataMultiple(paths);
 
     if (skillDataLoading)
@@ -562,7 +562,7 @@ export default function IdentityComparisonAdvanced({ identities, displayType, se
             return acc;
         }
 
-        const list = getSkillList(identity, compareType, skillData[`identitiesv2/${id}`]);
+        const list = getSkillList(identity, compareType, skillData[`identities/${id}`]);
         if (grouped) acc.push([identity, list]);
         else list.forEach(skill => acc.push([identity, [skill]]));
         return acc;

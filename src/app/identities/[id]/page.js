@@ -48,7 +48,7 @@ function BuildsTab({ builds }) {
 export default function Identity({ params }) {
     const { id } = React.use(params);
     const [identities, identitiesLoading] = useData("identities");
-    const [skillData, skillDataLoading] = useData(`identitiesv2/${id}`);
+    const [skillData, skillDataLoading] = useData(`identities/${id}`);
     const identityData = identitiesLoading ? null : identities[id];
     const [uptie, setUptie] = useState(4);
     const [level, setLevel] = useState(LEVEL_CAP);

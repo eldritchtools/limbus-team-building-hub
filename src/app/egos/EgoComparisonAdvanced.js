@@ -465,7 +465,7 @@ export default function EgoComparisonAdvanced({ egos, displayType, separateSinne
     const [sortAscending, setSortAscending] = useState(true);
     const [grouped, setGrouped] = useState(true);
 
-    const paths = useMemo(() => egos.map(([id, _]) => `egosv2/${id}`), [egos]);
+    const paths = useMemo(() => egos.map(([id, _]) => `egos/${id}`), [egos]);
     const [skillData, skillDataLoading] = useDataMultiple(paths);
 
     if (skillDataLoading)
@@ -479,7 +479,7 @@ export default function EgoComparisonAdvanced({ egos, displayType, separateSinne
             return acc;
         }
 
-        const list = getSkillList(ego, compareType, skillData[`egosv2/${id}`]);
+        const list = getSkillList(ego, compareType, skillData[`egos/${id}`]);
         if (grouped) acc.push([ego, list]);
         else list.forEach(skill => acc.push([ego, [skill]]));
         return acc;

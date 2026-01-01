@@ -47,7 +47,7 @@ function BuildsTab({ builds }) {
 export default function EgoPage({ params }) {
     const { id } = React.use(params);
     const [egos, egosLoading] = useData("egos");
-    const [skillData, skillDataLoading] = useData(`egosv2/${id}`);
+    const [skillData, skillDataLoading] = useData(`egos/${id}`);
     const egoData = egosLoading ? null : egos[id];
     const [uptie, setUptie] = useState(4);
     const [activeTab, setActiveTab] = useState("notes");

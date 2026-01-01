@@ -52,6 +52,7 @@ function computeSkill(skill, opts) {
         let coinCritMultiplier = critMultiplier;
         let coinDamageAdder = 0;
         let coinReuses = 0;
+        let critReuses = 0;
 
         if (skill.bonusesEnabled && opts.cond === "all")
             coin.bonuses?.forEach(bonus => {
@@ -73,7 +74,10 @@ function computeSkill(skill, opts) {
                         coinCritMultiplier += bonus.value;
                         break;
                     case "reuse":
-                        coinReuses += bonus.value;
+                        if (bonus.extra?.cond === "crit")
+                            critReuses += bonus.value;
+                        else
+                            coinReuses += bonus.value;
                         break;
                     default:
                         break;
@@ -92,7 +96,8 @@ function computeSkill(skill, opts) {
 
         let newRoll = roll;
         let newDamage = 0;
-        for (let i = 0; i < 1 + coinReuses; i++) {
+        let reuses = coinReuses;
+        for (let i = 0; i < 1 + coinReuses + (skill.applyCrits ? critReuses : 0); i++) {
             newRoll += (p * coinPower);
             if (skill.applyCrits) {
                 newDamage += newRoll * (resistMultiplier + 0.2) * (coinDamageMultiplier + coinCritMultiplier) + coinDamageAdder;
@@ -238,7 +243,7 @@ function extractSkillData(skill, uptie, level, rank, applyCrits = false) {
 }
 
 function IdentitySkillCalc({ identity, uptie = 4, level = LEVEL_CAP, opts }) {
-    const [skillData, skillDataLoading] = useData(`identitiesv2/${identity.id}`);
+    const [skillData, skillDataLoading] = useData(`identities/${identity.id}`);
 
     if (skillDataLoading) 
         return <div style={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center", textAlign: "center"}}>
@@ -277,14 +282,14 @@ const egoRanks = ["ZAYIN", "TETH", "HE", "WAW", "ALEPH"];
 function EgoSkillCalc({ egos, threadspins, level = LEVEL_CAP, opts }) {
     const egosList = useMemo(() => egos.map((ego, i) => [ego, threadspins ? (threadspins[i] ?? 4) : 4, egoRanks[i]]), [egos, threadspins]);
 
-    const [skillData, skillDataLoading] = useDataMultiple(egosList.filter(([ego]) => ego).map(([ego]) => `egosv2/${ego.id}`));
+    const [skillData, skillDataLoading] = useDataMultiple(egosList.filter(([ego]) => ego).map(([ego]) => `egos/${ego.id}`));
 
     if (skillDataLoading) return null;
 
     const list = egosList
         .filter(([ego]) => ego)
         .map(([ego, ts, rank]) => {
-            const data = skillData[`egosv2/${ego.id}`];
+            const data = skillData[`egos/${ego.id}`];
             const skillList = [...data.awakeningSkills, ...(data.corrosionSkills ?? [])];
 
             return skillList.map(skill => extractSkillData(skill, ts, level, [rank]));

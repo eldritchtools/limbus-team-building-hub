@@ -255,7 +255,7 @@ function OverlayContainer({ displayType, identity, egos, identityLevel, identity
 
 function CalcComponent({ opts, setOpts }) {
     useEffect(() => {
-        setOpts({ source: "identity", cond: "default", type: "max", sp: 0, view: "compress", target: {} });
+        setOpts({ source: "identity", cond: "default", type: "max", sp: 0, crit: "poise", view: "compress", target: {} });
     }, [setOpts]);
 
     const valueComponent = (name, key, def) => <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>

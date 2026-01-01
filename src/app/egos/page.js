@@ -67,7 +67,7 @@ function EgoDetails({ id, ego }) {
             </div>)}
         </div>)}
         {wrapCell(<div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", maxWidth: "75ch", padding: "0.5rem", gap: "0.5rem", textAlign: "center" }}>
-            {(ego.keywordTags || ego.statuses).sort().map(keyword => <Status key={keyword} id={keyword} style={{ height: "32px" }} />)}
+            {ego.statuses.sort().map(keyword => <Status key={keyword} id={keyword} style={{ height: "32px" }} />)}
         </div>)}
     </tr>
 }
@@ -138,9 +138,9 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
                 }
             } else if (type === "keyword") {
                 if (strictFiltering) {
-                    if (!filters[type].every(x => (ego.keywordTags || ego.statuses).includes(keywordMapping[x]))) return false;
+                    if (!filters[type].every(x => ego.statuses.includes(keywordMapping[x]))) return false;
                 } else {
-                    if (!filters[type].some(x => (ego.keywordTags || ego.statuses).includes(keywordMapping[x]))) return false;
+                    if (!filters[type].some(x => ego.statuses.includes(keywordMapping[x]))) return false;
                 }
             } else if (type === "sinner") {
                 if (strictFiltering) {
@@ -153,9 +153,9 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
 
         if (selectedStatuses.length !== 0) {
             if (strictFiltering) {
-                if (!selectedStatuses.every(statusOption => (ego.keywordTags || ego.statuses).includes(statusOption.value))) return false;
+                if (!selectedStatuses.every(statusOption => ego.statuses.includes(statusOption.value))) return false;
             } else {
-                if (!selectedStatuses.some(statusOption => (ego.keywordTags || ego.statuses).includes(statusOption.value))) return false;
+                if (!selectedStatuses.some(statusOption => ego.statuses.includes(statusOption.value))) return false;
             }
         }
 
@@ -375,7 +375,10 @@ export default function EgosPage() {
         seasonList.add(9100);
 
         Object.entries(egos).forEach(([_id, ego]) => {
-            (ego.keywordTags || ego.statuses).forEach(status => statusList.add(status))
+            ego.statuses.forEach(status => {
+                if (status !== "")
+                statusList.add(status)
+            })
             seasonList.add(ego.season);
         })
 

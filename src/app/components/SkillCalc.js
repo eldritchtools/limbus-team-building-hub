@@ -41,7 +41,7 @@ function computeSkill(skill, opts) {
                 case "critdamage":
                     critMultiplier += bonus.value;
                     break;
-                case "offlevel": case "deflevel":
+                case "skilllevel":
                     offDefLevel += bonus.value;
                     break;
                 default:

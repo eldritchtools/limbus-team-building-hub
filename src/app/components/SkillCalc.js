@@ -18,6 +18,7 @@ function computeSkill(skill, opts) {
     let critMultiplier = 0; // Added to damage multiplier, so no need to start at 1
     let damageAdder = 0;
     let clashBonus = 0;
+    let offDefLevel = skill.offDefLevel;
 
     if (skill.bonusesEnabled && opts.cond !== "default")
         skill.bonuses?.forEach(bonus => {
@@ -40,19 +41,44 @@ function computeSkill(skill, opts) {
                 case "critdamage":
                     critMultiplier += bonus.value;
                     break;
+                case "skilllevel":
+                    offDefLevel += bonus.value;
+                    break;
                 default:
                     break;
             }
         })
 
+    const evaluateValue = value => {
+        if (typeof value === 'number')
+            return value;
+
+        let expr = value.slice(1);
+        const resolvedExpr = expr.replace(/\{([a-zA-Z_][a-zA-Z0-9_.]*)\}/g, (match, name) => {
+            let pieces = name.split(".");
+            if (pieces[0] === "res") {
+                return opts.target[pieces[1]] ?? 1;
+            }
+            return null;
+        });
+
+        try {
+            return new Function(`return ${resolvedExpr};`)();
+        } catch (err) {
+            throw new Error(`Invalid expression after substitution: ${resolvedExpr}`);
+        }
+    }
 
     let [clash, damage] = skill.coins.reduce(([clash, damage, roll], coin) => {
         let coinPower = skill.coinPower + coinPowerBonus;
         let coinDamageMultiplier = damageMultiplier;
+        let coinHeadsDamageMultiplier = 0;
         let coinCritMultiplier = critMultiplier;
         let coinDamageAdder = 0;
         let coinReuses = 0;
         let critReuses = 0;
+        let headReuses = 0;
+        let endBonuses = [];
 
         if (skill.bonusesEnabled && opts.cond === "all")
             coin.bonuses?.forEach(bonus => {
@@ -61,21 +87,30 @@ function computeSkill(skill, opts) {
                         coinPower += bonus.value;
                         break;
                     case "damage":
-                        if (bonus.extra.op === "mul")
-                            coinDamageMultiplier += bonus.value;
-                        else if (bonus.extra.op === "add") {
-                            if ("type" in bonus.extra.op)
-                                coinDamageAdder += bonus.value * opts.target[bonus.extra.op["type"]];
+                        if (bonus.extra.op === "mul") {
+                            if ("type" in bonus.extra) {
+                                endBonuses.push(bonus);
+                            } else {
+                                if (bonus.extra.cond ?? "" === "heads")
+                                    coinHeadsDamageMultiplier += evaluateValue(bonus.value);
+                                else
+                                    coinDamageMultiplier += evaluateValue(bonus.value);
+                            }
+                        } else if (bonus.extra.op === "add") {
+                            if ("type" in bonus.extra)
+                                coinDamageAdder += evaluateValue(bonus.value) * (opts.target[bonus.extra["type"]] ?? 1);
                             else
-                                coinDamageAdder += bonus.value;
+                                coinDamageAdder += evaluateValue(bonus.value);
                         }
                         break;
                     case "critdamage":
-                        coinCritMultiplier += bonus.value;
+                        coinCritMultiplier += evaluateValue(bonus.value);
                         break;
                     case "reuse":
                         if (bonus.extra?.cond === "crit")
                             critReuses += bonus.value;
+                        else if (bonus.extra?.cond === "heads")
+                            headReuses += bonus.value;
                         else
                             coinReuses += bonus.value;
                         break;
@@ -92,11 +127,11 @@ function computeSkill(skill, opts) {
         let resistMultiplier = 1;
         if (skill.atkType) resistMultiplier += (opts.target[skill.atkType] ?? 1) - 1;
         if (skill.affinity !== "none") resistMultiplier += (opts.target[skill.affinity] ?? 1) - 1;
-        resistMultiplier += (skill.offDefLevel - (opts.target.def ?? LEVEL_CAP)) / (Math.abs(skill.offDefLevel - (opts.target.def ?? LEVEL_CAP)) + 25);
+        resistMultiplier += (offDefLevel - (opts.target.def ?? LEVEL_CAP)) / (Math.abs(offDefLevel - (opts.target.def ?? LEVEL_CAP)) + 25);
 
+        coinDamageMultiplier += p * coinHeadsDamageMultiplier;
         let newRoll = roll;
         let newDamage = 0;
-        let reuses = coinReuses;
         for (let i = 0; i < 1 + coinReuses + (skill.applyCrits ? critReuses : 0); i++) {
             newRoll += (p * coinPower);
             if (skill.applyCrits) {
@@ -105,24 +140,52 @@ function computeSkill(skill, opts) {
                 newDamage += newRoll * resistMultiplier * coinDamageMultiplier + coinDamageAdder;
             }
         }
+        let reuseMultiplier = 1;
+        for (let i = 0; i < headReuses; i++) {
+            reuseMultiplier *= p;
+            newRoll += (p * coinPower);
+            if (skill.applyCrits) {
+                newDamage += reuseMultiplier * (newRoll * (resistMultiplier + 0.2) * (coinDamageMultiplier + coinCritMultiplier) + coinDamageAdder);
+            } else {
+                newDamage += reuseMultiplier * (newRoll * resistMultiplier * coinDamageMultiplier + coinDamageAdder);
+            }
+        }
 
         if (newDamage < 1) newDamage = 1;
 
-        return [clash + (p * coinPower), damage + newDamage, newRoll];
+        let finalDamage = newDamage;
+        endBonuses.forEach(bonus => {
+            if (bonus.type === "damage" && bonus.extra.op === "mul") {
+                let addedDamage = newDamage * evaluateValue(bonus.value);
+                if ("max" in bonus.extra) addedDamage = Math.min(addedDamage, bonus.extra["max"]);
+                finalDamage += addedDamage * (opts.target[bonus.extra.op["type"]] ?? 1);
+            }
+        });
+
+        return [clash + (p * coinPower), damage + finalDamage, newRoll];
     }, [basePower, 0, basePower]);
 
     if (skill.atkType) {
-        if (skill.offDefLevel > (opts.target.off ?? LEVEL_CAP)) clash += Math.floor((skill.offDefLevel - (opts.target.off ?? LEVEL_CAP)) / 3);
+        if (offDefLevel > (opts.target.off ?? LEVEL_CAP)) clash += Math.floor((offDefLevel - (opts.target.off ?? LEVEL_CAP)) / 3);
     } else {
-        if (skill.offDefLevel > (opts.target.def ?? LEVEL_CAP)) clash += Math.floor((skill.offDefLevel - (opts.target.def ?? LEVEL_CAP)) / 3);
+        if (offDefLevel > (opts.target.def ?? LEVEL_CAP)) clash += Math.floor((offDefLevel - (opts.target.def ?? LEVEL_CAP)) / 3);
     }
 
     clash += clashBonus;
+    clash = Math.max(clash, 0);
 
     return [formatter.format(clash), skill.atkType ? formatter.format(damage) : "0"];
 }
 
 function CalcCard({ skill, clash, damage }) {
+    const otherProps = {};
+    const otherStyles = {};
+    if (skill.bonusNotes){
+        otherProps["data-tooltip-id"] = "calc-tooltip";
+        otherProps["data-tooltip-content"] = skill["bonusNotes"];
+        otherStyles["textDecoration"] = "underline";
+    }
+    
     return <div style={{ display: "flex", flexDirection: "column", border: `1px ${affinityColorMapping[skill.affinity] ?? "#777"} solid`, borderRadius: "1rem", padding: "0.5rem", gap: "0.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
             <div style={{ display: "flex", gap: "0.2rem", alignItems: "center" }}>
@@ -159,9 +222,9 @@ function CalcCard({ skill, clash, damage }) {
             </span>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "2fr 3fr" }}>
-            <span>Clash: {formatter.format(clash)}</span>
+            <span {...otherProps} style={otherStyles}>Clash: {formatter.format(clash)}</span>
             {skill.atkType ?
-                <span>Damage: {formatter.format(damage)}</span> :
+                <span {...otherProps} style={otherStyles}>Damage: {formatter.format(damage)}</span> :
                 null
             }
         </div>
@@ -188,13 +251,29 @@ function SkillCalc({ skills, opts }) {
             const [clash, damage] = computeSkill(skill, opts);
             const label = typeof skill.rank[0] === 'number' ? `S${skill.rank[0]}` : (skill.rank[0] === "Defense" ? "Def" : skill.rank[0][0]);
 
+            const otherProps = {};
+            const otherStyles = {};
+            if (skill.bonusNotes){
+                otherProps["data-tooltip-id"] = "calc-tooltip";
+                otherProps["data-tooltip-content"] = skill.bonusNotes;
+                otherStyles["textDecoration"] = "underline";
+            }
+
             if (!(label in clashes)) clashes[label] = [];
             if (clashes[label].length !== 0) clashes[label].push(<span key={clashes[label].length}>, </span>);
-            clashes[label].push(<span key={clashes[label].length} style={{ color: affinityColorMapping[skill.affinity] ?? "#ddd", fontWeight: "bold" }}>{clash}</span>)
+            clashes[label].push(
+                <span key={clashes[label].length} style={{ color: affinityColorMapping[skill.affinity] ?? "#ddd", fontWeight: "bold", ...otherStyles }} {...otherProps}>
+                    {clash}
+                </span>
+            )
 
             if (!(label in damages)) damages[label] = [];
             if (damages[label].length !== 0) damages[label].push(<span key={damages[label].length}>, </span>);
-            damages[label].push(<span key={damages[label].length} style={{ color: affinityColorMapping[skill.affinity] ?? "#ddd", fontWeight: "bold" }}>{damage}</span>)
+            damages[label].push(
+                <span key={damages[label].length} style={{ color: affinityColorMapping[skill.affinity] ?? "#ddd", fontWeight: "bold", ...otherStyles }} {...otherProps}>
+                    {damage}
+                </span>
+            )
         });
 
         const gridItems = [
@@ -225,8 +304,7 @@ function SkillCalc({ skills, opts }) {
 
 function extractSkillData(skill, uptie, level, rank, applyCrits = false) {
     const data = skill.data.reduce((acc, dataTier) => dataTier.uptie <= uptie ? { ...acc, ...dataTier } : acc, {});
-
-    return {
+    const skillData = {
         name: data.name,
         rank: rank,
         atkType: data.atkType,
@@ -240,13 +318,16 @@ function extractSkillData(skill, uptie, level, rank, applyCrits = false) {
         bonuses: data.bonuses,
         applyCrits: applyCrits
     };
+
+    if ("bonusNotes" in skill) skillData.bonusNotes = skill["bonusNotes"];
+    return skillData;
 }
 
 function IdentitySkillCalc({ identity, uptie = 4, level = LEVEL_CAP, opts }) {
     const [skillData, skillDataLoading] = useData(`identities/${identity.id}`);
 
-    if (skillDataLoading) 
-        return <div style={{display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center", textAlign: "center"}}>
+    if (skillDataLoading)
+        return <div style={{ display: "flex", width: "100%", height: "100%", justifyContent: "center", alignItems: "center", textAlign: "center" }}>
             Loading...
         </div>;
 

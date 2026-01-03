@@ -266,8 +266,37 @@ function CalcComponent({ opts, setOpts }) {
         />
     </div>
 
-    return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <span style={{textAlign: "center"}}>The numbers here are only meant to serve as a guide and may not be 100% accurate. These computations only count the skill in isolation and do not consider other effects such as statuses on the sinner/target, passives, resonance bonuses, and so on. Please report any errors in the discord.</span>
+    const resetTarget = () => {
+        setOpts(p => ({ ...p, target: {} }));
+    }
+
+    const resetButton = <button onClick={resetTarget}>Reset Target</button>
+
+    let staggerLevel = 0;
+    if ("target" in opts) {
+        if ((opts.target.slash ?? 1) === 2 && (opts.target.pierce ?? 1) === 2 && (opts.target.blunt ?? 1) === 2) staggerLevel = 1;
+        else if ((opts.target.slash ?? 1) === 2.5 && (opts.target.pierce ?? 1) === 2.5 && (opts.target.blunt ?? 1) === 2.5) staggerLevel = 2;
+        else if ((opts.target.slash ?? 1) === 3 && (opts.target.pierce ?? 1) === 3 && (opts.target.blunt ?? 1) === 3) staggerLevel = 3;
+    }
+
+    const applyStagger = r => {
+        setOpts(p => ({ ...p, target: { ...p.target, slash: r, pierce: r, blunt: r } }));
+    }
+
+    const staggerButton = staggerLevel === 1 ?
+        <button onClick={() => applyStagger(2.5)}>Apply Stagger+</button> :
+        staggerLevel === 2 ?
+            <button onClick={() => applyStagger(3)}>Apply Stagger++</button> :
+            <button onClick={() => applyStagger(2)}>Apply Stagger</button>
+
+    const applyLunarMemory = () => {
+        setOpts(p => ({ ...p, target: { ...p.target, slash: 2, pierce: 2, blunt: 2, wrath: 2, lust: 2, sloth: 2, gluttony: 2, gloom: 2, pride: 2, envy: 2 } }));
+    }
+
+    const lunarMemoryButton = <button onClick={applyLunarMemory}>Apply Lunar Memory</button>
+
+    return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", paddingBottom: "0.25rem" }}>
+        <span style={{ textAlign: "center" }}>These computations only count the skill in isolation and do not consider most other effects such as statuses on the sinner/target, passives, resonance bonuses, and so on.<br/>Any numbers shown are only meant to serve as a guide and may not be 100% accurate. Numbers with underlines have additional info that can be displayed with a tooltip. Errors can be reported in the Discord.</span>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", justifyContent: "center" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center" }}>
                 <span>Skill Info:</span>
@@ -332,6 +361,11 @@ function CalcComponent({ opts, setOpts }) {
                     {valueComponent("gloom", "gloom", 1)}
                     {valueComponent("pride", "pride", 1)}
                     {valueComponent("envy", "envy", 1)}
+                </div>
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", justifyContent: "center" }}>
+                    {resetButton}
+                    {staggerButton}
+                    {lunarMemoryButton}
                 </div>
             </div>
         </div>

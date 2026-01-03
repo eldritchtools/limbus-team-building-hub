@@ -49,6 +49,25 @@ function computeSkill(skill, opts) {
             }
         })
 
+    const evaluateValue = value => {
+        if (typeof value === 'number')
+            return value;
+
+        let expr = value.slice(1);
+        const resolvedExpr = expr.replace(/\{([a-zA-Z_][a-zA-Z0-9_.]*)\}/g, (match, name) => {
+            let pieces = name.split(".");
+            if (pieces[0] === "res") {
+                return opts.target[pieces[1]] ?? 1;
+            }
+            return null;
+        });
+
+        try {
+            return new Function(`return ${resolvedExpr};`)();
+        } catch (err) {
+            throw new Error(`Invalid expression after substitution: ${resolvedExpr}`);
+        }
+    }
 
     let [clash, damage] = skill.coins.reduce(([clash, damage, roll], coin) => {
         let coinPower = skill.coinPower + coinPowerBonus;
@@ -68,24 +87,24 @@ function computeSkill(skill, opts) {
                         coinPower += bonus.value;
                         break;
                     case "damage":
-                        if (bonus.extra.op === "mul")
-                            if ("type" in bonus.extra.op) {
+                        if (bonus.extra.op === "mul") {
+                            if ("type" in bonus.extra) {
                                 endBonuses.push(bonus);
                             } else {
-                                if (bonus.extra.op.cond ?? "" === "heads")
-                                    coinHeadsDamageMultiplier += bonus.value;
+                                if (bonus.extra.cond ?? "" === "heads")
+                                    coinHeadsDamageMultiplier += evaluateValue(bonus.value);
                                 else
-                                    coinDamageMultiplier += bonus.value;
+                                    coinDamageMultiplier += evaluateValue(bonus.value);
                             }
-                        else if (bonus.extra.op === "add") {
-                            if ("type" in bonus.extra.op)
-                                coinDamageAdder += bonus.value * opts.target[bonus.extra.op["type"]];
+                        } else if (bonus.extra.op === "add") {
+                            if ("type" in bonus.extra)
+                                coinDamageAdder += evaluateValue(bonus.value) * (opts.target[bonus.extra["type"]] ?? 1);
                             else
-                                coinDamageAdder += bonus.value;
+                                coinDamageAdder += evaluateValue(bonus.value);
                         }
                         break;
                     case "critdamage":
-                        coinCritMultiplier += bonus.value;
+                        coinCritMultiplier += evaluateValue(bonus.value);
                         break;
                     case "reuse":
                         if (bonus.extra?.cond === "crit")
@@ -137,9 +156,9 @@ function computeSkill(skill, opts) {
         let finalDamage = newDamage;
         endBonuses.forEach(bonus => {
             if (bonus.type === "damage" && bonus.extra.op === "mul") {
-                let addedDamage = newDamage * bonus.value;
-                if ("max" in bonus.extra.op) addedDamage = Math.min(addedDamage, bonus.extra.op["max"]);
-                finalDamage += addedDamage * opts.target[bonus.extra.op["type"]];
+                let addedDamage = newDamage * evaluateValue(bonus.value);
+                if ("max" in bonus.extra) addedDamage = Math.min(addedDamage, bonus.extra["max"]);
+                finalDamage += addedDamage * (opts.target[bonus.extra.op["type"]] ?? 1);
             }
         });
 
@@ -153,6 +172,7 @@ function computeSkill(skill, opts) {
     }
 
     clash += clashBonus;
+    clash = Math.max(clash, 0);
 
     return [formatter.format(clash), skill.atkType ? formatter.format(damage) : "0"];
 }

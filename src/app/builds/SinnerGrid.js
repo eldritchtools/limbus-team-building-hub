@@ -295,8 +295,8 @@ function CalcComponent({ opts, setOpts }) {
 
     const lunarMemoryButton = <button onClick={applyLunarMemory}>Apply Lunar Memory</button>
 
-    return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <span style={{ textAlign: "center" }}>The numbers here are only meant to serve as a guide and may not be 100% accurate. These computations only count the skill in isolation and do not consider other effects such as statuses on the sinner/target, passives, resonance bonuses, and so on. Please report any errors in the discord.</span>
+    return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", paddingBottom: "0.25rem" }}>
+        <span style={{ textAlign: "center" }}>These computations only count the skill in isolation and do not consider most other effects such as statuses on the sinner/target, passives, resonance bonuses, and so on.<br/>Any numbers shown are only meant to serve as a guide and may not be 100% accurate. Numbers with underlines have additional info that can be displayed with a tooltip. Errors can be reported in the Discord.</span>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", justifyContent: "center" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center" }}>
                 <span>Skill Info:</span>

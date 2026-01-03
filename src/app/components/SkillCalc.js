@@ -178,6 +178,14 @@ function computeSkill(skill, opts) {
 }
 
 function CalcCard({ skill, clash, damage }) {
+    const otherProps = {};
+    const otherStyles = {};
+    if (skill.bonusNotes){
+        otherProps["data-tooltip-id"] = "calc-tooltip";
+        otherProps["data-tooltip-content"] = skill["bonusNotes"];
+        otherStyles["textDecoration"] = "underline";
+    }
+    
     return <div style={{ display: "flex", flexDirection: "column", border: `1px ${affinityColorMapping[skill.affinity] ?? "#777"} solid`, borderRadius: "1rem", padding: "0.5rem", gap: "0.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
             <div style={{ display: "flex", gap: "0.2rem", alignItems: "center" }}>
@@ -214,9 +222,9 @@ function CalcCard({ skill, clash, damage }) {
             </span>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "2fr 3fr" }}>
-            <span>Clash: {formatter.format(clash)}</span>
+            <span {...otherProps} style={otherStyles}>Clash: {formatter.format(clash)}</span>
             {skill.atkType ?
-                <span>Damage: {formatter.format(damage)}</span> :
+                <span {...otherProps} style={otherStyles}>Damage: {formatter.format(damage)}</span> :
                 null
             }
         </div>
@@ -243,13 +251,29 @@ function SkillCalc({ skills, opts }) {
             const [clash, damage] = computeSkill(skill, opts);
             const label = typeof skill.rank[0] === 'number' ? `S${skill.rank[0]}` : (skill.rank[0] === "Defense" ? "Def" : skill.rank[0][0]);
 
+            const otherProps = {};
+            const otherStyles = {};
+            if (skill.bonusNotes){
+                otherProps["data-tooltip-id"] = "calc-tooltip";
+                otherProps["data-tooltip-content"] = skill.bonusNotes;
+                otherStyles["textDecoration"] = "underline";
+            }
+
             if (!(label in clashes)) clashes[label] = [];
             if (clashes[label].length !== 0) clashes[label].push(<span key={clashes[label].length}>, </span>);
-            clashes[label].push(<span key={clashes[label].length} style={{ color: affinityColorMapping[skill.affinity] ?? "#ddd", fontWeight: "bold" }}>{clash}</span>)
+            clashes[label].push(
+                <span key={clashes[label].length} style={{ color: affinityColorMapping[skill.affinity] ?? "#ddd", fontWeight: "bold", ...otherStyles }} {...otherProps}>
+                    {clash}
+                </span>
+            )
 
             if (!(label in damages)) damages[label] = [];
             if (damages[label].length !== 0) damages[label].push(<span key={damages[label].length}>, </span>);
-            damages[label].push(<span key={damages[label].length} style={{ color: affinityColorMapping[skill.affinity] ?? "#ddd", fontWeight: "bold" }}>{damage}</span>)
+            damages[label].push(
+                <span key={damages[label].length} style={{ color: affinityColorMapping[skill.affinity] ?? "#ddd", fontWeight: "bold", ...otherStyles }} {...otherProps}>
+                    {damage}
+                </span>
+            )
         });
 
         const gridItems = [
@@ -280,8 +304,7 @@ function SkillCalc({ skills, opts }) {
 
 function extractSkillData(skill, uptie, level, rank, applyCrits = false) {
     const data = skill.data.reduce((acc, dataTier) => dataTier.uptie <= uptie ? { ...acc, ...dataTier } : acc, {});
-
-    return {
+    const skillData = {
         name: data.name,
         rank: rank,
         atkType: data.atkType,
@@ -295,6 +318,9 @@ function extractSkillData(skill, uptie, level, rank, applyCrits = false) {
         bonuses: data.bonuses,
         applyCrits: applyCrits
     };
+
+    if ("bonusNotes" in skill) skillData.bonusNotes = skill["bonusNotes"];
+    return skillData;
 }
 
 function IdentitySkillCalc({ identity, uptie = 4, level = LEVEL_CAP, opts }) {

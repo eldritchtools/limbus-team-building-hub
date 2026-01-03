@@ -13,6 +13,7 @@ import { RequestsCacheProvider } from "./database/RequestsCacheProvider";
 
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
+import { CalcTooltip } from "./components/CalcTooltip";
 
 TimeAgo.addDefaultLocale(en)
 
@@ -62,6 +63,7 @@ export default function LayoutComponent({ children }) {
                     <EgoTooltip />
                     <GeneralTooltip />
                     <GiftTooltip />
+                    <CalcTooltip />
                 </DataProvider>
             </Layout>
         </RequestsCacheProvider>

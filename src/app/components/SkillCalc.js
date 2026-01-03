@@ -53,6 +53,7 @@ function computeSkill(skill, opts) {
     let [clash, damage] = skill.coins.reduce(([clash, damage, roll], coin) => {
         let coinPower = skill.coinPower + coinPowerBonus;
         let coinDamageMultiplier = damageMultiplier;
+        let coinHeadsDamageMultiplier = 0;
         let coinCritMultiplier = critMultiplier;
         let coinDamageAdder = 0;
         let coinReuses = 0;
@@ -71,7 +72,10 @@ function computeSkill(skill, opts) {
                             if ("type" in bonus.extra.op) {
                                 endBonuses.push(bonus);
                             } else {
-                                coinDamageMultiplier += bonus.value;
+                                if (bonus.extra.op.cond ?? "" === "heads")
+                                    coinHeadsDamageMultiplier += bonus.value;
+                                else
+                                    coinDamageMultiplier += bonus.value;
                             }
                         else if (bonus.extra.op === "add") {
                             if ("type" in bonus.extra.op)
@@ -106,6 +110,7 @@ function computeSkill(skill, opts) {
         if (skill.affinity !== "none") resistMultiplier += (opts.target[skill.affinity] ?? 1) - 1;
         resistMultiplier += (offDefLevel - (opts.target.def ?? LEVEL_CAP)) / (Math.abs(offDefLevel - (opts.target.def ?? LEVEL_CAP)) + 25);
 
+        coinDamageMultiplier += p * coinHeadsDamageMultiplier;
         let newRoll = roll;
         let newDamage = 0;
         for (let i = 0; i < 1 + coinReuses + (skill.applyCrits ? critReuses : 0); i++) {

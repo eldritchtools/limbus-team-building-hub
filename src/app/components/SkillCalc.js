@@ -132,7 +132,9 @@ function computeSkill(skill, opts) {
         let finalDamage = newDamage;
         endBonuses.forEach(bonus => {
             if (bonus.type === "damage" && bonus.extra.op === "mul") {
-                finalDamage += newDamage * bonus.value * opts.target[bonus.extra.op["type"]];
+                let addedDamage = newDamage * bonus.value;
+                if ("max" in bonus.extra.op) addedDamage = Math.min(addedDamage, bonus.extra.op["max"]);
+                finalDamage += addedDamage * opts.target[bonus.extra.op["type"]];
             }
         });
 

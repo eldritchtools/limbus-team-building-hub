@@ -333,7 +333,7 @@ function CalcComponent({ opts, setOpts }) {
                     <DropdownButton
                         value={opts.crit ?? "poise"}
                         setValue={(x) => setOpts(p => ({ ...p, crit: x }))}
-                        options={{ "all": "Apply Crits to All", "poise": "Apply Crits to Poise Ids", "none": "Ignore Crits" }}
+                        options={{ "all": "Apply Crits to All", "poise": "Apply Crits to Poise Ids/Skills", "none": "Ignore Crits" }}
                     />
                 </div>
                 {<span style={{ whiteSpace: "pre-wrap", textAlign: "center" }}>

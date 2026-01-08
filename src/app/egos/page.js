@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Icon, EgoImg, RarityImg, SinnerIcon, Status, statuses, useData } from "@eldritchtools/limbus-shared-library";
+import { Icon, EgoImg, RarityImg, SinnerIcon, Status, useData } from "@eldritchtools/limbus-shared-library";
 import { capitalizeFirstLetter, ColorResist, getSeasonString, sinnerMapping } from "../utils";
 import { selectStyle } from "../styles";
 import dynamic from "next/dynamic";
@@ -334,6 +334,7 @@ function MultiSelector({ options, selected, setSelected, placeholder }) {
 
 export default function EgosPage() {
     const [egos, egosLoading] = useData("egos");
+    const [statuses, statusesLoading] = useData("statuses");
 
     const [searchString, setSearchString] = useState("");
     const [selectedMainFilters, setSelectedMainFilters] = useState([]);
@@ -369,7 +370,7 @@ export default function EgosPage() {
     const [selectedSeasons, setSelectedSeasons] = useState([]);
 
     const [statusOptions, seasonOptions] = useMemo(() => {
-        if (egosLoading) return [];
+        if (egosLoading || statusesLoading) return [];
         const statusList = new Set();
         const seasonList = new Set();
         seasonList.add(9100);
@@ -391,7 +392,7 @@ export default function EgosPage() {
             label: season === 9100 ? "Walpurgisnacht (any)" : getSeasonString(season),
             name: season === 9100 ? "Walpurgisnacht" : getSeasonString(season)
         })).sort((a, b) => a.value - b.value)]
-    }, [egos, egosLoading]);
+    }, [egos, egosLoading, statuses, statusesLoading]);
 
     return <div style={{ display: "flex", flexDirection: "column", maxHeight: "100%", width: "100%", gap: "1rem", alignItems: "center" }}>
         <div style={{ display: "flex", gap: "2rem", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>

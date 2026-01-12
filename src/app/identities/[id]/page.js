@@ -40,7 +40,7 @@ function NotesTab({ notes }) {
 function BuildsTab({ builds }) {
     if (!builds) return <div style={{ color: "#777", textAlign: "center" }}>Loading builds...</div>;
     if (builds.length === 0) return <div style={{ color: "#777", textAlign: "center" }}>No builds found.</div>;
-    return <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+    return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", marginLeft: "14px" }}>
         {builds.map(build => <BuildEntry key={build.id} build={build} size={"M"} complete={false} />)}
     </div>
 }

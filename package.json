@@ -19,6 +19,7 @@
     "@codemirror/view": "^6.39.4",
     "@eldritchtools/limbus-shared-library": "github:eldritchtools/limbus-shared-library#v0.7.6",
     "@eldritchtools/shared-components": "github:eldritchtools/shared-components#v1.5.13",
+    "@heroicons/react": "^2.2.0",
     "@lezer/highlight": "^1.2.3",
     "@radix-ui/react-select": "^2.2.6",
     "@supabase/supabase-js": "^2.81.1",

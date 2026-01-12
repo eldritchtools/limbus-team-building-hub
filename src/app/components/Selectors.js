@@ -19,13 +19,49 @@ function checkSearch(name, sinner, str) {
     return normalizeString(name).includes(normStr);
 }
 
-function IdentitySelector({ selected, setSelected, isMulti = false, styles = selectStyle }) {
+export function SelectorWithExclusion({ options, optionsMapped, selected, setSelected, placeholder, filterFunction, isMulti, styles, excludeMode }) {
+    const value = useMemo(() => {
+        if (isMulti) {
+            return selected.map((id) => {
+                const exclude = id[0] === '-';
+                const val = { ...optionsMapped[exclude ? id.slice(1) : id] };
+                if (exclude) val.exclude = true;
+                return val;
+            })
+        } else {
+            return selected ? optionsMapped[selected] : [selected];
+        }
+    }, [isMulti, selected, optionsMapped]);
+
+    const onChangeFunction = items => {
+        if (isMulti) {
+            setSelected(items.map(item =>
+                selected.find(x => (x[0] === '-' ? x.slice(1) : x) === item.value) ?? (excludeMode ? `-${item.value}` : item.value)
+            ));
+        } else {
+            setSelected(items ? items.value : items);
+        }
+    }
+
+    return <Select
+        isMulti={isMulti}
+        isClearable={true}
+        options={options || Object.values(optionsMapped)}
+        value={value}
+        onChange={onChangeFunction}
+        placeholder={placeholder}
+        filterOption={filterFunction}
+        styles={styles}
+    />;
+}
+
+function IdentitySelector({ selected, setSelected, isMulti = false, styles = selectStyle, excludeMode }) {
     const [identities, loading] = useData("identities_mini");
 
     const optionsMapped = useMemo(() => loading ? {} : Object.entries(identities).reduce((acc, [id, identity]) => {
         acc[id] = {
             value: identity.id,
-            label: <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            label: <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", maxWidth: "65vw" }}>
                 <IdentityImg id={identity.id} uptie={4} displayName={false} scale={0.125} />
                 <span>[{sinnerMapping[identity.sinnerId]}] {identity.name}</span>
             </div>,
@@ -35,25 +71,25 @@ function IdentitySelector({ selected, setSelected, isMulti = false, styles = sel
         return acc;
     }, {}), [identities, loading]);
 
-    return <Select
-        isMulti={isMulti}
-        isClearable={true}
-        options={Object.values(optionsMapped)}
-        value={isMulti ? selected.map(id => optionsMapped[id]) : (selected ? optionsMapped[selected]: selected)}
-        onChange={isMulti ? items => setSelected(items.map(x => x.value)) : item => setSelected(item ? item.value : item)}
+    return <SelectorWithExclusion
+        optionsMapped={optionsMapped}
+        selected={selected}
+        setSelected={setSelected}
         placeholder={"Search Identities..."}
-        filterOption={(candidate, input) => checkSearch(candidate.data.name, candidate.data.sinner, input)}
+        filterFunction={(candidate, input) => checkSearch(candidate.data.name, candidate.data.sinner, input)}
+        isMulti={isMulti}
         styles={styles}
+        excludeMode={excludeMode}
     />;
 }
 
-function EgoSelector({ selected, setSelected, isMulti = false, styles = selectStyle }) {
+function EgoSelector({ selected, setSelected, isMulti = false, styles = selectStyle, excludeMode }) {
     const [egos, loading] = useData("egos_mini");
 
     const optionsMapped = useMemo(() => loading ? [] : Object.entries(egos).reduce((acc, [id, ego]) => {
         acc[id] = {
             value: ego.id,
-            label: <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            label: <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", maxWidth: "65vw" }}>
                 <EgoImg id={ego.id} type={"awaken"} displayName={false} scale={0.125} />
                 <span>[{sinnerMapping[ego.sinnerId]}] {ego.name}</span>
             </div>,
@@ -63,19 +99,19 @@ function EgoSelector({ selected, setSelected, isMulti = false, styles = selectSt
         return acc;
     }, {}), [egos, loading]);
 
-    return <Select
-        isMulti={isMulti}
-        isClearable={true}
-        options={Object.values(optionsMapped)}
-        value={isMulti ? selected.map(id => optionsMapped[id]) : (selected ? optionsMapped[selected]: selected)}
-        onChange={isMulti ? items => setSelected(items.map(x => x.value)) : item => setSelected(item ? item.value : item)}
+    return <SelectorWithExclusion
+        optionsMapped={optionsMapped}
+        selected={selected}
+        setSelected={setSelected}
         placeholder={"Search E.G.Os..."}
-        filterOption={(candidate, input) => checkSearch(candidate.data.name, candidate.data.sinner, input)}
+        filterFunction={(candidate, input) => checkSearch(candidate.data.name, candidate.data.sinner, input)}
+        isMulti={isMulti}
         styles={styles}
+        excludeMode={excludeMode}
     />;
 }
 
-function StatusSelector({ selected, setSelected, isMulti = false, styles = selectStyle }) {
+function StatusSelector({ selected, setSelected, isMulti = false, styles = selectStyle, excludeMode }) {
     const [statuses, loading] = useData("statuses");
 
     const optionsMapped = useMemo(() => loading ? [] : Object.entries(statuses).reduce((acc, [id, status]) => {
@@ -89,15 +125,16 @@ function StatusSelector({ selected, setSelected, isMulti = false, styles = selec
 
     const optionsSorted = useMemo(() => Object.values(optionsMapped).sort((a, b) => normalizeString(a.name).localeCompare(normalizeString(b.name))), [optionsMapped]);
 
-    return <Select
-        isMulti={isMulti}
-        isClearable={true}
+    return <SelectorWithExclusion
         options={optionsSorted}
-        value={isMulti ? selected.map(id => optionsMapped[id]) : (selected ? optionsMapped[selected]: selected)}
-        onChange={isMulti ? items => setSelected(items.map(x => x.value)) : item => setSelected(item ? item.value : item)}
+        optionsMapped={optionsMapped}
+        selected={selected}
+        setSelected={setSelected}
         placeholder={"Search Statuses..."}
-        filterOption={(candidate, input) => checkSearch(candidate.data.name, null, input)}
+        filterFunction={(candidate, input) => checkSearch(candidate.data.name, null, input)}
+        isMulti={isMulti}
         styles={styles}
+        excludeMode={excludeMode}
     />;
 }
 
@@ -118,7 +155,7 @@ function KeywordSelector({ selected, setSelected, isMulti = false, styles = sele
         isMulti={isMulti}
         isClearable={true}
         options={Object.values(optionsMapped)}
-        value={isMulti ? selected.map(id => optionsMapped[id]) : (selected ? optionsMapped[selected]: selected)}
+        value={isMulti ? selected.map(id => optionsMapped[id]) : (selected ? optionsMapped[selected] : selected)}
         onChange={isMulti ? items => setSelected(items.map(x => x.value)) : item => setSelected(item ? item.value : item)}
         placeholder={"Search Keywords..."}
         filterOption={(candidate, input) => checkSearch(candidate.data.name, null, input)}
@@ -144,7 +181,7 @@ function GiftSelector({ selected, setSelected, isMulti = false, styles = selectS
         isMulti={isMulti}
         isClearable={true}
         options={optionsSorted}
-        value={isMulti ? selected.map(id => optionsMapped[id]) : (selected ? optionsMapped[selected]: selected)}
+        value={isMulti ? selected.map(id => optionsMapped[id]) : (selected ? optionsMapped[selected] : selected)}
         onChange={isMulti ? items => setSelected(items.map(x => x.value)) : item => setSelected(item ? item.value : item)}
         placeholder={"Search Gifts..."}
         filterOption={(candidate, input) => checkSearch(candidate.data.name, null, input)}
@@ -166,7 +203,7 @@ function SinnerSelector({ selected, setSelected, isMulti = false, styles = selec
         isMulti={isMulti}
         isClearable={true}
         options={Object.values(optionsMapped)}
-        value={isMulti ? selected.map(id => optionsMapped[id]) : (selected ? optionsMapped[selected]: selected)}
+        value={isMulti ? selected.map(id => optionsMapped[id]) : (selected ? optionsMapped[selected] : selected)}
         onChange={isMulti ? items => setSelected(items.map(x => x.value)) : item => setSelected(item ? item.value : item)}
         placeholder={"Search Sinner..."}
         filterOption={(candidate, input) => checkSearch(candidate.data.name, null, input)}

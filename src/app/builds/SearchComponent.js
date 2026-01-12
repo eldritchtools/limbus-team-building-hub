@@ -1,18 +1,21 @@
 "use client";
 
 import { Icon } from "@eldritchtools/limbus-shared-library";
-import { selectStyleVariable, selectStyleWide } from "../styles";
+import { selectStyleVariable } from "../styles";
 import TagSelector, { tagToTagSelectorOption } from "../components/TagSelector";
 import { useState } from "react";
-import { keywordIconConvert, keywordIdMapping, keywordToIdMapping } from "../keywordIds";
+import { keywordIconConvert, keywordToIdMapping } from "../keywordIds";
 import { EgoSelector, IdentitySelector } from "../components/Selectors";
 import Link from "next/link";
-import { useBreakpoint } from "@eldritchtools/shared-components";
+import "./SearchComponent.css";
+import { generalTooltipProps } from "../components/GeneralTooltip";
 
 function KeywordSelector({ selectedKeywords, setSelectedKeywords }) {
-    const handleToggle = (filter, selected) => {
+    const handleToggle = (filter, selected, excluded) => {
         if (selected)
-            setSelectedKeywords(p => p.filter(x => x !== filter));
+            setSelectedKeywords(p => p.map(x => x === filter ? `-${x}` : x));
+        else if (excluded)
+            setSelectedKeywords(p => p.filter(x => `-${filter}` !== x));
         else
             setSelectedKeywords(p => [...p, filter]);
     }
@@ -21,21 +24,24 @@ function KeywordSelector({ selectedKeywords, setSelectedKeywords }) {
         setSelectedKeywords([]);
     }
 
-    const toggleComponent = (filter, selected) => {
+    const toggleComponent = (filter) => {
+        const selected = selectedKeywords.includes(filter);
+        const excluded = !selected && selectedKeywords.includes(`-${filter}`);
+
         return <div key={filter} style={{
-            backgroundColor: selected ? "#3f3f3f" : "#1f1f1f", height: "32px", display: "flex",
+            backgroundColor: selected ? "#3f3f3f" : (excluded ? "rgba(239,68,68, 0.8)" : "#1f1f1f"), height: "32px", display: "flex",
             alignItems: "center", justifyContent: "center", padding: "0.1rem 0.2rem", cursor: "pointer",
-            borderBottom: selected ? "2px #4caf50 solid" : "transparent",
+            borderBottom: selected ? "2px #4caf50 solid" : (excluded ? "2px #dc2626 solid" : "transparent"),
             transition: "all 0.2s"
         }}
-            onClick={() => handleToggle(filter, selected)}
+            onClick={() => handleToggle(filter, selected, excluded)}
         >
             <Icon path={keywordIconConvert(filter)} style={{ height: "32px" }} />
         </div>
     }
 
     return <div style={{ display: "flex", flexWrap: "wrap", border: "1px #777 dotted", borderRadius: "1rem", minWidth: "100px", padding: "0.5rem", justifyContent: "center" }}>
-        {Object.keys(keywordToIdMapping).reduce((acc, kw) => [...acc, toggleComponent(kw, selectedKeywords.includes(kw))], [])}
+        {Object.keys(keywordToIdMapping).reduce((acc, kw) => [...acc, toggleComponent(kw)], [])}
         {<div style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }} onClick={clearAll}>Clear All</div>}
     </div>
 }
@@ -46,9 +52,11 @@ export default function SearchComponent({ options = {} }) {
     const [tags, setTags] = useState((options.tags || []).map(t => tagToTagSelectorOption(t)));
     const [identities, setIdentities] = useState(options.identities || []);
     const [egos, setEgos] = useState(options.egos || []);
-    const [keywords, setKeywords] = useState((options.keywords || []).map(kw => keywordIdMapping[kw]) || []);
+    const [keywords, setKeywords] = useState(options.keywords || []);
     const [sortBy, setSortBy] = useState(options.sortBy || "score");
     const [strictFiltering, setStrictFiltering] = useState(options.strictFiltering || false);
+    const [identitiesExclude, setIdentitiesExclude] = useState(false);
+    const [egosExclude, setEgosExclude] = useState(false);
 
     const applyFilters = () => {
         const searchFilters = {};
@@ -66,18 +74,38 @@ export default function SearchComponent({ options = {} }) {
     };
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "0.5rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "0.5rem", maxWidth: "940px" }}>
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Title</span>
             <div style={{ display: "flex" }}><input value={title} onChange={e => setTitle(e.target.value)} style={{ minWidth: "clamp(15rem, 90%, 25rem)", maxWidth: "100%" }} /></div>
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>User</span>
             <div style={{ display: "flex" }}><input value={username} onChange={e => setUsername(e.target.value)} style={{ minWidth: "clamp(15rem, 90%, 25rem)", maxWidth: "100%" }} /></div>
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Tags</span>
             <TagSelector selected={tags} onChange={setTags} creatable={false} styles={selectStyleVariable} />
-            <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Identities</span>
-            <IdentitySelector selected={identities} setSelected={setIdentities} isMulti={true} styles={selectStyleVariable} />
-            <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>EGOs</span>
-            <EgoSelector selected={egos} setSelected={setEgos} isMulti={true} styles={selectStyleVariable} />
-            <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Keywords</span>
+            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "end", gap: "0.2rem" }}>
+                <div {...generalTooltipProps("includeExclude")} style={{ borderBottom: "1px #777 dotted" }}>Identities</div>
+                <div
+                    className="toggle-text"
+                    onClick={() => setIdentitiesExclude(p => !p)}
+                    style={{ color: identitiesExclude ? "#f87171" : "#4ade80" }}
+                >
+                    {identitiesExclude ? "Exclude" : "Include"}
+                </div>
+            </div>
+            <IdentitySelector selected={identities} setSelected={setIdentities} isMulti={true} styles={selectStyleVariable} excludeMode={identitiesExclude} />
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "end", textAlign: "end", gap: "0.2rem" }}>
+                <div {...generalTooltipProps("includeExclude")} style={{ borderBottom: "1px #777 dotted" }}>EGOs</div>
+                <div
+                    className="toggle-text"
+                    onClick={() => setEgosExclude(p => !p)}
+                    style={{ color: egosExclude ? "#f87171" : "#4ade80" }}
+                >
+                    {egosExclude ? "Exclude" : "Include"}
+                </div>
+            </div>
+            <EgoSelector selected={egos} setSelected={setEgos} isMulti={true} styles={selectStyleVariable} excludeMode={egosExclude} />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>
+                <span {...generalTooltipProps("twiceToExclude")} style={{ borderBottom: "1px #777 dotted" }}>Keywords</span>
+            </div>
             <KeywordSelector selectedKeywords={keywords} setSelectedKeywords={setKeywords} />
             <span style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>Sort By</span>
             <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center" }}>

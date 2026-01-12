@@ -13,8 +13,8 @@ export default function SearchBuildsContent() {
         if (f === "title") acc[f] = v;
         else if (f === "username") acc[f] = v;
         else if (f === "tags") acc[f] = v.split(",");
-        else if (f === "identities" || f === "egos") acc[f] = v.split(",").map(x => parseInt(x));
-        else if (f === "keywords") acc[f] = v.split(",").map(x => keywordToIdMapping[x]);
+        else if (f === "identities" || f === "egos") acc[f] = v.split(",");
+        else if (f === "keywords") acc[f] = v.split(",");
         return acc;
     }, {}), [searchParams]);
 
@@ -30,7 +30,31 @@ export default function SearchBuildsContent() {
         const fetchBuilds = async () => {
             try {
                 setLoading(true);
-                const data = await getFilteredBuilds(filters, true, sortBy, strictFiltering, page, 24);
+                const newFilters = Object.entries(filters).reduce((acc, [f, v]) => {
+                    if (f === "title" || f === "username") acc[f] = v;
+                    else if (f === "tags") acc[f] = v.split(",");
+                    else if (f === "identities" || f === "egos") {
+                        const [include, exclude] = v.reduce(([i, e], x) => {
+                            if (x[0] === "-") e.push(parseInt(x.slice(1)));
+                            else i.push(parseInt(x));
+                            return [i, e];
+                        }, [[], []]);
+                        if (include.length > 0) acc[f] = include;
+                        if (exclude.length > 0) acc[`${f}_exclude`] = exclude;
+                    }
+                    else if (f === "keywords") {
+                        const [include, exclude] = v.reduce(([i, e], x) => {
+                            if (x[0] === "-") e.push(keywordToIdMapping[x.slice(1)]);
+                            else i.push(keywordToIdMapping[x]);
+                            return [i, e];
+                        }, [[], []]);
+                        if (include.length > 0) acc[f] = include;
+                        if (exclude.length > 0) acc[`${f}_exclude`] = exclude;
+                    }
+                    return acc;
+                }, {});
+
+                const data = await getFilteredBuilds(newFilters, true, sortBy, strictFiltering, page, 24);
 
                 setBuilds(data || []);
                 setLoading(false);

@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_filtered_builds_v5(
+CREATE OR REPLACE FUNCTION public.get_filtered_builds_v6(
   title_filter TEXT DEFAULT NULL,
   username_filter TEXT DEFAULT NULL,
   username_exact_filter TEXT DEFAULT NULL,
@@ -6,8 +6,11 @@ CREATE OR REPLACE FUNCTION public.get_filtered_builds_v5(
   build_id_filter UUID[] DEFAULT NULL,
   tag_filter TEXT[] DEFAULT NULL,
   identity_filter INT[] DEFAULT NULL,
+  identity_exclude INT[] DEFAULT NULL,
   ego_filter INT[] DEFAULT NULL,
+  ego_exclude INT[] DEFAULT NULL,
   keyword_filter INT[] DEFAULT NULL,
+  keyword_exclude INT[] DEFAULT NULL,
   p_published BOOLEAN DEFAULT TRUE,
   sort_by TEXT DEFAULT 'score',
   limit_count INTEGER DEFAULT 20,
@@ -87,6 +90,10 @@ BEGIN
       )
     )
     AND (
+      identity_exclude IS NULL
+      OR NOT (b.identity_ids && identity_exclude)
+    )
+    AND (
       ego_filter IS NULL
       OR (
         (strict_filter = FALSE AND b.ego_ids && ego_filter)
@@ -94,11 +101,19 @@ BEGIN
       )
     )
     AND (
+      ego_exclude IS NULL
+      OR NOT (b.ego_ids && ego_exclude)
+    )
+    AND (
       keyword_filter IS NULL
       OR (
         (strict_filter = FALSE AND b.keyword_ids && keyword_filter)
         OR (strict_filter = TRUE AND b.keyword_ids @> keyword_filter)
       )
+    )
+    AND (
+      keyword_exclude IS NULL
+      OR NOT (b.keyword_ids && keyword_exclude)
     )
   GROUP BY 
     b.id, u.username, u.flair

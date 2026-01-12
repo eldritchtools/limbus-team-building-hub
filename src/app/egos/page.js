@@ -10,6 +10,8 @@ import "./egos.css";
 import EgoComparisonAdvanced from "./EgoComparisonAdvanced";
 import DropdownButton from "../components/DropdownButton";
 import EgoComparisonBasic from "./EgoComparisonBasic";
+import { SelectorWithExclusion } from "../components/Selectors";
+import { generalTooltipProps } from "../components/GeneralTooltip";
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const mainFilters = {
@@ -108,11 +110,35 @@ function checkSearchMatch(searchString, ego) {
 }
 
 function EgoList({ egos, searchString, selectedMainFilters, displayType, separateSinners, strictFiltering, selectedStatuses, selectedSeasons, compareMode }) {
-    const filters = useMemo(() => selectedMainFilters.reduce((acc, filter) => {
-        if (mainFiltersMapping[filter] in acc) acc[mainFiltersMapping[filter]].push(filter);
-        else acc[mainFiltersMapping[filter]] = [filter];
-        return acc;
-    }, {}), [selectedMainFilters])
+    const [filters, filtersExclude] = useMemo(() => selectedMainFilters.reduce(([f, fe], filter) => {
+        const exc = filter[0] === "-";
+        let realFilter = exc ? filter.slice(1) : filter;
+        if (Number.isInteger(Number(realFilter))) realFilter = Number(realFilter);
+
+        if (exc) {
+            if (mainFiltersMapping[realFilter] in fe) fe[mainFiltersMapping[realFilter]].push(realFilter);
+            else fe[mainFiltersMapping[realFilter]] = [realFilter];
+        } else {
+            if (mainFiltersMapping[realFilter] in f) f[mainFiltersMapping[realFilter]].push(realFilter);
+            else f[mainFiltersMapping[realFilter]] = [realFilter];
+        }
+
+        return [f, fe];
+    }, [{}, {}]), [selectedMainFilters]);
+
+    const [statusesInclude, statusesExclude] = useMemo(() =>
+        selectedStatuses.reduce(([include, exclude], x) => {
+            if (x[0] === '-') exclude.push(x.slice(1));
+            else include.push(x);
+            return [include, exclude];
+        }, [[], []]), [selectedStatuses]);
+
+    const [seasonsInclude, seasonsExclude] = useMemo(() =>
+        selectedSeasons.reduce(([include, exclude], x) => {
+            if (x[0] === '-') exclude.push(parseInt(x.slice(1)));
+            else include.push(parseInt(x));
+            return [include, exclude];
+        }, [[], []]), [selectedSeasons]);
 
     const list = useMemo(() => Object.entries(egos).filter(([_id, ego]) => {
         if (searchString !== "" && !checkSearchMatch(searchString, ego)) return false;
@@ -151,24 +177,46 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
             }
         }
 
-        if (selectedStatuses.length !== 0) {
-            if (strictFiltering) {
-                if (!selectedStatuses.every(statusOption => ego.statuses.includes(statusOption.value))) return false;
-            } else {
-                if (!selectedStatuses.some(statusOption => ego.statuses.includes(statusOption.value))) return false;
+        for (const type in filtersExclude) {
+            if (type === "tier") {
+                if (filtersExclude[type].some(x => x === ego.rank.toLowerCase())) return false;
+            } else if (type === "affinity") {
+                if (filtersExclude[type].some(x => ego.awakeningType.affinity === x || ("corrosionType" in ego && ego.corrosionType.affinity === x))) return false;
+            } else if (type === "skillType") {
+                if (filtersExclude[type].some(x => ego.awakeningType.type === x.toLowerCase() || ("corrosionType" in ego && ego.corrosionType.type === x.toLowerCase()))) return false;
+            } else if (type === "keyword") {
+                if (filtersExclude[type].some(x => ego.statuses.includes(keywordMapping[x]))) return false;
+            } else if (type === "sinner") {
+                if (filtersExclude[type].some(x => x === ego.sinnerId)) return false;
             }
         }
 
-        if (selectedSeasons.length !== 0) {
+        if (statusesExclude.length !== 0) {
+            if (statusesExclude.some(status => ego.statuses.includes(status))) return false;
+        }
+
+        if (statusesInclude.length !== 0) {
             if (strictFiltering) {
-                if (!selectedSeasons.every(season => season.value === ego.season || (season.value === 9100 && ego.season > 9100))) return false;
+                if (!statusesInclude.every(status => ego.statuses.includes(status))) return false;
             } else {
-                if (!selectedSeasons.some(season => season.value === ego.season || (season.value === 9100 && ego.season > 9100))) return false;
+                if (!statusesInclude.some(status => ego.statuses.includes(status))) return false;
+            }
+        }
+
+        if (seasonsExclude.length !== 0) {
+            if (seasonsExclude.some(season => season === ego.season || (season === 9100 && ego.season > 9100))) return false;
+        }
+
+        if (seasonsInclude.length !== 0) {
+            if (strictFiltering) {
+                if (!seasonsInclude.every(season => season === ego.season || (season === 9100 && ego.season > 9100))) return false;
+            } else {
+                if (!seasonsInclude.some(season => season === ego.season || (season === 9100 && ego.season > 9100))) return false;
             }
         }
 
         return true;
-    }), [searchString, filters, egos, selectedStatuses, selectedSeasons, strictFiltering]);
+    }), [searchString, filters, filtersExclude, egos, statusesInclude, statusesExclude, seasonsInclude, seasonsExclude, strictFiltering]);
 
     if (compareMode === "basic") {
         return <EgoComparisonBasic />
@@ -269,24 +317,30 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
 }
 
 function MainFilterSelector({ selectedMainFilters, setSelectedMainFilters }) {
-    const handleToggle = (filter, selected) => {
+    const handleToggle = (filter, selected, excluded) => {
         if (selected)
-            setSelectedMainFilters(prev => prev.filter(x => x !== filter));
+            setSelectedMainFilters(p => p.map(x => x === filter ? `-${x}` : x));
+        else if (excluded)
+            setSelectedMainFilters(p => p.filter(x => `-${filter}` !== x));
         else
-            setSelectedMainFilters(prev => [...prev, filter]);
+            setSelectedMainFilters(p => [...p, filter]);
     }
 
     const clearAll = () => {
         setSelectedMainFilters([]);
     }
 
-    const toggleComponent = (filter, selected) => {
+    const toggleComponent = (filter) => {
+        const selected = selectedMainFilters.includes(filter);
+        const excluded = !selected && selectedMainFilters.includes(`-${filter}`);
+
         return <div key={filter} style={{
-            backgroundColor: selected ? "#3f3f3f" : "#1f1f1f", height: "32px", display: "flex",
+            backgroundColor: selected ? "#3f3f3f" : (excluded ? "rgba(239,68,68, 0.8)" : "#1f1f1f"), height: "32px", display: "flex",
             alignItems: "center", justifyContent: "center", padding: "0.1rem 0.2rem", cursor: "pointer",
-            borderBottom: selected ? "2px #4caf50 solid" : "transparent"
+            borderBottom: selected ? "2px #4caf50 solid" : (excluded ? "2px #dc2626 solid" : "transparent"),
+            transition: "all 0.2s"
         }}
-            onClick={() => handleToggle(filter, selected)}
+            onClick={() => handleToggle(filter, selected, excluded)}
         >
             {Number.isInteger(filter) ? <SinnerIcon num={filter} style={{ height: "32px" }} /> : <Icon path={filter} style={{ height: "32px" }} />}
         </div>
@@ -298,19 +352,19 @@ function MainFilterSelector({ selectedMainFilters, setSelectedMainFilters }) {
                 if (category === "tier") {
                     return <div key={category} style={{ display: "flex", flexDirection: "column", borderBottom: "1px #777 dotted" }}>
                         <div style={{ display: "flex", justifyContent: "center", padding: "0.2rem" }}>
-                            {list.slice(0, 3).map(filter => toggleComponent(filter, selectedMainFilters.includes(filter)))}
+                            {list.slice(0, 3).map(filter => toggleComponent(filter))}
                         </div>
                         <div style={{ display: "flex", justifyContent: "center", padding: "0.2rem" }}>
-                            {list.slice(3, 5).map(filter => toggleComponent(filter, selectedMainFilters.includes(filter)))}
+                            {list.slice(3, 5).map(filter => toggleComponent(filter))}
                         </div>
                     </div>
                 } else if (category === "sinner") {
                     return <div key={category} style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", padding: "0.2rem", borderBottom: "1px #777 dotted" }}>
-                        {list.map(filter => toggleComponent(filter, selectedMainFilters.includes(filter)))}
+                        {list.map(filter => toggleComponent(filter))}
                     </div>
                 } else {
                     return <div key={category} style={{ display: "flex", justifyContent: "center", padding: "0.2rem", borderBottom: "1px #777 dotted" }}>
-                        {list.map(filter => toggleComponent(filter, selectedMainFilters.includes(filter)))}
+                        {list.map(filter => toggleComponent(filter))}
                     </div>
                 }
             })
@@ -319,16 +373,18 @@ function MainFilterSelector({ selectedMainFilters, setSelectedMainFilters }) {
     </div>
 }
 
-function MultiSelector({ options, selected, setSelected, placeholder }) {
-    return <Select
-        isMulti
-        options={options}
-        value={selected}
-        onChange={setSelected}
+function MultiSelector({ options, selected, setSelected, placeholder, excludeMode }) {
+    const optionsMapped = useMemo(() => options.reduce((acc, opt) => { acc[opt.value] = opt; return acc; }, {}), [options]);
+
+    return <SelectorWithExclusion
+        optionsMapped={optionsMapped}
+        selected={selected}
+        setSelected={setSelected}
         placeholder={placeholder}
-        isClearable={true}
+        filterFunction={(candidate, input) => candidate.data.name.toLowerCase().includes(input.toLowerCase())}
+        isMulti={true}
         styles={selectStyle}
-        filterOption={(candidate, input) => candidate.data.name.toLowerCase().includes(input.toLowerCase())}
+        excludeMode={excludeMode}
     />;
 }
 
@@ -367,10 +423,12 @@ export default function EgosPage() {
     }
 
     const [selectedStatuses, setSelectedStatuses] = useState([]);
+    const [statusesExcluding, setStatusesExcluding] = useState(false);
     const [selectedSeasons, setSelectedSeasons] = useState([]);
+    const [seasonsExcluding, setSeasonsExcluding] = useState(false);
 
     const [statusOptions, seasonOptions] = useMemo(() => {
-        if (egosLoading || statusesLoading) return [];
+        if (egosLoading || statusesLoading) return [[], []];
         const statusList = new Set();
         const seasonList = new Set();
         seasonList.add(9100);
@@ -378,7 +436,7 @@ export default function EgosPage() {
         Object.entries(egos).forEach(([_id, ego]) => {
             ego.statuses.forEach(status => {
                 if (status !== "")
-                statusList.add(status)
+                    statusList.add(status)
             })
             seasonList.add(ego.season);
         })
@@ -388,7 +446,7 @@ export default function EgosPage() {
             label: <Status id={id} includeTooltip={false} />,
             name: statuses[id].name
         })).sort((a, b) => a.name.localeCompare(b.name)), [...seasonList].map(season => ({
-            value: season,
+            value: `${season}`,
             label: season === 9100 ? "Walpurgisnacht (any)" : getSeasonString(season),
             name: season === 9100 ? "Walpurgisnacht" : getSeasonString(season)
         })).sort((a, b) => a.value - b.value)]
@@ -399,10 +457,32 @@ export default function EgosPage() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, auto)", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
                 <span style={{ textAlign: 'end' }}>Search:</span>
                 <input value={searchString} onChange={e => setSearchString(e.target.value)} placeholder={"E.G.O Name"} />
-                <span style={{ textAlign: "end" }}>Filter Statuses:</span>
-                <MultiSelector options={statusOptions} selected={selectedStatuses} setSelected={setSelectedStatuses} placeholder={"Select Statuses..."} />
-                <span style={{ textAlign: "end" }}>Filter Season:</span>
-                <MultiSelector options={seasonOptions} selected={selectedSeasons} setSelected={setSelectedSeasons} placeholder={"Select Seasons..."} />
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "end", textAlign: "end", gap: "0.2rem" }}>
+                    <div {...generalTooltipProps("includeExclude")} style={{ borderBottom: "1px #777 dotted" }}>Filter Statuses:</div>
+                    <div
+                        className="toggle-text"
+                        onClick={() => setStatusesExcluding(p => !p)}
+                        style={{ color: statusesExcluding ? "#f87171" : "#4ade80" }}
+                    >
+                        {statusesExcluding ? "Exclude" : "Include"}
+                    </div>
+                </div>
+                <MultiSelector options={statusOptions} selected={selectedStatuses} setSelected={setSelectedStatuses}
+                    placeholder={"Select Statuses..."} excludeMode={statusesExcluding}
+                />
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "end", textAlign: "end", gap: "0.2rem" }}>
+                    <div {...generalTooltipProps("includeExclude")} style={{ borderBottom: "1px #777 dotted" }}>Filter Season:</div>
+                    <div
+                        className="toggle-text"
+                        onClick={() => setSeasonsExcluding(p => !p)}
+                        style={{ color: seasonsExcluding ? "#f87171" : "#4ade80" }}
+                    >
+                        {seasonsExcluding ? "Exclude" : "Include"}
+                    </div>
+                </div>
+                <MultiSelector options={seasonOptions} selected={selectedSeasons} setSelected={setSelectedSeasons}
+                    placeholder={"Select Seasons..."} excludeMode={seasonsExcluding}
+                />
                 <span style={{ textAlign: "end" }}>Display Type:</span>
                 <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
                     <label>

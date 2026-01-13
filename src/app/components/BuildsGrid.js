@@ -3,7 +3,7 @@ import BuildEntry from "./BuildEntry";
 import { useBreakpoint } from "@eldritchtools/shared-components";
 
 export default function BuildsGrid({ builds }) {
-    const [compressed, setCompressed] = useState(false);
+    const [compressed, setCompressed] = useState(null);
     const { isMobile } = useBreakpoint();
 
     useEffect(() => {
@@ -15,6 +15,8 @@ export default function BuildsGrid({ builds }) {
         localStorage.setItem("buildsCompressed", JSON.stringify(checked));
         setCompressed(checked);
     }
+
+    if (compressed === null) return null;
 
     return <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         {!isMobile ?

@@ -22,7 +22,7 @@ const paths = [
     {
         path: "/my-profile", title: "My Profile", subpaths: [
             { path: "/builds/new", title: "New Build" },
-            { path: "/my-profile?tab=builds", title: "My Builds" },
+            { path: "/my-profile?tab=published", title: "My Builds" },
             { path: "/my-profile?tab=drafts", title: "My Drafts" },
             { path: "/my-profile?tab=saved", title: "Saved Builds" },
         ]

@@ -35,17 +35,12 @@ export default function ProfilePage() {
         }
     }, [profile]);
 
-    const [activeTab, setActiveTab] = useState("published");
+    const searchTab = searchParams.get('tab') ?? "published";
+    const [activeTab, setActiveTab] = useState(searchTab);
 
     useEffect(() => {
-        const tab = searchParams.get('tab');
-        switch (tab) {
-            case "builds": setActiveTab("published"); return;
-            case "drafts": setActiveTab("drafts"); return;
-            case "saved": setActiveTab("saved"); return;
-            default: return;
-        }
-    }, [searchParams]);
+        setActiveTab(searchTab);
+    }, [searchTab]);
 
     useEffect(() => {
         switch (activeTab) {
@@ -72,7 +67,7 @@ export default function ProfilePage() {
             case "saved":
                 if (user) {
                     setBuildsLoading(true);
-                    getSaves(user.id, page, 24).then(b => { console.log(b); setBuilds(b); setBuildsLoading(false); })
+                    getSaves(user.id, page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
                 } else {
                     setBuildsLoading(true);
                     const fetchSaves = async () => {
@@ -141,7 +136,7 @@ export default function ProfilePage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", maxWidth: "1600px" }}>
                     <h2>Details</h2>
                     <div>
-                        View your profile <Link href={`profiles/${profile.username}`}>here</Link>.
+                        View your profile <Link className="text-link" href={`profiles/${profile.username}`}>here</Link>.
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                         Username: <input value={username} onChange={e => setUsername(e.target.value)} />

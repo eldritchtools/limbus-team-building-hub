@@ -130,3 +130,20 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+.text-link {
+  color: #ddd;
+  font-weight: bold;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.text-link:hover,
+.text-link:visited:hover {
+  color: #80cfff;
+  text-shadow: 0 0 4px rgba(128, 207, 255, 0.6);
+}
+
+.text-link:visited {
+  color: #ddd;
+}

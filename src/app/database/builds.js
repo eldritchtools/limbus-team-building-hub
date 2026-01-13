@@ -22,15 +22,18 @@ async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", 
     if ("username_exact" in filters) options["username_exact_filter"] = filters["username_exact"];
     if ("tags" in filters) options["tag_filter"] = filters["tags"];
     if ("identities" in filters) options["identity_filter"] = filters["identities"];
+    if ("identities_exclude" in filters) options["identity_exclude"] = filters["identities_exclude"];
     if ("egos" in filters) options["ego_filter"] = filters["egos"];
+    if ("egos_exclude" in filters) options["ego_exclude"] = filters["egos_exclude"];
     if ("keywords" in filters) options["keyword_filter"] = filters["keywords"];
+    if ("keywords_exclude" in filters) options["keyword_exclude"] = filters["keywords_exclude"];
     options.p_published = isPublished;
     options.sort_by = sortBy;
     options.strict_filter = strictFiltering;
     options.limit_count = pageSize;
     options.offset_count = start;
 
-    const { data, error } = await getSupabase().rpc('get_filtered_builds_v5', options);
+    const { data, error } = await getSupabase().rpc('get_filtered_builds_v6', options);
 
     if (error) throw (error);
     return data;

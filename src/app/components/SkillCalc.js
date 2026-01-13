@@ -363,6 +363,8 @@ function SkillCalc({ skills, opts }) {
 
 function extractSkillData(skill, uptie, level, rank, applyCrits = false) {
     const data = skill.data.reduce((acc, dataTier) => dataTier.uptie <= uptie ? { ...acc, ...dataTier } : acc, {});
+    if (Object.keys(data).length === 0) return null;
+
     const skillData = {
         name: data.name,
         rank: rank,
@@ -396,15 +398,18 @@ function IdentitySkillCalc({ identity, uptie = 4, level = LEVEL_CAP, opts }) {
         const tier = skillData.skills[skill.id].tier;
 
         const finalApplyCrits = applyCrits || (opts.crit === "poise" && (skillData.skills[skill.id].critSkill ?? false));
+        const data = extractSkillData(skillData.skills[skill.id], uptie, level, [tier, counts[tier] + 1], finalApplyCrits);
+
+        if (!data) return [skills, counts];
 
         if (tier in counts) {
             return [
-                [...skills, extractSkillData(skillData.skills[skill.id], uptie, level, [tier, counts[tier] + 1], finalApplyCrits)],
+                [...skills, data],
                 { ...counts, [tier]: counts[tier] + 1 }
             ]
         } else {
             return [
-                [...skills, extractSkillData(skillData.skills[skill.id], uptie, level, [tier], finalApplyCrits)],
+                [...skills, data],
                 { ...counts, [tier]: 1 }
             ]
         }
@@ -413,8 +418,8 @@ function IdentitySkillCalc({ identity, uptie = 4, level = LEVEL_CAP, opts }) {
     const defskills = identity.defenseSkillTypes.map(s => {
         const finalApplyCrits = applyCrits || (opts.crit === "poise" && (skillData.skills[s.id].critSkill ?? false));
 
-        return extractSkillData(skillData.skills[s.id], uptie, level, ["Defense"], finalApplyCrits)
-    });
+        return extractSkillData(skillData.skills[s.id], uptie, level, ["Defense"], finalApplyCrits);
+    }).filter(x => x);
 
     const list = [...atkskills, ...defskills];
 
@@ -447,7 +452,7 @@ function EgoSkillCalc({ egos, threadspins, level = LEVEL_CAP, opts }) {
                 const finalApplyCrits = applyCrits || (opts.crit === "poise" && (skill.critSkill ?? false));
 
                 return extractSkillData(skill, ts, level, [rank], finalApplyCrits);
-            });
+            }).filter(x => x);
         }).flat();
 
     if (list.length === 0) return null;

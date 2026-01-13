@@ -25,6 +25,7 @@ const seasonMapping = {
     4: "4 - Clear All Cathy",
     5: "5 - Oblivion",
     6: "6 - Zàng Huā Yín",
+    7: "7 - Kumo no ito • oti on akA",
     8000: "Pilgrimage of Compassion"
 }
 

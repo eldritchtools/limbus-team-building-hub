@@ -3,7 +3,7 @@ import BuildEntry from "./BuildEntry";
 import { useBreakpoint } from "@eldritchtools/shared-components";
 
 export default function BuildsGrid({ builds }) {
-    const [compressed, setCompressed] = useState(false);
+    const [compressed, setCompressed] = useState(null);
     const { isMobile } = useBreakpoint();
 
     useEffect(() => {
@@ -16,6 +16,8 @@ export default function BuildsGrid({ builds }) {
         setCompressed(checked);
     }
 
+    if (compressed === null) return null;
+
     return <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         {!isMobile ?
             <div style={{ alignSelf: "center" }}>
@@ -26,14 +28,14 @@ export default function BuildsGrid({ builds }) {
             </div> : null}
 
         {isMobile ?
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 300px)", gap: "0.5rem", justifyContent: "center" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 300px)", gap: "1rem", justifyContent: "center" }}>
                 {builds.map(build => <BuildEntry key={build.id} build={build} size={"S"} />)}
             </div> :
             compressed ?
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 450px)", gap: "0.5rem", justifyContent: "center" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 460px)", gap: "1rem", justifyContent: "center" }}>
                     {builds.map(build => <BuildEntry key={build.id} build={build} size={"M"} />)}
                 </div> :
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 640px)", gap: "0.5rem", justifyContent: "center" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 640px)", gap: "1rem", justifyContent: "center" }}>
                     {builds.map(build => <BuildEntry key={build.id} build={build} size={"L"} />)}
                 </div>
         }

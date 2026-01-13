@@ -97,7 +97,7 @@ function AuthForm() {
                 <input type="password" placeholder="Password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 {isLogin ? (
                     <div style={{ display: "flex", justifyContent: "end" }}>
-                        <Link href="/auth/forgot-password" style={{ textAlign: 'right', fontSize: "0.8rem" }}>
+                        <Link className="text-link" href="/auth/forgot-password" style={{ textAlign: 'right', fontSize: "0.8rem" }}>
                             Forgot your password?
                         </Link>
                     </div>
@@ -127,13 +127,7 @@ function AuthForm() {
                 {isLogin ? 'Need an account?' : 'Already have one?'}{' '}
                 <button
                     onClick={() => setIsLogin(!isLogin)}
-                    style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#7ba7ff',
-                        textDecoration: 'underline',
-                        cursor: 'pointer',
-                    }}
+                    className='signup-button'
                 >
                     {isLogin ? 'Sign up' : 'Login'}
                 </button>

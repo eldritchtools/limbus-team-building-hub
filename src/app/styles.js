@@ -6,7 +6,7 @@ const selectStyle = {
         borderColor: state.isFocused ? "#888" : "#555",
         boxShadow: "none",
         "&:hover": { borderColor: "#888" },
-        minHeight: "32px",
+        minHeight: "28px",
         minWidth: "15rem",
         maxWidth: "40rem"
     }),
@@ -14,7 +14,8 @@ const selectStyle = {
         ...provided,
         backgroundColor: "#2a2a2a",
         border: "1px solid #555",
-        maxWidth: "40rem"
+        maxWidth: "40rem",
+        zIndex: 3
     }),
     option: (provided, state) => ({
         ...provided,
@@ -40,11 +41,13 @@ const selectStyle = {
         minWidth: 1,
         flex: 1
     }),
-    multiValue: (provided) => ({
+    multiValue: (provided, state) => ({
         ...provided,
         backgroundColor: "#555",
+        border: state.data.exclude ? "2px solid #ef4444" : "transparent",
+        boxShadow: state.data.exclude ? "inset 0 0 0 1px rgba(239,68,68,0.25)" : null,
         borderRadius: "8px",
-        padding: "2px 4px",
+        padding: "2px 4px"
     }),
     multiValueLabel: (provided) => ({
         ...provided,
@@ -62,15 +65,16 @@ const selectStyleWide = {
         borderColor: state.isFocused ? "#888" : "#555",
         boxShadow: "none",
         "&:hover": { borderColor: "#888" },
-        minHeight: "32px",
+        minHeight: "28px",
         width: "55rem"
     }),
     menu: (provided) => ({
         ...provided,
         backgroundColor: "#2a2a2a",
         border: "1px solid #555",
-        minHeight: "32px",
-        width: "55rem"
+        minHeight: "28px",
+        width: "55rem",
+        zIndex: 3
     }),
 };
 
@@ -83,15 +87,16 @@ const selectStyleVariable = {
         borderColor: state.isFocused ? "#888" : "#555",
         boxShadow: "none",
         "&:hover": { borderColor: "#888" },
-        minHeight: "32px",
+        minHeight: "28px",
         width: "100%"
     }),
     menu: (provided) => ({
         ...provided,
         backgroundColor: "#2a2a2a",
         border: "1px solid #555",
-        minHeight: "32px",
-        width: "100%"
+        minHeight: "28px",
+        width: "100%",
+        zIndex: 3
     }),
 };
 

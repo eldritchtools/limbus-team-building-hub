@@ -17,7 +17,7 @@ export default function DropdownButton({ value, setValue, options, left=true, st
 
     const extraStyle = left ? {left:0} : {right:0};
 
-    return <div ref={ref} style={{ position: "relative", display: "inline-block" }}>
+    return <div ref={ref} style={{ position: "relative" }}>
         <button onClick={() => setOpen(o => !o)}>
             {value in options ? options[value] : Object.values(options)[0]}
         </button>

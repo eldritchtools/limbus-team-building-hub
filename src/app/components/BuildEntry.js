@@ -11,11 +11,13 @@ import SaveButton from "./SaveButton";
 import ReactTimeAgo from "react-time-ago";
 import { decodeBuildExtraOpts } from "./BuildExtraOpts";
 import { useBreakpoint } from "@eldritchtools/shared-components";
+import "./BuildEntry.css";
+import CommentButton from "./CommentButton";
 
 function getSizes(size, isMobile) {
-    if(isMobile || size === "S") return { width: "300px", margins: "0.2rem", iconSize: 24, scale: 0.175 };
-    if(size === "M") return { width: "450px", margins: "0.2rem", iconSize: 32, scale: 0.275 };
-    if(size === "L") return { width: "640px", margins: "0.5rem", iconSize: 32, scale: 0.375 }
+    if (isMobile || size === "S") return { width: "300px", iconSize: 24, buttonIconSize: 16, scale: 0.175 };
+    if (size === "M") return { width: "460px", iconSize: 28, buttonIconSize: 20, scale: 0.275 };
+    if (size === "L") return { width: "640px", iconSize: 28, buttonIconSize: 20, scale: 0.375 }
     return null;
 }
 
@@ -36,34 +38,41 @@ export default function BuildEntry({ build, size, complete = true }) {
 
     if (!sizes) return null;
 
-    return <div style={{ width: sizes.width, display: "flex", flexDirection: "column", border: "1px #777 solid", borderRadius: "1rem", padding: "1rem", boxSizing: "border-box", textAlign: "left" }}>
-        <Link href={`/builds/${build.id}`}>
-            <h2 style={{ display: "flex", fontSize: "1.2rem", fontWeight: "bold", alignItems: "center", gap: "0.2rem", marginTop: "0rem", marginBottom: sizes.margins }}>
-                {complete ?
-                    <div style={{ display: "flex", gap: "0" }}>
-                        {build.keyword_ids.map(id => <KeywordIcon key={id} id={keywordIdMapping[id]} size={sizes.iconSize} />)}
-                    </div> : null}
-                {build.title}
-            </h2>
-        </Link>
-        <div style={{ fontSize: "0.8rem", marginBottom: sizes.margins, color: "#ddd" }}>
-            {!isLocalId(build.id) ? 
-                <span>by <Username username={build.username} flair={build.user_flair} /> • </span> :
-                null
-            }<ReactTimeAgo date={build.published_at ?? build.created_at} locale="en-US" timeStyle="mini" />
-        </div>
-        <div style={{ display: "flex", flexDirection: "row", marginBottom: sizes.margins, alignSelf: "center" }}>
-            <IdentityImgSpread identityIds={build.identity_ids} scale={sizes.scale} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} {...extraProps} />
-        </div>
-        {complete ? <>
-            <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
-                {size === "L" ? "Tags: " : null}{build.tags.map((t, i) => t ? <Tag key={i} tag={t} /> : null)}
+    return <div className="build-entry" style={{ width: sizes.width }}>
+        <Link href={`/builds/${build.id}`} className="build-entry-link" />
+
+        {build.keyword_ids.length > 0 ?
+            <div className="build-icon-rails">
+                {build.keyword_ids.map(id => <KeywordIcon key={id} id={keywordIdMapping[id]} size={sizes.iconSize} />)}
+            </div> :
+            null
+        }
+
+        <div className="build-contents" style={{ marginTop: build.keyword_ids.length === 0 ? 0 : "0px" }}>
+            <div style={{ display: "flex", height: "2.4rem", alignItems: "center", marginBottom: "0.2rem" }}>
+                <h2 className="build-title" style={{ fontSize: "1.2rem", fontWeight: "bold", marginTop: "0", marginBottom: "0" }}>
+                    {build.title}
+                </h2>
             </div>
-            <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", marginTop: "0.25rem" }}>
-                <LikeButton buildId={build.id} likeCount={build.like_count} />
-                <SaveButton buildId={build.id} />
-                💬 {build.comment_count}
+            <div style={{ fontSize: "0.8rem", marginBottom: "0.2rem", color: "#ddd" }}>
+                {!isLocalId(build.id) ?
+                    <span>by <Username username={build.username} flair={build.user_flair} /> • </span> :
+                    null
+                }<ReactTimeAgo date={build.published_at ?? build.created_at} locale="en-US" timeStyle="mini" />
             </div>
-        </> : null}
+            <div style={{ marginBottom: "0.2rem", alignSelf: "center" }}>
+                <IdentityImgSpread identityIds={build.identity_ids} scale={sizes.scale} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} {...extraProps} />
+            </div>
+            {complete ? <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+                {build.tags.map((t, i) => t ? <Tag key={i} tag={t} /> : null)}
+            </div> : null}
+        </div>
+        {complete ?
+            <div className="build-buttons-container">
+                <LikeButton buildId={build.id} likeCount={build.like_count} buildEntryVersion={true} iconSize={sizes.buttonIconSize} />
+                <CommentButton buildId={build.id} count={build.comment_count} iconSize={sizes.buttonIconSize} />
+                <SaveButton buildId={build.id} buildEntryVersion={true} iconSize={sizes.buttonIconSize} />
+            </div>
+            : null}
     </div>
 }

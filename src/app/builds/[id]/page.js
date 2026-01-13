@@ -5,7 +5,7 @@ import { deleteBuild, getBuild } from "@/app/database/builds";
 import { KeywordIcon } from "@eldritchtools/limbus-shared-library";
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/app/database/authProvider";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Modal } from "@/app/components/Modal";
 import { keywordIdMapping } from "@/app/keywordIds";
 import Username from "@/app/components/Username";
@@ -24,6 +24,7 @@ import { generalTooltipProps } from "@/app/components/GeneralTooltip";
 import { useBreakpoint } from "@eldritchtools/shared-components";
 import DisplayTypeButton from "../DisplayTypeButton";
 import { buildsStore } from "@/app/database/localDB";
+import { DeleteSolid, EditSolid, ShareSolid } from "@/app/components/Symbols";
 
 function isLocalId(id) {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -50,6 +51,23 @@ export default function BuildPage({ params }) {
     const { isDesktop } = useBreakpoint();
 
     const [displayType, setDisplayType] = useState(null);
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        if (!loading && pathname && searchParams) {
+            const hash = window.location.hash?.substring(1);
+            if (!hash) return;
+
+            const el = document.getElementById(hash);
+            if (el) {
+                setTimeout(() => {
+                    const y = el.getBoundingClientRect().top + window.pageYOffset - 48;
+                    window.scrollTo({ top: y, behavior: 'smooth' })
+                }, 200);
+            }
+        }
+    }, [loading, pathname, searchParams]);
 
     useEffect(() => {
         const savedType = localStorage.getItem("buildDisplayType");
@@ -201,22 +219,22 @@ export default function BuildPage({ params }) {
                 <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
                     Tags: {build.tags.map((t, i) => <Tag key={i} tag={isLocalId(id) ? t : t.name} />)}
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", flexWrap: "wrap" }}>
                     <LikeButton buildId={id} likeCount={likeCount} />
                     <SaveButton buildId={id} />
                     <button onClick={() => setShareOpen(true)}>
-                        🔗 Share
+                        <ShareSolid text={"Share"} />
                     </button>
                     {
                         (user && user.id === build.user_id) || isLocalId(id) ?
                             <button onClick={editBuild}>
-                                ✎ Edit
+                                <EditSolid text={"Edit"} />
                             </button> : null
                     }
                     {
                         user && user.id === build.user_id ?
                             <button onClick={() => setDeleteOpen(true)}>
-                                🗑️ Delete
+                                <DeleteSolid text={"Delete"} />
                             </button> : null
                     }
                 </div>
@@ -225,7 +243,7 @@ export default function BuildPage({ params }) {
 
         <div style={{ border: "1px #777 solid" }} />
         {build.is_published ?
-            <div style={{ width: "clamp(300px, 100%, 1200px)", alignSelf: "center" }}>
+            <div id="comments" style={{ width: "clamp(300px, 100%, 1200px)", alignSelf: "center" }}>
                 <CommentSection buildId={id} ownerId={build.user_id} commentCount={commentCount} pinnedComment={build.pinned_comment} />
             </div> :
             <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>No comments while the build is not published.</p>

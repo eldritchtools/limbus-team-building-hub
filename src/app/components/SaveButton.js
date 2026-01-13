@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useRequestsCache } from "../database/RequestsCacheProvider";
 import { useAuth } from "../database/authProvider";
 import { savesStore } from "../database/localDB";
+import { SaveOutline, SaveSolid } from "./Symbols";
 
-function NormalSaveButton({ buildId, user }) {
+function NormalSaveButton({ buildId, user, buildEntryVersion, iconSize }) {
     const { savedMap, toggleSave, fetchUserData } = useRequestsCache();
     const [loading, setLoading] = useState(false);
 
@@ -18,9 +19,18 @@ function NormalSaveButton({ buildId, user }) {
         setLoading(false);
     };
 
-    return <button onClick={handleClick} className={saved ? "toggle-button-active" : "toggle-button"} disabled={loading}>
-        ⭐ {saved ? "Saved" : "Save"}
-    </button>
+    if (buildEntryVersion) {
+        return <div
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", color: loading ? "#aaa" : "#ddd", borderBottomRightRadius: "12px" }}
+            onClick={loading ? null : handleClick}
+        >
+            {saved ? <SaveSolid text={"Saved"} size={iconSize} /> : <SaveOutline text={"Save"} size={iconSize} />}
+        </div>
+    } else {
+        return <button onClick={handleClick} className={saved ? "toggle-button-active" : "toggle-button"} disabled={loading}>
+            {saved ? <SaveSolid text={"Saved"} size={iconSize} /> : <SaveOutline text={"Save"} size={iconSize} />}
+        </button>
+    }
 }
 
 function isLocalId(id) {
@@ -28,7 +38,7 @@ function isLocalId(id) {
     return !uuidRegex.test(id);
 }
 
-function LocalSaveButton({ buildId }) {
+function LocalSaveButton({ buildId, buildEntryVersion, iconSize }) {
     const [saved, setSaved] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -39,7 +49,7 @@ function LocalSaveButton({ buildId }) {
         fetchSaved();
     }, [buildId]);
 
-    if(isLocalId(buildId)) return null;
+    if (isLocalId(buildId)) return null;
 
     const handleClick = async () => {
         setLoading(true);
@@ -53,14 +63,23 @@ function LocalSaveButton({ buildId }) {
         setLoading(false);
     };
 
-    return <button onClick={handleClick} className={saved ? "toggle-button-active" : "toggle-button"} disabled={loading}>
-        ⭐ {saved ? "Saved" : "Save"}
-    </button>
+    if (buildEntryVersion) {
+        return <div
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", color: loading ? "#aaa" : "#ddd", borderBottomRightRadius: "12px" }}
+            onClick={loading ? null : handleClick}
+        >
+            {saved ? <SaveSolid text={"Saved"} size={iconSize} /> : <SaveOutline text={"Save"} size={iconSize} />}
+        </div>
+    } else {
+        return <button onClick={handleClick} className={saved ? "toggle-button-active" : "toggle-button"} disabled={loading}>
+            {saved ? <SaveSolid text={"Saved"} size={iconSize} /> : <SaveOutline text={"Save"} size={iconSize} />}
+        </button>
+    }
 }
 
-export default function SaveButton({ buildId }) {
+export default function SaveButton({ buildId, buildEntryVersion=false, iconSize }) {
     const { user } = useAuth();
-    if (!user) return <LocalSaveButton buildId={buildId} />;
-    else return <NormalSaveButton buildId={buildId} user={user} />
+    if (!user) return <LocalSaveButton buildId={buildId} buildEntryVersion={buildEntryVersion} iconSize={iconSize} />;
+    else return <NormalSaveButton buildId={buildId} user={user} buildEntryVersion={buildEntryVersion} iconSize={iconSize} />
 
 }

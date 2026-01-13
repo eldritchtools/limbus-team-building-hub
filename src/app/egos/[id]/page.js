@@ -39,7 +39,7 @@ function NotesTab({ notes }) {
 function BuildsTab({ builds }) {
     if (!builds) return <div style={{ color: "#777", textAlign: "center" }}>Loading builds...</div>;
     if (builds.length === 0) return <div style={{ color: "#777", textAlign: "center" }}>No builds found.</div>;
-    return <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+    return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginLeft: "14px" }}>
         {builds.map(build => <BuildEntry key={build.id} build={build} size={"M"} complete={false} />)}
     </div>
 }
@@ -145,20 +145,20 @@ export default function EgoPage({ params }) {
             </div>
             <div style={{ display: "flex", flexDirection: "column", minWidth: "min(480px, 100%)", flex: 1, gap: "0.5rem" }}>
                 <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-                    {skillData.awakeningSkills.map(skill => <div key={skill.id} style={{ flex: 1, minWidth: "min(300px, 100%)" }}>
+                    {skillData.awakeningSkills.map((skill, i) => <div key={i} style={{ flex: 1, minWidth: "min(300px, 100%)" }}>
                         <SkillCard skill={skill} uptie={uptie} type={"awakening"} />
                     </div>)}
                 </div>
                 {"corrosionSkills" in skillData ?
                     <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-                        {skillData.corrosionSkills.map(skill => <div key={skill.id} style={{ flex: 1, minWidth: "min(300px, 100%)" }}>
+                        {skillData.corrosionSkills.map((skill, i) => <div key={i} style={{ flex: 1, minWidth: "min(300px, 100%)" }}>
                             <SkillCard skill={skill} uptie={uptie} type={"corrosion"} />
                         </div>)}
                     </div> : null}
                 {uptie >= 2 && passives ?
                     <div style={{ display: "flex", flexDirection: "column" }}>
                         <div style={{ color: "#aaa", fontWeight: "bold", fontSize: "1.25rem" }}>Passives</div>
-                        {passives.map(passive => <PassiveCard key={passive} passive={passive} />)}
+                        {passives.map((passive, i) => <PassiveCard key={i} passive={passive} />)}
                     </div> :
                     null
                 }

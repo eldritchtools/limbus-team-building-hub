@@ -16,7 +16,10 @@ export default function LikeButton({ buildId, likeCount, buildEntryVersion = fal
 
     if (!user)
         if (buildEntryVersion) {
-            return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "#aaa", borderBottomLeftRadius: "12px" }}>
+            return <div
+                className="is-disabled"
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "#ddd", borderBottomLeftRadius: "12px" }}
+            >
                 <LikeOutline text={text} size={iconSize} />
             </div>
         } else {
@@ -38,7 +41,8 @@ export default function LikeButton({ buildId, likeCount, buildEntryVersion = fal
 
     if (buildEntryVersion) {
         return <div
-            style={{ display: "flex", alignItems: "center", justifyContent: "center", color: loading ? "#aaa" : "#ddd", borderBottomLeftRadius: "12px" }}
+            className={loading ? "is-disabled" : null}
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "#ddd", borderBottomLeftRadius: "12px" }}
             onClick={loading ? null : handleClick}
         >
             {liked ? <LikeSolid text={text} size={iconSize} /> : <LikeOutline text={text} size={iconSize} />}

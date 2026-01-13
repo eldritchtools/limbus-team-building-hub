@@ -128,7 +128,7 @@ export default function SearchComponent({ options = {} }) {
         </div>
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginTop: "0.2rem" }}>
             <button style={{ fontSize: "1.2rem", cursor: "pointer" }} onClick={applyFilters}>Search Builds</button>
-            or <Link href={"/builds/new"}>create a build</Link>
+            or <Link className="text-link" href={"/builds/new"}>create a build</Link>
         </div>
     </div>
 }

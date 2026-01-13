@@ -84,8 +84,12 @@
     border-bottom-right-radius: 12px;
 }
 
-.build-buttons-container>*:hover {
+.build-buttons-container > *:hover:not(.is-disabled) {
     background: #3a3a3a;
     transition: all 0.2s ease;
     cursor: pointer;
+}
+
+.build-buttons-container > .is-disabled {
+  opacity: 0.5;
 }

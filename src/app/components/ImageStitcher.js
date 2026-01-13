@@ -46,14 +46,14 @@ const ImageStitcher = ({ build, outputFileName = "stitched_image.png" }) => {
         try {
             await loadImages;
 
-            canvas.width = 6 * baseSize;
-            canvas.height = 2 * baseSize;
+            canvas.width = 6 * baseSize+10;
+            canvas.height = 2 * baseSize+2;
 
             const emptyNudge = .125 * baseSize;
 
             images.forEach((img, i) => {
-                const x = (i % 6) * baseSize;
-                const y = Math.floor(i / 6) * baseSize;
+                const x = (i % 6) * (baseSize + 2) - 2;
+                const y = Math.floor(i / 6) * (baseSize + 2) - 2;
 
                 if (identitiesList[i]) ctx.drawImage(img, 0, 0, img.width, img.height, x, y, baseSize, baseSize);
                 else ctx.drawImage(img, 0, 0, img.width, img.height, x + emptyNudge, y + emptyNudge, baseSize * .75, baseSize * .75);
@@ -96,7 +96,7 @@ const ImageStitcher = ({ build, outputFileName = "stitched_image.png" }) => {
     const sizeStr = baseSize => `${baseSize * 6}x${baseSize * 2}`;
     const scale = Math.min(0.5, window.innerWidth / 7 / 256);
     return (
-        <div style={{ display: "flex", flexDirection: "column", width: "100%", alignItems: "center", gap: "0.2rem" }}>
+        <div style={{ display: "flex", flexDirection: "column", width: "100%", alignItems: "center", gap: "0.2rem", marginBottom: "0.2rem" }}>
             <div style={{ alignSelf: "start" }}>Download team build image</div>
             {
                 includeOrder ?
@@ -121,6 +121,9 @@ const ImageStitcher = ({ build, outputFileName = "stitched_image.png" }) => {
                             <input type="checkbox" checked={includeOrder} onChange={() => setIncludeOrder(p => !p)} />
                             Include deployment order?
                         </label>
+                    </div>
+                    <div style={{fontSize: "0.8rem"}}>
+                        *Downloaded image will be similar but not exactly the same as the preview.
                     </div>
                 </div>
             }

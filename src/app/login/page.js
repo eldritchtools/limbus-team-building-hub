@@ -127,13 +127,7 @@ function AuthForm() {
                 {isLogin ? 'Need an account?' : 'Already have one?'}{' '}
                 <button
                     onClick={() => setIsLogin(!isLogin)}
-                    style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#7ba7ff',
-                        textDecoration: 'underline',
-                        cursor: 'pointer',
-                    }}
+                    className='signup-button'
                 >
                     {isLogin ? 'Sign up' : 'Login'}
                 </button>

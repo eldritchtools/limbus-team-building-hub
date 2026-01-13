@@ -82,23 +82,21 @@ input[type="checkbox"] {
 }
 
 a {
-  color: #4da6ff; /* bright blue */
-  text-decoration: underline;
-  transition: color 0.2s ease, text-shadow 0.2s ease;
+  color: #ddd;
+  font-weight: bold;
+  text-decoration: none;
+  transition: all 0.2s ease;
 }
 
 a:hover,
 a:focus {
-  color: #80cfff; /* lighter blue on hover */
-  text-shadow: 0 0 4px rgba(128, 207, 255, 0.6); /* subtle glow */
+  filter: brightness(1.2);
+  text-shadow: 0 0 4px rgba(128, 207, 255, 0.6);
 }
 
-a:visited {
-  color: #b366ff; /* purple that's still bright enough */
-}
-
-a:active {
-  color: #ffcc66; /* amber for click */
+a:visited,
+a:visited:hover {
+  color: #ddd;
 }
 
 .dark-scrollable::-webkit-scrollbar {

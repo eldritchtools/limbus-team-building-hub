@@ -219,7 +219,7 @@ export default function BuildPage({ params }) {
                 <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
                     Tags: {build.tags.map((t, i) => <Tag key={i} tag={isLocalId(id) ? t : t.name} />)}
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", flexWrap: "wrap" }}>
                     <LikeButton buildId={id} likeCount={likeCount} />
                     <SaveButton buildId={id} />
                     <button onClick={() => setShareOpen(true)}>

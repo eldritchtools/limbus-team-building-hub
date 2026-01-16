@@ -11,20 +11,23 @@ function constructWrapper(maxWidth) {
     return wrapper;
 }
 
-function constructImageElement(path, size) {
+function constructImageElement(path, size, fallback=null) {
     const img = document.createElement("img");
     img.style.width = `${size}px`;
     img.style.height = `${size}px`;
     img.style.objectFit = "contain";
     img.style.borderRadius = "4px";
     img.addEventListener("error", () => {
-        img.style.display = "none";
+        img.src = fallback;
+        img.addEventListener("error", () => {
+            img.style.display = "none";
+        });
     });
     img.src = path;
     return img;
 }
 
-function constructTitleElement(name, withIcon = null) {
+function constructTitleElement(name, withIcon = null, iconFallback = null) {
     const title = document.createElement("div");
     title.textContent = name;
     title.style.fontSize = "1.1rem";
@@ -39,7 +42,7 @@ function constructTitleElement(name, withIcon = null) {
         row.style.marginBottom = "8px";
 
         title.style.flexGrow = "1";
-        row.appendChild(constructImageElement(withIcon, 32))
+        row.appendChild(constructImageElement(withIcon, 32, iconFallback))
         row.appendChild(title);
         return row;
     } else {
@@ -101,7 +104,7 @@ function constructEgoAutocompleteTooltip(entry) {
 function constructStatusAutocompleteTooltip(entry) {
     const wrapper = constructWrapper(320);
 
-    wrapper.appendChild(constructTitleElement(entry.name, getStatusImgSrc(entry)));
+    wrapper.appendChild(constructTitleElement(entry.name, getStatusImgSrc(entry), getStatusImgSrc(null, entry.id)));
     wrapper.appendChild(constructTextElement(entry.desc));
 
     return wrapper;

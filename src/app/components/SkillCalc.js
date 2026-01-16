@@ -93,7 +93,6 @@ function computeSkill(skill, opts) {
 
         if (skill.bonusesEnabled && opts.cond === "all")
             coin.bonuses?.forEach(bonus => {
-                console.log(bonus);
                 switch (bonus.type) {
                     case "coin":
                         coinPower += bonus.value;

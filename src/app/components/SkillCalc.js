@@ -25,7 +25,11 @@ function computeSkill(skill, opts) {
         skill.bonuses?.forEach(bonus => {
             switch (bonus.type) {
                 case "base": case "final":
-                    basePower += bonus.value;
+                    if (bonus.extra?.cond === "tolastcoin") {
+                        lastCoinBonuses.push(bonus);
+                    } else {
+                        basePower += bonus.value;
+                    }
                     break;
                 case "clash":
                     clashBonus += bonus.value;
@@ -89,6 +93,7 @@ function computeSkill(skill, opts) {
 
         if (skill.bonusesEnabled && opts.cond === "all")
             coin.bonuses?.forEach(bonus => {
+                console.log(bonus);
                 switch (bonus.type) {
                     case "coin":
                         coinPower += bonus.value;
@@ -157,26 +162,31 @@ function computeSkill(skill, opts) {
 
         const simulateCoin = (reuse = false, headsReuse = false, lastcoin = false) => {
             newRoll += (p * coinPower);
-            let damage = newRoll;
 
             newLastCoinBonuses.forEach(bonus => lastCoinBonuses.push(bonus));
 
             if (lastcoin) {
                 lastCoinBonuses.forEach(bonus => {
-                    if (bonus.extra.op === "mul")
-                        if ("type" in bonus.extra) {
-                            endBonuses.push(bonus);
-                        } else {
-                            coinDamageMultiplier += evaluateValue(bonus.value);
+                    if (bonus.type === "damage") {
+                        if (bonus.extra.op === "mul")
+                            if ("type" in bonus.extra) {
+                                endBonuses.push(bonus);
+                            } else {
+                                coinDamageMultiplier += evaluateValue(bonus.value);
+                            }
+                        else if (bonus.extra.op === "add") {
+                            if ("type" in bonus.extra)
+                                coinDamageAdder += evaluateValue(bonus.value) * (opts.target[bonus.extra["type"]] ?? 1);
+                            else
+                                coinDamageAdder += evaluateValue(bonus.value);
                         }
-                    else if (bonus.extra.op === "add") {
-                        if ("type" in bonus.extra)
-                            coinDamageAdder += evaluateValue(bonus.value) * (opts.target[bonus.extra["type"]] ?? 1);
-                        else
-                            coinDamageAdder += evaluateValue(bonus.value);
+                    } else if (bonus.type === "base" || bonus.type === "final") {
+                        newRoll += bonus.value;
                     }
                 });
             }
+
+            let damage = newRoll;
 
             if (reuse) {
                 damage *= coinReuseDamageMultiplier;
@@ -221,7 +231,7 @@ function computeSkill(skill, opts) {
             simulateCoin(false, true, lastCoinWithoutReuse && i === headReuses - 1);
         }
 
-        return [clash + (p * coinPower), damage + newDamage, newRoll];
+        return [clash + (p * (skill.coinPower + coinPowerBonus)), damage + newDamage, newRoll];
     }, [basePower, 0, basePower]);
 
     if (skill.atkType) {

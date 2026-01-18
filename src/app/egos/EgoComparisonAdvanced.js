@@ -228,9 +228,10 @@ function ComparisonRow({ ego, skillList, compareType }) {
 
 function ComparisonList({ items, compareType, displayType, otherOpts }) {
     const [statuses, statusesLoading] = useData("statuses", compareType !== "stats");
+    const [skillTags, skillTagsLoading] = useData("skill_tags", compareType !== "stats");
     const { isMobile } = useBreakpoint();
 
-    if (statusesLoading && displayType !== "stats" && otherOpts.searchString.trim().length > 0) return null;
+    if ((statusesLoading || skillTagsLoading) && displayType !== "stats" && otherOpts.searchString.trim().length > 0) return null;
 
     const attachSearchScores = (list) =>
         list.map(([ego, skills]) => {
@@ -238,17 +239,17 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
             skills.forEach(([t, skill, i]) => {
                 if (t === "awa" || t === "cor") {
                     let skillData = skill.data.reduce((acc, dataTier) => ({ ...acc, ...dataTier }), {});
-                    pieces.push(replaceStatusVariablesTextOnly(skillData.desc, statuses));
+                    pieces.push(replaceStatusVariablesTextOnly(skillData.desc, statuses, skillTags));
                     if (skillData.coins) {
                         skillData.coins.forEach(coin => {
                             if (!("descs" in coin)) return; 
                             coin["descs"].forEach(desc =>
-                                pieces.push(replaceStatusVariablesTextOnly(desc, statuses))
+                                pieces.push(replaceStatusVariablesTextOnly(desc, statuses, skillTags))
                             )
                         })
                     }
                 } else if (t === "pas") {
-                    pieces.push(replaceStatusVariablesTextOnly(skill.desc, statuses));
+                    pieces.push(replaceStatusVariablesTextOnly(skill.desc, statuses, skillTags));
                 }
             })
 

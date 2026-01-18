@@ -232,7 +232,8 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
         }
 
         return true;
-    }), [searchString, filters, filtersExclude, identities, statusesInclude, statusesExclude, factionTagsInclude, factionTagsExclude, seasonsInclude, seasonsExclude, strictFiltering]);
+    }).sort(([aid, ao], [bid, bo]) => ao.sinnerId === bo.sinnerId ? bid.localeCompare(aid) : ao.sinnerId - bo.sinnerId),
+        [searchString, filters, filtersExclude, identities, statusesInclude, statusesExclude, factionTagsInclude, factionTagsExclude, seasonsInclude, seasonsExclude, strictFiltering]);
 
     if (compareMode === "basic") {
         return <IdentityComparisonBasic />

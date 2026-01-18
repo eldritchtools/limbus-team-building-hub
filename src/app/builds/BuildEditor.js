@@ -21,6 +21,7 @@ import DisplayTypeButton from "./DisplayTypeButton";
 import SinnerGrid from "./SinnerGrid";
 import { isTouchDevice } from "@eldritchtools/shared-components";
 import { buildsStore } from "../database/localDB";
+import SinDistribution from "../components/SinDistribution";
 
 const egoRankMapping = {
     "ZAYIN": 0,
@@ -396,13 +397,26 @@ export default function BuildEditor({ mode, buildId }) {
                     />
 
             )}
-        <div style={{ display: "flex" }}>
-            <button className={uptieLevelToggle ? "toggle-button-active" : "toggle-button"} onClick={() => setUptieLevelToggle(p => !p)} {...generalTooltipProps("optionaluptieorlevel")}>Indicate Uptie or Level</button>
-        </div>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
-            <span style={{ fontSize: "1.2rem" }}>Active Sinners</span>
-            <NumberInputWithButtons value={activeSinners} setValue={setActiveSinners} min={1} max={12} />
-            <button onClick={() => setDeploymentOrder([])} style={{ fontSize: "1.2rem" }}>Reset Deployment Order</button>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", border: "1px #aaa solid", borderRadius: "1rem", padding: "0.5rem" }}>
+                <button
+                    className={uptieLevelToggle ? "toggle-button-active" : "toggle-button"}
+                    onClick={() => setUptieLevelToggle(p => !p)}
+                    {...generalTooltipProps("optionaluptieorlevel")}
+                >
+                    Toggle Uptie and Level Inputs
+                </button>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", border: "1px #aaa solid", borderRadius: "1rem", padding: "0.5rem" }}>
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                    <span style={{ fontSize: "1.2rem" }}>Active Sinners</span>
+                    <NumberInputWithButtons value={activeSinners} setValue={setActiveSinners} min={1} max={12} />
+                </div>
+                <button onClick={() => setDeploymentOrder([])} style={{ fontSize: "1.2rem" }}>Reset Deployment Order</button>
+            </div>
+            <div style={{ border: "1px #aaa solid", borderRadius: "1rem", padding: "0.5rem" }}>
+                <SinDistribution identityIds={identityIds} deploymentOrder={deploymentOrder} activeSinners={activeSinners} />
+            </div>
         </div>
         <span style={{ fontSize: "1.2rem" }}>Description</span>
         <div className={{ maxWidth: "48rem", marginLeft: "auto", marginRight: "auto" }}>

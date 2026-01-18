@@ -25,6 +25,7 @@ import { useBreakpoint } from "@eldritchtools/shared-components";
 import DisplayTypeButton from "../DisplayTypeButton";
 import { buildsStore } from "@/app/database/localDB";
 import { DeleteSolid, EditSolid, ShareSolid } from "@/app/components/Symbols";
+import SinDistribution from "@/app/components/SinDistribution";
 
 function isLocalId(id) {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -183,7 +184,7 @@ export default function BuildPage({ params }) {
         />
 
         <div style={{ height: "0.5rem" }} />
-        <div style={{ display: "flex", flexDirection: isDesktop ? "row" : "column", width: isDesktop ? "90%" : "100%", alignSelf: "center", marginBottom: "1rem", gap: isDesktop ? 0 : "1rem" }}>
+        <div style={{ display: "flex", flexDirection: isDesktop ? "row" : "column", width: isDesktop ? "95%" : "100%", alignSelf: "center", marginBottom: "1rem", gap: isDesktop ? 0 : "1rem" }}>
             <div style={{ display: "flex", flexDirection: "column", paddingRight: "0.5rem", gap: "0.5rem", width: isDesktop ? "70%" : "100%" }}>
                 <span style={{ fontSize: "1.2rem" }}>Description</span>
                 <div className={{ maxWidth: "48rem", marginLeft: "auto", marginRight: "auto" }}>
@@ -199,6 +200,14 @@ export default function BuildPage({ params }) {
             <div style={{ border: "1px #777 solid" }} />
 
             <div style={{ display: "flex", flexDirection: "column", paddingLeft: "0.5rem", width: isDesktop ? "30%" : "100%", gap: "0.25rem" }}>
+                <div style={{ display: "flex" }}>
+                    <SinDistribution
+                        identityIds={build.identity_ids}
+                        identityUpties={identityUpties}
+                        deploymentOrder={build.deployment_order}
+                        activeSinners={build.active_sinners}
+                    />
+                </div>
                 {build.team_code.trim().length > 0 ? <>
                     <div>
                         <span style={{ fontSize: "1.2rem", borderBottom: "1px #ddd dotted" }} {...generalTooltipProps("teamcode")}>Team Code</span>

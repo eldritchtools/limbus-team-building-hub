@@ -114,7 +114,7 @@ function constructGiftAutocompleteTooltip(entry, otherData) {
     const wrapper = constructWrapper(320);
 
     wrapper.appendChild(constructTitleElement(entry.names[0], getGiftImgSrc(entry)));
-    wrapper.appendChild(constructTextElement(replaceStatusVariablesTextOnly(entry.descs[0], otherData)));
+    wrapper.appendChild(constructTextElement(replaceStatusVariablesTextOnly(entry.descs[0], otherData, {})));
 
     return wrapper;
 }

@@ -216,7 +216,8 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
         }
 
         return true;
-    }), [searchString, filters, filtersExclude, egos, statusesInclude, statusesExclude, seasonsInclude, seasonsExclude, strictFiltering]);
+    }).sort(([aid, ao], [bid, bo]) => ao.sinnerId === bo.sinnerId ? bid.localeCompare(aid) : ao.sinnerId - bo.sinnerId),
+        [searchString, filters, filtersExclude, egos, statusesInclude, statusesExclude, seasonsInclude, seasonsExclude, strictFiltering]);
 
     if (compareMode === "basic") {
         return <EgoComparisonBasic />

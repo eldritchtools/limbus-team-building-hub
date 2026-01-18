@@ -206,6 +206,7 @@ export default function BuildPage({ params }) {
                         identityUpties={identityUpties}
                         deploymentOrder={build.deployment_order}
                         activeSinners={build.active_sinners}
+                        alignment="start"
                     />
                 </div>
                 {build.team_code.trim().length > 0 ? <>

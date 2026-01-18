@@ -4,7 +4,7 @@ import DropdownButton from "./DropdownButton";
 
 const affinities = ["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"];
 
-export default function SinDistribution({ identityIds, deploymentOrder, activeSinners }) {
+export default function SinDistribution({ identityIds, deploymentOrder, activeSinners, alignment="center" }) {
     const [mode, setMode] = useState(null);
     const [identities, identitiesLoading] = useData("identities");
 
@@ -47,7 +47,7 @@ export default function SinDistribution({ identityIds, deploymentOrder, activeSi
         return acc;
     }, Object.fromEntries(affinities.map(x => [x, 0])));
 
-    return <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+    return <div style={{ display: "flex", flexDirection: "column", alignItems: alignment }}>
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
             <span>Sin Distribution:</span>
             <DropdownButton

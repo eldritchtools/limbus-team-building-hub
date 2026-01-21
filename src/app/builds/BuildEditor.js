@@ -22,6 +22,7 @@ import SinnerGrid from "./SinnerGrid";
 import { isTouchDevice } from "@eldritchtools/shared-components";
 import { buildsStore } from "../database/localDB";
 import SinDistribution from "../components/SinDistribution";
+import { constructTeamCode, parseTeamCode } from "../components/TeamCodeEncoding";
 
 const egoRankMapping = {
     "ZAYIN": 0,
@@ -333,6 +334,20 @@ export default function BuildEditor({ mode, buildId }) {
         }
     }
 
+    useEffect(() => {
+        const teamCode = constructTeamCode(identityIds, egoIds, deploymentOrder);
+        setTeamCode(teamCode);
+    }, [identityIds, egoIds, deploymentOrder]);
+
+    const handleSetTeamCode = (v) => {
+        setTeamCode(v);
+        const parseResult = parseTeamCode(v);
+        if (!parseResult) return;
+        setDeploymentOrder([...parseResult.deploymentOrder]);
+        setIdentityIds([...parseResult.identities]);
+        setEgoIds(parseResult.egos.map(egos => [...egos]));
+    }
+
     return loading ? <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontSize: "1.5rem", fontWeight: "bold" }}>
         Loading...
     </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", containerType: "inline-size" }}>
@@ -446,11 +461,16 @@ export default function BuildEditor({ mode, buildId }) {
                 }
             </div>
         </div>
-        <div>
-            <span style={{ fontSize: "1.2rem", borderBottom: "1px #ddd dotted" }} {...generalTooltipProps("teamcode")}>Team Code</span>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+            <div>
+                <span style={{ fontSize: "1.2rem", borderBottom: "1px #ddd dotted" }} {...generalTooltipProps("teamcode")}>Team Code</span>
+            </div>
+            <span style={{ fontSize: "1rem", color: "#aaa" }}>
+                Pasting a valid team code will replace the current team. Any changes to the team will automatically update the code below.
+            </span>
         </div>
         <div>
-            <textarea value={teamCode} onChange={e => setTeamCode(e.target.value)} rows={3} style={{ width: "clamp(20ch, 80%, 100ch)" }} />
+            <textarea value={teamCode} onChange={e => handleSetTeamCode(e.target.value)} rows={3} style={{ width: "clamp(20ch, 80%, 100ch)" }} />
         </div>
         <div>
             <span style={{ fontSize: "1.2rem" }} >Video</span>
@@ -463,6 +483,9 @@ export default function BuildEditor({ mode, buildId }) {
             null}
         <span style={{ fontSize: "1.2rem" }}>Tags</span>
         <TagSelector selected={tags} onChange={setTags} creatable={true} />
+        <div style={{color: "#aaa"}}>
+            {"Drafts can still be shared through the link, but aren't searchable and don't allow comments."}
+        </div>
         {isPublished ?
             <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                 <button style={{ padding: "0.5rem", fontSize: "1.2rem" }} onClick={() => handleSave(true)} disabled={saving}>Update</button>

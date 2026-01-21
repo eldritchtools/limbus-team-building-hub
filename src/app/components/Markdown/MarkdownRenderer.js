@@ -232,7 +232,19 @@ export default function MarkdownRenderer({ content }) {
                             {props.children}
                         </a>
                     );
-                }
+                },
+                blockquote: ({ node, ...props }) => (
+                    <blockquote
+                        style={{
+                            borderLeft: "4px solid #ccc",
+                            paddingLeft: "1rem",
+                            margin: "1rem 0",
+                            color: "#bbb",
+                            fontStyle: "italic",
+                        }}
+                        {...props}
+                    />
+                ),
             }}
         >
             {content}

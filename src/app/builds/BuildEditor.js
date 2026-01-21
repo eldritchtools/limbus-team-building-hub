@@ -466,7 +466,7 @@ export default function BuildEditor({ mode, buildId }) {
                 <span style={{ fontSize: "1.2rem", borderBottom: "1px #ddd dotted" }} {...generalTooltipProps("teamcode")}>Team Code</span>
             </div>
             <span style={{ fontSize: "1rem", color: "#aaa" }}>
-                Pasting a valid team code will replace the current team. Any changes to the team will automatically update the code below.
+                Pasting a valid team code will replace the current team. Any changes to the team will automatically update the code below. Missing identities and Zayin E.G.Os will default to their base versions in the team code.
             </span>
         </div>
         <div>
@@ -483,9 +483,12 @@ export default function BuildEditor({ mode, buildId }) {
             null}
         <span style={{ fontSize: "1.2rem" }}>Tags</span>
         <TagSelector selected={tags} onChange={setTags} creatable={true} />
-        <div style={{color: "#aaa"}}>
-            {"Drafts can still be shared through the link, but aren't searchable and don't allow comments."}
-        </div>
+        {user && !isPublished ? 
+            <div style={{color: "#aaa"}}>
+                {"Drafts can still be shared through the link, but aren't searchable and don't allow comments."}
+            </div> :
+            null
+        }
         {isPublished ?
             <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
                 <button style={{ padding: "0.5rem", fontSize: "1.2rem" }} onClick={() => handleSave(true)} disabled={saving}>Update</button>

@@ -20,7 +20,6 @@ function uint8ArrayToBase64(bytes) {
 
 function decodeDoubleBase64Gzip(encoded) {
     const compressed = base64ToUint8Array(encoded);
-    console.log(compressed);
     const decompressed = pako.ungzip(compressed);
     const innerBase64 = new TextDecoder().decode(decompressed);
     return base64ToUint8Array(innerBase64);
@@ -32,7 +31,6 @@ function encodeDoubleBase64Gzip(data) {
     const compressed = pako.gzip(textBytes, {level: 9, mtime: 0, os: 3});
     compressed[8] = 0x00;
     compressed[9] = 0x0a;
-    console.log(compressed);
     return uint8ArrayToBase64(compressed);
 }
 
@@ -93,7 +91,7 @@ function intToBinary(num, places) {
 }
 
 function stripId(id) {
-    return parseInt(id.slice(3));
+    return parseInt(`${id}`.slice(3));
 }
 
 export function constructTeamCode(identityIds, egoIds, deploymentOrder) {

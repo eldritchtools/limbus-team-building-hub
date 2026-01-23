@@ -213,7 +213,7 @@ function computeSkill(skill, opts) {
                 if (bonus.type === "damage" && bonus.extra.op === "mul") {
                     let addedDamage = damage * evaluateValue(bonus.value);
                     if ("max" in bonus.extra) addedDamage = Math.min(addedDamage, bonus.extra["max"]);
-                    finalDamage += addedDamage * (opts.target[bonus.extra.op["type"]] ?? 1);
+                    finalDamage += addedDamage * (opts.target[bonus.extra.type] ?? 1);
                 }
             });
 

@@ -165,9 +165,12 @@ function ComparisonRow({ ego, skillList, compareType }) {
                             <Icon path={"defense level"} style={{ width: iconSize }} />
                         }
                         {skillData.levelCorrection < 0 ? skillData.levelCorrection : `+${skillData.levelCorrection}`}
-                        <span>
-                            Atk Weight: {skillData.atkWeight}
-                        </span>
+                    </span>
+                    <span>
+                        SP Cost: {skillData.spCost}
+                    </span>
+                    <span>
+                        Atk Weight: {skillData.atkWeight}
                     </span>
                 </div>,
 
@@ -242,7 +245,7 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
                     pieces.push(replaceStatusVariablesTextOnly(skillData.desc, statuses, skillTags));
                     if (skillData.coins) {
                         skillData.coins.forEach(coin => {
-                            if (!("descs" in coin)) return; 
+                            if (!("descs" in coin)) return;
                             coin["descs"].forEach(desc =>
                                 pieces.push(replaceStatusVariablesTextOnly(desc, statuses, skillTags))
                             )
@@ -284,6 +287,7 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
                     if (outsideInterval(skillData.coinValue, otherOpts.coinPower)) return false;
                     if (outsideInterval(skillData.coins.length, otherOpts.coins)) return false;
                     if (outsideInterval(skillData.levelCorrection, otherOpts.levelOffset)) return false;
+                    if (outsideInterval(skillData.spCost, otherOpts.spCost)) return false;
                     if (outsideInterval(skillData.atkWeight, otherOpts.atkWeight)) return false;
                     return true;
                 });
@@ -359,6 +363,13 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
                     sorted = list.map(x => attachData(x)).sort(([a, as], [b, bs]) => {
                         const at = as.reduce((acc, [t, sk, i, skd]) => acc + skd.levelCorrection, 0);
                         const bt = bs.reduce((acc, [t, sk, i, skd]) => acc + skd.levelCorrection, 0);
+                        return at - bt;
+                    })
+                    break;
+                case "sp cost":
+                    sorted = list.map(x => attachData(x)).sort(([a, as], [b, bs]) => {
+                        const at = as.reduce((acc, [t, sk, i, skd]) => acc + skd.spCost, 0);
+                        const bt = bs.reduce((acc, [t, sk, i, skd]) => acc + skd.spCost, 0);
                         return at - bt;
                     })
                     break;
@@ -461,6 +472,7 @@ export default function EgoComparisonAdvanced({ egos, displayType, separateSinne
     const [coinPower, setCoinPower] = useState([-99, 99]);
     const [coins, setCoins] = useState([0, 9]);
     const [levelOffset, setLevelOffset] = useState([-9, 9]);
+    const [spCost, setSpCost] = useState([0, 90]);
     const [atkWeight, setAtkWeight] = useState([1, 9]);
     const [sortType, setSortType] = useState("default");
     const [sortAscending, setSortAscending] = useState(true);
@@ -506,6 +518,7 @@ export default function EgoComparisonAdvanced({ egos, displayType, separateSinne
         coinPower: coinPower,
         coins: coins,
         levelOffset: levelOffset,
+        spCost: spCost,
         atkWeight: atkWeight,
         sortType: sortType,
         sortAscending: sortAscending
@@ -539,6 +552,7 @@ export default function EgoComparisonAdvanced({ egos, displayType, separateSinne
                     "coin power": "coin power",
                     "coins": "coins",
                     "level offset": "level offset",
+                    "sp cost": "sp cost",
                     "atk weight": "atk weight"
                 } :
                 ["pas"].includes(compareType) ?
@@ -580,7 +594,7 @@ export default function EgoComparisonAdvanced({ egos, displayType, separateSinne
         </div>
         <div style={{ display: "flex", alignItems: "start", flexWrap: "wrap", justifyContent: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
             {compareType === "stats" ? <>
-                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", justifyContent: "center"}}>
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", justifyContent: "center" }}>
                     <div style={filterStyle}>
                         <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
                             <span>Max Cost:</span>
@@ -645,6 +659,10 @@ export default function EgoComparisonAdvanced({ egos, displayType, separateSinne
                                 <Icon path={"defense level"} style={{ width: "32px", height: "32px" }} />
                             </span>
                             <RangeInput min={-9} max={9} value={levelOffset} onChange={setLevelOffset} />
+                        </div>
+                        <div style={filterStyle}>
+                            <span style={{ display: "flex", height: "32px", alignItems: "center" }}>SP Cost:</span>
+                            <RangeInput min={0} max={90} value={spCost} onChange={setSpCost} />
                         </div>
                         <div style={filterStyle}>
                             <span style={{ display: "flex", height: "32px", alignItems: "center" }}>Atk Weight:</span>

@@ -47,8 +47,8 @@ export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "
                 <SkillLabel skill={skill} type={type} index={index} />
             </div>
         </div>
-        <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: "0.25rem", alignItems: "center", marginBottom: "0.25rem" }}>
-            <span style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
+        <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: "0.1rem", marginBottom: "0.25rem" }}>
+            <span style={{ display: "flex", height: iconSize, gap: "0.25rem", alignItems: "center", border: "1px #777 solid", borderRadius: "0.5rem", padding: "0 0.2rem" }}>
                 <span>
                     Power: {skillData.baseValue} {skillData.coinValue < 0 ? skillData.coinValue : `+${skillData.coinValue}`}
                 </span>
@@ -56,7 +56,7 @@ export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "
                     {skillData.coins.map((coin, i) => <Icon key={i} path={coin["type"] === "unbreakable" ? "unbreakable coin" : "coin"} style={{ height: coinSize }} />)}
                 </span>
             </span>
-            <span style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
+            <span style={{ display: "flex", height: iconSize, gap: "0.25rem", alignItems: "center", border: "1px #777 solid", borderRadius: "0.5rem", padding: "0 0.2rem" }}>
                 {skillData.defType === "attack" || skillData.defType === "counter" ?
                     <Icon path={"offense level"} style={{ width: iconSize }} /> :
                     <Icon path={"defense level"} style={{ width: iconSize }} />
@@ -65,9 +65,16 @@ export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "
                     <span>{level + skillData.levelCorrection} ({skillData.levelCorrection < 0 ? skillData.levelCorrection : `+${skillData.levelCorrection}`})</span> :
                     skillData.levelCorrection < 0 ? skillData.levelCorrection : `+${skillData.levelCorrection}`
                 }
-                <span>
-                    Atk Weight: {skillData.atkWeight}
-                </span>
+            </span>
+            {
+                skillData.spCost ?
+                    <span style={{ display: "flex", height: iconSize, alignItems: "center", border: "1px #777 solid", borderRadius: "0.5rem", padding: "0 0.2rem" }}>
+                        SP Cost: {skillData.spCost}
+                    </span> :
+                    null
+            }
+            <span style={{ display: "flex", height: iconSize, alignItems: "center", border: "1px #777 solid", borderRadius: "0.5rem", padding: "0 0.2rem" }}>
+                Atk Weight: {skillData.atkWeight}
             </span>
         </div>
         <div style={{ whiteSpace: "pre-wrap", lineHeight: "1.2", marginBottom: "0.25rem" }}>

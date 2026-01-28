@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import TooltipLink from "../components/TooltipLink";
 import DropdownButton from "../components/DropdownButton";
 import { EgoSkillCalc, IdentitySkillCalc } from "../components/SkillCalc";
+import NumberInput from "../components/NumberInput";
 
 function SkillTypes({ skillType, identityUptie }) {
     const showAffinity = !identityUptie || !("affinityUptie" in skillType) || identityUptie >= skillType.affinityUptie;
@@ -260,8 +261,9 @@ function CalcComponent({ opts, setOpts }) {
 
     const valueComponent = (name, key, def) => <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
         <Icon path={name} style={{ width: "32px", height: "32px" }} />
-        <input type="number" value={opts.target ? (opts.target[key] ?? def) : def}
-            onChange={e => setOpts(p => ({ ...p, target: { ...p.target, [key]: Number(e.target.value) } }))}
+        <NumberInput 
+            value={opts.target ? (opts.target[key] ?? def) : def}
+            onChange={v => setOpts(p => ({ ...p, target: { ...p.target, [key]: v } }))}
             style={{ width: "5ch", textAlign: "center" }}
         />
     </div>

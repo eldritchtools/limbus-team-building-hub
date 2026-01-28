@@ -1,5 +1,3 @@
-"use client";
-
 import { getSupabase } from "./connection";
 
 async function getPopularBuilds(page = 1, pageSize = 20) {
@@ -121,5 +119,28 @@ async function unpinComment(buildId) {
     return true;
 }
 
+async function getBuildsForSitemap(page, count) {
+    const offset = (page - 1) * count;
+    const { data, error } = await getSupabase()
+        .from('builds')
+        .select('id, created_at, updated_at')
+        .eq('is_published', true)
+        .order('created_at', { ascending: true })
+        .range(offset, offset + count - 1);
 
-export { getPopularBuilds, getFilteredBuilds, getBuild, insertBuild, updateBuild, deleteBuild, pinComment, unpinComment };
+    if (error) throw (error);
+    return data;
+}
+
+async function getBuildsCountForSitemap() {
+    const { count, error } = await getSupabase()
+        .from('builds')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_published', true);
+
+    if (error) throw (error);
+    return count;
+}
+
+
+export { getPopularBuilds, getFilteredBuilds, getBuild, insertBuild, updateBuild, deleteBuild, pinComment, unpinComment, getBuildsForSitemap, getBuildsCountForSitemap };

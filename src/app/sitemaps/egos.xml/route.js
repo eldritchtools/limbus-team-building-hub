@@ -1,17 +1,30 @@
-import { SITE_URL, ASSETS_URL, buildUrlSet } from "@/app/lib/sitemap-helper";
+import { ASSETS_URL, buildUrlSet, SITE_URL } from "@/app/lib/sitemap-helper";
 
 export async function GET() {
-    const res = await fetch(`${ASSETS_URL}/data/egos.json`);
-    const data = await res.json();
+    try {
+        const res = await fetch(`${ASSETS_URL}/data/egos.json`, { headers: { 'Accept': 'application/json', 'User-Agent': 'sitemap-generator' } });
 
-    const urls = Object.keys(data).map((b) => ({
-        loc: `${SITE_URL}/egos/${b}`,
-    }));
+        if (!res.ok) throw new Error(`Upstream ${res.status}`);
 
-    return new Response(buildUrlSet(urls), {
-        headers: {
-            'Content-Type': 'application/xml',
-            'Cache-Control': 'public, max-age=86400',
-        },
-    });
+        const data = await res.json();
+
+        const urls = Object.keys(data).map((b) => ({
+            loc: `${SITE_URL}/egos/${b}`,
+        }));
+
+        return new Response(buildUrlSet(urls), {
+            headers: {
+                'Content-Type': 'application/xml',
+                'Cache-Control': 'public, max-age=86400',
+            },
+        });
+    } catch {
+        // Return a valid (empty) sitemap instead of 500
+        return new Response(buildUrlSet([]), {
+            headers: {
+                'Content-Type': 'application/xml',
+                'Cache-Control': 'public, max-age=300',
+            },
+        });
+    }
 }

@@ -26,6 +26,7 @@ import DisplayTypeButton from "../DisplayTypeButton";
 import { buildsStore } from "@/app/database/localDB";
 import { DeleteSolid, EditSolid, ShareSolid } from "@/app/components/Symbols";
 import SinDistribution from "@/app/components/SinDistribution";
+import SocialsDisplay from "@/app/components/SocialsDisplay";
 
 function isLocalId(id) {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -199,7 +200,7 @@ export default function BuildPage({ params }) {
 
             <div style={{ border: "1px #777 solid" }} />
 
-            <div style={{ display: "flex", flexDirection: "column", paddingLeft: "0.5rem", width: isDesktop ? "30%" : "100%", gap: "0.25rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", paddingLeft: "0.5rem", width: isDesktop ? "30%" : "100%", gap: "0.5rem" }}>
                 <div style={{ display: "flex" }}>
                     <SinDistribution
                         identityIds={build.identity_ids}
@@ -226,9 +227,12 @@ export default function BuildPage({ params }) {
                     </div>
                 </> : null
                 }
-                <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
-                    Tags: {build.tags.map((t, i) => <Tag key={i} tag={isLocalId(id) ? t : t.name} />)}
-                </div>
+                {build.tags.length > 0 ?
+                    <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+                        Tags: {build.tags.map((t, i) => <Tag key={i} tag={isLocalId(id) ? t : t.name} />)}
+                    </div> :
+                    null
+                }
                 <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", flexWrap: "wrap" }}>
                     <LikeButton buildId={id} likeCount={likeCount} />
                     <SaveButton buildId={id} />
@@ -248,6 +252,13 @@ export default function BuildPage({ params }) {
                             </button> : null
                     }
                 </div>
+                {build.user_socials.length > 0 ?
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "start", gap: "0.25rem" }}>
+                        <span>Connect with {build.username}:</span>
+                        <SocialsDisplay socials={build.user_socials} expandDirection="column" align="start" />
+                    </div> :
+                    null
+                }
             </div>
         </div>
 

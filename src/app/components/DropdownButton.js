@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./DropdownButton.css";
 
-export default function DropdownButton({ value, setValue, options, left=true, styleOverride={} }) {
+export default function DropdownButton({ value, setValue, options, defaultDisplay, left=true, styleOverride={} }) {
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
 
@@ -19,7 +19,7 @@ export default function DropdownButton({ value, setValue, options, left=true, st
 
     return <div ref={ref} style={{ position: "relative" }}>
         <button onClick={() => setOpen(o => !o)}>
-            {value in options ? options[value] : Object.values(options)[0]}
+            {value in options ? options[value] : (defaultDisplay ?? Object.values(options)[0])}
         </button>
 
         {open && (

@@ -1,4 +1,4 @@
-import { SITE_URL, CHUNK_SIZE, buildUrlSet } from "@/app/lib/sitemap-helper";
+import { SITE_URL, CHUNK_SIZE, buildUrlSet } from "@/app/lib/sitemapHelper";
 import { getBuildsForSitemap } from '@/app/database/builds';
 
 export async function GET(_, { params }) {

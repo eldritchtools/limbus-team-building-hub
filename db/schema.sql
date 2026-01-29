@@ -9,6 +9,7 @@ CREATE TABLE public.users (
   flair TEXT DEFAULT NULL,
   description TEXT DEFAULT NULL,
   is_admin BOOLEAN DEFAULT FALSE,
+  socials JSONB DEFAULT '[]',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

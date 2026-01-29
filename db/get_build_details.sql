@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_build_details_v2(
+CREATE OR REPLACE FUNCTION public.get_build_details_v3(
   p_build_id UUID,
   p_for_edit BOOLEAN DEFAULT FALSE
 )
@@ -50,6 +50,7 @@ BEGIN
       'user_id', u.id,
       'username', u.username,
       'user_flair', u.flair,
+      'user_socials', u.socials,
       'title', b.title,
       'body', b.body,
       'deployment_order', b.deployment_order,

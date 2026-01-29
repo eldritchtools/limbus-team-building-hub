@@ -38,7 +38,7 @@ async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", 
 }
 
 async function getBuild(id, forEdit = false) {
-    const { data, error } = await getSupabase().rpc("get_build_details_v2", {
+    const { data, error } = await getSupabase().rpc("get_build_details_v3", {
         p_build_id: id,
         p_for_edit: forEdit,
     });

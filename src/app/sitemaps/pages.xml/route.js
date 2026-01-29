@@ -1,4 +1,4 @@
-import { buildUrlSet, SITE_URL } from "@/app/lib/sitemap-helper";
+import { buildUrlSet, SITE_URL } from "@/app/lib/sitemapHelper";
 
 export async function GET() {
     const today = new Date().toISOString().split('T')[0];

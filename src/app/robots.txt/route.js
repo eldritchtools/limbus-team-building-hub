@@ -1,4 +1,4 @@
-import { SITE_URL } from "../lib/sitemap-helper";
+import { SITE_URL } from "../lib/sitemapHelper";
 
 export function GET() {
   return new Response(

@@ -65,14 +65,18 @@ function ComparisonRowBase({ identity, content }) {
 function ComparisonCard({ identity, skillList, compareType }) {
     if (compareType === "stats") {
         const content = <div style={{ display: "flex", flexDirection: "column", height: "auto", justifyContent: "center", gap: "0.2rem" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem", textAlign: "center" }}>
                     <Icon path={"hp"} style={{ height: "32px" }} />
                     {constructHp(identity, LEVEL_CAP)}
                 </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem", textAlign: "center" }}>
                     <Icon path={"speed"} style={{ height: "32px" }} />
                     {identity.speedList[3].join(" - ")}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem", textAlign: "center" }}>
+                    <Icon path={"defense level"} style={{ height: "32px" }} />
+                    {LEVEL_CAP + identity.defCorrection} ({identity.defCorrection >= 0 ? `+${identity.defCorrection}` : identity.defCorrection})
                 </div>
             </div>
 
@@ -125,6 +129,8 @@ function ComparisonRow({ identity, skillList, compareType }) {
                 {constructHp(identity, LEVEL_CAP)}
                 <Icon path={"speed"} style={{ height: "32px" }} />
                 {identity.speedList[3].join(" - ")}
+                <Icon path={"defense level"} style={{ height: "32px" }} />
+                {LEVEL_CAP + identity.defCorrection} ({identity.defCorrection >= 0 ? `+${identity.defCorrection}` : identity.defCorrection})
             </div>,
             <div key={2} style={{ display: "grid", gridTemplateColumns: "auto auto auto", justifyContent: "center", textAlign: "center", gap: "0.2rem" }}>
                 <Icon path={"Slash"} style={{ height: "32px" }} />
@@ -292,6 +298,7 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
                 } else if (otherOpts.speedType === "contained") {
                     if (speedMin > otherOpts.speed[0] || speedMax < otherOpts.speed[1]) return false;
                 }
+                if (outsideInterval(identity.defCorrection, otherOpts.defenseLevel)) return false;
                 if (outsideInterval(identity.resists.slash, otherOpts.slashRes)) return false;
                 if (outsideInterval(identity.resists.pierce, otherOpts.pierceRes)) return false;
                 if (outsideInterval(identity.resists.blunt, otherOpts.bluntRes)) return false;
@@ -374,6 +381,9 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
                         const [bmin, bmax] = b.speedList[3];
                         return amin === bmin ? amax - bmax : amin - bmin;
                     })
+                    break;
+                case "defense level":
+                    sorted = list.sort(([a], [b]) => a.defCorrection - b.defCorrection);
                     break;
                 case "slash resist":
                     sorted = list.sort(([a], [b]) => a.resists.slash - b.resists.slash);
@@ -470,7 +480,7 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
                         <thead>
                             <tr style={{ height: "1.25rem" }}>
                                 <th>Identity</th>
-                                <th>Hp, Speed</th>
+                                <th>Hp, Speed, Defense Level</th>
                                 <th>Resists</th>
                                 <th>Keywords</th>
                             </tr>
@@ -535,6 +545,7 @@ export default function IdentityComparisonAdvanced({ identities, displayType, se
     const [staggers, setStaggers] = useState([0, 5]);
     const [speed, setSpeed] = useState([0, 9]);
     const [speedType, setSpeedType] = useState("overlap");
+    const [defenseLevel, setDefenseLevel] = useState([-9, 9]);
     const [slashRes, setSlashRes] = useState([0, 2]);
     const [pierceRes, setPierceRes] = useState([0, 2]);
     const [bluntRes, setBluntRes] = useState([0, 2]);
@@ -587,6 +598,7 @@ export default function IdentityComparisonAdvanced({ identities, displayType, se
         staggers: staggers,
         speed: speed,
         speedType: speedType,
+        defenseLevel: defenseLevel,
         slashRes: slashRes,
         pierceRes: pierceRes,
         bluntRes: bluntRes,
@@ -608,6 +620,7 @@ export default function IdentityComparisonAdvanced({ identities, displayType, se
                 "max hp": "max hp",
                 "max speed": "max speed",
                 "min speed": "min speed",
+                "defense level": "defense level",
                 "slash resist": "slash resist",
                 "pierce resist": "pierce resist",
                 "blunt resist": "blunt resist"
@@ -683,6 +696,10 @@ export default function IdentityComparisonAdvanced({ identities, displayType, se
                             </button>
                         </div>
                         <RangeInput min={0} max={9} value={speed} onChange={setSpeed} />
+                    </div>
+                    <div style={filterStyle}>
+                        <Icon path={"defense level"} style={{ width: "32px", height: "32px" }} />
+                        <RangeInput min={-9} max={9} value={defenseLevel} onChange={setDefenseLevel} />
                     </div>
                 </div>
                 <div style={{ display: "flex", gap: "0.5rem", }}>

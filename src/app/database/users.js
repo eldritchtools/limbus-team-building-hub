@@ -2,10 +2,10 @@
 
 import { getSupabase } from "./connection";
 
-async function getUserFromUsername(username) {
+async function getUserDataFromUsername(username, field="*") {
     const { data: user } = await getSupabase()
         .from("users")
-        .select("*")
+        .select(field)
         .eq("username", username)
         .maybeSingle();
 
@@ -13,10 +13,11 @@ async function getUserFromUsername(username) {
     else return null;
 }
 
-async function updateUser(userId, flair, description) {
+async function updateUser(userId, flair, description, socials) {
     const update = {
         flair: flair.trim(),
-        description: description.trim()
+        description: description.trim(),
+        socials: socials
     };
 
     const { data, error } = await getSupabase()
@@ -28,4 +29,4 @@ async function updateUser(userId, flair, description) {
     return data;
 }
 
-export { getUserFromUsername, updateUser };
+export { getUserDataFromUsername, updateUser };

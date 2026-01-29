@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getUserFromUsername } from "@/app/database/users";
+import { getUserDataFromUsername } from "@/app/database/users";
 import { getFilteredBuilds } from "@/app/database/builds";
 import React from "react";
 import BuildsGrid from "@/app/components/BuildsGrid";
 import MarkdownRenderer from "@/app/components/Markdown/MarkdownRenderer";
 import { useBreakpoint } from "@eldritchtools/shared-components";
+import SocialsDisplay from "@/app/components/SocialsDisplay";
 
 export default function ProfilePage({ params }) {
     const { username } = React.use(params);
@@ -19,16 +20,18 @@ export default function ProfilePage({ params }) {
     const [page, setPage] = useState(1);
     const [flair, setFlair] = useState("");
     const [description, setDescription] = useState("");
+    const [socials, setSocials] = useState([]);
     const [userExists, setUserExists] = useState(false);
     const [checkingUser, setCheckingUser] = useState(true);
     const { isDesktop } = useBreakpoint();
 
     useEffect(() => {
-        getUserFromUsername(parsedUsername).then(x => {
+        getUserDataFromUsername(parsedUsername).then(x => {
             if (x) {
                 setUserExists(true);
                 setFlair(x.flair ?? "");
                 setDescription(x.description ?? "");
+                setSocials(x.socials ?? []);
             }
             else setUserExists(false);
             setCheckingUser(false);
@@ -53,9 +56,12 @@ export default function ProfilePage({ params }) {
     }
 
     return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <h2 style={{ alignSelf: "center", marginBottom: "0" }}>{parsedUsername}&apos;s Builds</h2>
-        <div style={{ alignSelf: "center" }}><em>{flair}</em></div>
-        <div style={{ alignSelf: "center", width: isDesktop ? "70%" : "90%" }}> <MarkdownRenderer content={description} /></div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center" }}>
+            <h2 style={{ marginBottom: "0" }}>{parsedUsername}</h2>
+            <div><em>{flair}</em></div>
+            {socials.length > 0 ? <SocialsDisplay socials={socials} /> : null}
+            <div style={{ width: isDesktop ? "70%" : "90%" }}> <MarkdownRenderer content={description} /></div>
+        </div>
         <div style={{ alignSelf: "center", border: "1px #777 solid", width: "90%" }} />
         {buildsLoading ?
             <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading...</p> :

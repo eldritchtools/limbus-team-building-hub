@@ -8,6 +8,8 @@ import { useEffect, useMemo, useState } from "react";
 import TooltipLink from "../components/TooltipLink";
 import DropdownButton from "../components/DropdownButton";
 import { EgoSkillCalc, IdentitySkillCalc } from "../components/SkillCalc";
+import NumberInput from "../components/NumberInput";
+import { useBreakpoint } from "@eldritchtools/shared-components";
 
 function SkillTypes({ skillType, identityUptie }) {
     const showAffinity = !identityUptie || !("affinityUptie" in skillType) || identityUptie >= skillType.affinityUptie;
@@ -83,6 +85,7 @@ function DeploymentComponent({ order, activeSinners, sinnerId }) {
 }
 
 function OverlayContainer({ displayType, identity, egos, identityLevel, identityUptie, egoThreadspins, otherOpts, children }) {
+    const { isDesktop } = useBreakpoint();
     if (["names", "icons"].includes(displayType)) return children;
 
     const constructOverlay = (behind, content, blockAccess) => {
@@ -95,34 +98,44 @@ function OverlayContainer({ displayType, identity, egos, identityLevel, identity
     }
 
     if (displayType === "stats") {
-        const overlayStyle = { fontSize: "1rem", position: "absolute", left: "50%", bottom: 0, transform: "translateX(-50%)", background: "rgba(0, 0, 0, 0.2)" };
+        const constructIconText = (icon, text) => {
+            if (isDesktop) {
+                return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
+                    <Icon path={icon} style={{ height: "32px" }} />
+                    <span>{text}</span>
+                </div>
+            } else {
+                return <div style={{ position: "relative", display: "flex", justifyContent: "center", width: "100%" }}>
+                    <Icon path={icon} style={{ height: "32px" }} />
+                    <span style={{
+                        fontSize: "1rem",
+                        position: "absolute",
+                        left: "50%",
+                        bottom: 0,
+                        transform: "translateX(-50%)",
+                        background: "rgba(0, 0, 0, 0.2)",
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        color: "rgba(255, 255, 255, 0.8)"
+                    }}>{text}</span>
+                </div>
+            }
+        }
 
         return constructOverlay(children, identity ?
             <div style={{ display: "flex", flexDirection: "column", height: "100%", justifyContent: "center", gap: "0.2rem" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
-                        <Icon path={"hp"} style={{ height: "32px" }} />
-                        {constructHp(identity, identityLevel ?? LEVEL_CAP)}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
-                        <Icon path={"speed"} style={{ height: "32px" }} />
-                        {identity.speedList[(identityUptie ?? 4) - 1].join(" - ")}
-                    </div>
+                <div style={{ display: "grid", gridTemplateColumns: "3fr 2fr 2fr" }}>
+                    {constructIconText("hp", constructHp(identity, identityLevel ?? LEVEL_CAP))}
+                    {constructIconText("speed", identity.speedList[(identityUptie ?? 4) - 1].join(" - "))}
+                    {constructIconText("defense level",
+                        `${(identityLevel ?? LEVEL_CAP) + identity.defCorrection} (${identity.defCorrection >= 0 ? `+${identity.defCorrection}` : identity.defCorrection})`
+                    )}
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", textAlign: "center" }}>
-                    <div style={{ position: "relative", display: "flex", justifyContent: "center", width: "100%" }}>
-                        <Icon path={"Slash"} style={{ width: "32px", height: "32px" }} />
-                        <span style={overlayStyle}><ColorResist resist={identity.resists.slash} /></span>
-                    </div>
-                    <div style={{ position: "relative", display: "flex", justifyContent: "center", width: "100%" }}>
-                        <Icon path={"Pierce"} style={{ width: "32px", height: "32px" }} />
-                        <span style={overlayStyle}><ColorResist resist={identity.resists.pierce} /></span>
-                    </div>
-                    <div style={{ position: "relative", display: "flex", justifyContent: "center", width: "100%" }}>
-                        <Icon path={"Blunt"} style={{ width: "32px", height: "32px" }} />
-                        <span style={overlayStyle}><ColorResist resist={identity.resists.blunt} /></span>
-                    </div>
+                    {constructIconText("Slash", <ColorResist resist={identity.resists.slash} />)}
+                    {constructIconText("Pierce", <ColorResist resist={identity.resists.pierce} />)}
+                    {constructIconText("Blunt", <ColorResist resist={identity.resists.blunt} />)}
                 </div>
 
                 <div style={{ display: "flex", gap: "0.25rem", justifyContent: "center" }}>
@@ -260,8 +273,9 @@ function CalcComponent({ opts, setOpts }) {
 
     const valueComponent = (name, key, def) => <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
         <Icon path={name} style={{ width: "32px", height: "32px" }} />
-        <input type="number" value={opts.target ? (opts.target[key] ?? def) : def}
-            onChange={e => setOpts(p => ({ ...p, target: { ...p.target, [key]: Number(e.target.value) } }))}
+        <NumberInput
+            value={opts.target ? (opts.target[key] ?? def) : def}
+            onChange={v => setOpts(p => ({ ...p, target: { ...p.target, [key]: v } }))}
             style={{ width: "5ch", textAlign: "center" }}
         />
     </div>
@@ -299,7 +313,7 @@ function CalcComponent({ opts, setOpts }) {
         <span style={{ textAlign: "center" }}>These computations only count the skill in isolation and do not consider most other effects such as statuses on the sinner/target, passives, resonance bonuses, and so on.<br />Any numbers shown are only meant to serve as a guide and may not be 100% accurate. Numbers with underlines have additional info that can be displayed with a tooltip. Errors can be reported in the Discord.</span>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", justifyContent: "center" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center", border: "1px #777 solid", borderRadius: "0.5rem", padding: "0.25rem" }}>
-                <span style={{fontSize: "1.2rem"}}>Skill Info:</span>
+                <span style={{ fontSize: "1.2rem" }}>Skill Info:</span>
                 <div style={{ display: "grid", gap: "0.5rem", gridTemplateColumns: "repeat(2, auto)" }}>
                     <div style={{ display: "flex", alignItems: "center" }}>
                         Skills:
@@ -366,8 +380,8 @@ function CalcComponent({ opts, setOpts }) {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center", border: "1px #777 solid", borderRadius: "0.5rem", padding: "0.25rem" }}>
-                <span style={{fontSize: "1.2rem"}}>Target Levels and Resists:</span>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)"}}>
+                <span style={{ fontSize: "1.2rem" }}>Target Levels and Resists:</span>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
                     {valueComponent("offense level", "off", LEVEL_CAP)}
                     {valueComponent("defense level", "def", LEVEL_CAP)}
                     {valueComponent("Slash", "slash", 1)}
@@ -380,7 +394,7 @@ function CalcComponent({ opts, setOpts }) {
                     {valueComponent("gloom", "gloom", 1)}
                     {valueComponent("pride", "pride", 1)}
                     {valueComponent("envy", "envy", 1)}
-                    <div style={{textAlign: "center", gridColumn: "span 3", padding: "0.2rem"}}>Apply Values:</div>
+                    <div style={{ textAlign: "center", gridColumn: "span 3", padding: "0.2rem" }}>Apply Values:</div>
                     {resetButton}
                     {staggerButton}
                     {lunarMemoryButton}

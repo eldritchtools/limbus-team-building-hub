@@ -53,14 +53,18 @@ function ComparisonCard({ identity }) {
         </div>
         <div style={{ border: "1px #aaa solid", width: "100%" }} />
         <div style={{ display: "flex", flexDirection: "column", width: "auto", height: "auto", justifyContent: "center", gap: "0.2rem", alignItems: "center" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "3fr 2fr 2fr" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem", textAlign: "center" }}>
                     <Icon path={"hp"} style={{ height: "32px" }} />
                     {constructHp(identity, LEVEL_CAP)}
                 </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem", textAlign: "center" }}>
                     <Icon path={"speed"} style={{ height: "32px" }} />
                     {identity.speedList[3].join(" - ")}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem", textAlign: "center" }}>
+                    <Icon path={"defense level"} style={{ height: "32px" }} />
+                    {LEVEL_CAP + identity.defCorrection} ({identity.defCorrection >= 0 ? `+${identity.defCorrection}` : identity.defCorrection})
                 </div>
             </div>
 

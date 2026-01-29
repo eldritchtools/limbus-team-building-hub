@@ -100,6 +100,8 @@ export default function Identity({ params }) {
                         <span>Season</span>
                         <span>{getSeasonString(identityData.season)}</span>
                     </div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", textAlign: "center" }}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 3fr", alignItems: "center", border: "1px #777 dotted" }}>
                         <div style={{ display: "flex", justifyContent: "center" }}><Icon path={"hp"} style={{ height: "32px" }} /></div>
                         <span style={{ borderLeft: "1px #777 dotted" }}>{constructHp(identityData, level)}</span>
@@ -107,6 +109,10 @@ export default function Identity({ params }) {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 3fr", alignItems: "center", border: "1px #777 dotted" }}>
                         <div style={{ display: "flex", justifyContent: "center" }}><Icon path={"speed"} style={{ height: "32px" }} /></div>
                         <span style={{ borderLeft: "1px #777 dotted" }}>{identityData.speedList[uptie - 1].join(" - ")}</span>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 3fr", alignItems: "center", border: "1px #777 dotted" }}>
+                        <div style={{ display: "flex", justifyContent: "center" }}><Icon path={"defense level"} style={{ height: "32px" }} /></div>
+                        <span style={{ borderLeft: "1px #777 dotted" }}>{level + identityData.defCorrection} ({identityData.defCorrection >= 0 ? `+${identityData.defCorrection}` : identityData.defCorrection})</span>
                     </div>
                 </div>
                 <div style={{ border: "1px #777 dotted", padding: "0.2rem", textAlign: "center" }}>Resists</div>

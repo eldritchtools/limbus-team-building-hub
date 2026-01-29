@@ -1,4 +1,4 @@
-import { SITE_URL, ASSETS_URL, buildUrlSet } from "@/app/lib/sitemap";
+import { SITE_URL, ASSETS_URL, buildUrlSet } from "@/app/lib/sitemap-helper";
 
 export async function GET() {
     const res = await fetch(`${ASSETS_URL}/data/egos.json`);

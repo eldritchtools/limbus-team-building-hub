@@ -1,4 +1,4 @@
-import { ASSETS_URL, buildUrlSet, SITE_URL } from "@/app/lib/sitemap";
+import { ASSETS_URL, buildUrlSet, SITE_URL } from "@/app/lib/sitemap-helper";
 
 
 export async function GET() {

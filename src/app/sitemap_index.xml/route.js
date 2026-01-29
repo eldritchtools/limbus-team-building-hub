@@ -1,4 +1,4 @@
-import { SITE_URL, CHUNK_SIZE } from "@/app/lib/sitemap";
+import { SITE_URL, CHUNK_SIZE } from "@/app/lib/sitemap-helper";
 import { getBuildsCountForSitemap } from '../database/builds';
 
 export async function GET() {

@@ -13,7 +13,7 @@ import BuildEntry from "@/app/components/BuildEntry";
 import { getFilteredBuilds } from "@/app/database/builds";
 import NumberInputWithButtons from "@/app/components/NumberInputWithButtons";
 import { constructHp, constructPassive } from "../IdentityUtils";
-import { useBreakpoint } from "@eldritchtools/shared-components";
+import DiffedText from "@/app/components/DiffedText";
 
 function NotesTab({ notes }) {
     if (!notes || !notes.main) return <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>;
@@ -54,6 +54,8 @@ export default function Identity({ params }) {
     const [level, setLevel] = useState(LEVEL_CAP);
     const [activeTab, setActiveTab] = useState("notes");
     const [builds, setBuilds] = useState(null);
+    const [compareMode, setCompareMode] = useState(false);
+    const [preuptie, setPreuptie] = useState(1);
 
     useEffect(() => {
         const fetchBuilds = async () => {
@@ -69,8 +71,37 @@ export default function Identity({ params }) {
 
     if (identitiesLoading || skillDataLoading) return null;
 
+    const handleSetUptie = (v) => {
+        if (v === "compare mode") setCompareMode(true);
+        else {
+            setUptie(v);
+            if (v < preuptie) setPreuptie(v);
+        }
+    }
+
+    const handleSetPreuptie = (v) => {
+        setPreuptie(v);
+        if (v > uptie) setUptie(v);
+    }
+
     const combatPassives = skillData.combatPassives.findLast(passives => passives.uptie <= uptie);
     const supportPassives = skillData.supportPassives.findLast(passives => passives.uptie <= uptie);
+    const passivesPreMapping = {}
+    if (compareMode) {
+        const precombat = skillData.combatPassives.findLast(passives => passives.uptie <= preuptie);
+        if (precombat)
+            combatPassives.passives.forEach(passive => {
+                const match = precombat.passives.find(x => skillData.passiveData[x].name === skillData.passiveData[passive].name);
+                if (match) passivesPreMapping[passive] = match;
+            })
+
+        const presupport = skillData.supportPassives.findLast(passives => passives.uptie <= preuptie);
+        if (presupport)
+            supportPassives.passives.forEach(passive => {
+                const match = presupport.passives.find(x => skillData.passiveData[x].name === skillData.passiveData[passive].name);
+                if (match) passivesPreMapping[passive] = match;
+            })
+    }
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
         <div style={{ display: "flex", flexDirection: "row", width: "100%", flexWrap: "wrap", justifyContent: "center", gap: "1rem" }}>
@@ -84,7 +115,14 @@ export default function Identity({ params }) {
                 </div>
                 <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem", justifyContent: "center", padding: "0.5rem" }}>
                     <SinnerIcon num={identityData.sinnerId} style={{ height: "40px" }} />
-                    Uptie: <UptieSelector value={uptie} setValue={setUptie} />
+                    Uptie: {compareMode ?
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            <UptieSelector value={preuptie} setValue={handleSetPreuptie} />
+                            ➔
+                            <UptieSelector value={uptie} setValue={handleSetUptie} />
+                        </div> :
+                        <UptieSelector value={uptie} setValue={handleSetUptie} bottomOption={"compare mode"} />
+                    }
                     Level: <NumberInputWithButtons value={level} setValue={setLevel} min={1} max={LEVEL_CAP} />
                 </div>
                 <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
@@ -108,7 +146,11 @@ export default function Identity({ params }) {
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 3fr", alignItems: "center", border: "1px #777 dotted" }}>
                         <div style={{ display: "flex", justifyContent: "center" }}><Icon path={"speed"} style={{ height: "32px" }} /></div>
-                        <span style={{ borderLeft: "1px #777 dotted" }}>{identityData.speedList[uptie - 1].join(" - ")}</span>
+                        <span style={{ borderLeft: "1px #777 dotted" }}>{
+                            compareMode ?
+                                <DiffedText before={identityData.speedList[preuptie - 1].join(" - ")} after={identityData.speedList[uptie - 1].join(" - ")} /> :
+                                identityData.speedList[uptie - 1].join(" - ")
+                        }</span>
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 3fr", alignItems: "center", border: "1px #777 dotted" }}>
                         <div style={{ display: "flex", justifyContent: "center" }}><Icon path={"defense level"} style={{ height: "32px" }} /></div>
@@ -171,13 +213,13 @@ export default function Identity({ params }) {
                         if (list.length === 0) return null;
                         return <div key={tier} style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
                             {list.map((skill, index) => <div key={skill.id} style={{ flex: 1, minWidth: "min(300px, 100%)" }}>
-                                <SkillCard skill={skillData.skills[skill.id]} uptie={uptie} count={skill.num} level={level} index={index} />
+                                <SkillCard skill={skillData.skills[skill.id]} uptie={uptie} count={skill.num} level={level} index={index} preuptie={compareMode ? preuptie : null} />
                             </div>)}
                         </div>
                     })}
                     <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
                         {identityData.defenseSkillTypes.map(skill => <div key={skill.id} style={{ flex: 1, minWidth: "min(300px, 100%)" }}>
-                            <SkillCard key={skill.id} skill={skillData.skills[skill.id]} uptie={uptie} level={level} type={"defense"} />
+                            <SkillCard key={skill.id} skill={skillData.skills[skill.id]} uptie={uptie} level={level} type={"defense"} preuptie={compareMode ? preuptie : null} />
                         </div>)}
                     </div>
                     {combatPassives ?
@@ -185,7 +227,19 @@ export default function Identity({ params }) {
                             <div style={{ color: "#aaa", fontWeight: "bold", fontSize: "1.25rem" }}>Combat Passives</div>
                             <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
                                 {combatPassives.passives.map((passive, i) => <div key={i} style={{ flex: 1, minWidth: "min(300px, 100%)" }}>
-                                    <PassiveCard passive={constructPassive(passive, skillData.passiveData)} />
+                                    {compareMode ? (
+                                        passivesPreMapping[passive] ?
+                                            <PassiveCard
+                                                passive={constructPassive(passive, skillData.passiveData)}
+                                                pre={constructPassive(passivesPreMapping[passive], skillData.passiveData)}
+                                            /> :
+                                            <PassiveCard
+                                                passive={constructPassive(passive, skillData.passiveData)}
+                                                background={"rgba(46, 160, 67, 0.35)"}
+                                            />
+                                    ) :
+                                        <PassiveCard passive={constructPassive(passive, skillData.passiveData)} />
+                                    }
                                 </div>)}
                             </div>
                         </div> :
@@ -195,7 +249,21 @@ export default function Identity({ params }) {
                         <div style={{ display: "flex", flexDirection: "column" }}>
                             <div style={{ color: "#aaa", fontWeight: "bold", fontSize: "1.25rem" }}>Support Passives</div>
                             <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", minWidth: "min(300px, 100%)" }}>
-                                {supportPassives.passives.map((passive, i) => <div key={i} style={{ flex: 1 }}><PassiveCard passive={skillData.passiveData[passive]} /></div>)}
+                                {supportPassives.passives.map((passive, i) => <div key={i} style={{ flex: 1 }}>
+                                    {compareMode ? (
+                                        passivesPreMapping[passive] ?
+                                            <PassiveCard
+                                                passive={skillData.passiveData[passive]}
+                                                pre={skillData.passiveData[passivesPreMapping[passive]]}
+                                            /> :
+                                            <PassiveCard
+                                                passive={skillData.passiveData[passive]}
+                                                background={"rgba(46, 160, 67, 0.35)"}
+                                            />
+                                    ) :
+                                        <PassiveCard passive={skillData.passiveData[passive]} />
+                                    }
+                                </div>)}
                             </div>
                         </div> :
                         null

@@ -6,9 +6,12 @@ import PassiveCard from "../components/PassiveCard";
 import { constructHp, constructPassive } from "./IdentityUtils";
 import { IdentitySelector } from "../components/Selectors";
 import { selectStyleVariable } from "../styles";
+import UptieSelector from "../components/UptieSelector";
 
 function ComparisonCard({ identity }) {
     const [skillData, skillDataLoading] = useData(`identities/${identity.id}`);
+    const [uptie, setUptie] = useState(4);
+
     if (skillDataLoading)
         return <div style={{ display: "flex", flexDirection: "column", flex: "1", minWidth: "320px", border: "1px #aaa solid", borderRadius: "1rem", padding: "0.5rem", gap: "0.5rem" }}>
             <span style={{ fontSize: "1.2rem", textAlign: "center" }}>Loading...</span>
@@ -19,23 +22,26 @@ function ComparisonCard({ identity }) {
     identity.skillTypes.forEach(s => {
         const data = skillData.skills[s.id];
         if (data.tier in counts) {
-            skills.push(<SkillCard key={skills.length} skill={data} mini={true} index={counts[data.tier]} />)
+            skills.push(<SkillCard key={skills.length}  skill={data} uptie={uptie} mini={true} index={counts[data.tier]} />)
             counts[data.tier] += 1;
         } else {
-            skills.push(<SkillCard key={skills.length} skill={data} mini={true} />)
+            skills.push(<SkillCard key={skills.length} skill={data} uptie={uptie} mini={true} />)
             counts[data.tier] = 1;
         }
     })
 
     identity.defenseSkillTypes.forEach(s => {
         const data = skillData.skills[s.id];
-        skills.push(<SkillCard key={skills.length} skill={data} mini={true} type={"defense"} />)
+        skills.push(<SkillCard key={skills.length} skill={data} uptie={uptie} mini={true} type={"defense"} />)
     })
 
-    skillData.combatPassives.at(-1).passives.forEach(passive => {
+    const combatPassives = skillData.combatPassives.findLast(passives => passives.uptie <= uptie) ?? {passives: []};
+    combatPassives.passives.forEach(passive => {
         skills.push(<PassiveCard key={skills.length} passive={constructPassive(passive, skillData.passiveData)} mini={true} type={"Combat"} />)
     });
-    skillData.supportPassives.at(-1).passives.forEach(passive => {
+
+    const supportPassives = skillData.supportPassives.findLast(passives => passives.uptie <= uptie) ?? {passives: []};
+    supportPassives.passives.forEach(passive => {
         skills.push(<PassiveCard key={skills.length} passive={constructPassive(passive, skillData.passiveData)} mini={true} type={"Support"} />)
     });
 
@@ -46,6 +52,7 @@ function ComparisonCard({ identity }) {
                 <span>{sinnerMapping[identity.sinnerId]}</span>
                 <span>{identity.name}</span>
             </div>
+            <UptieSelector value={uptie} setValue={setUptie} />
         </div>
         <div style={{ display: "flex", justifyContent: "center" }}>
             <IdentityImg identity={identity} uptie={2} displayName={false} displayRarity={false} size={128} />
@@ -60,7 +67,7 @@ function ComparisonCard({ identity }) {
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem", textAlign: "center" }}>
                     <Icon path={"speed"} style={{ height: "32px" }} />
-                    {identity.speedList[3].join(" - ")}
+                    {identity.speedList[uptie-1].join(" - ")}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.2rem", textAlign: "center" }}>
                     <Icon path={"defense level"} style={{ height: "32px" }} />

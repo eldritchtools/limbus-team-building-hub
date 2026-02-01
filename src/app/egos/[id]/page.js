@@ -52,6 +52,8 @@ export default function EgoPage({ params }) {
     const [uptie, setUptie] = useState(4);
     const [activeTab, setActiveTab] = useState("notes");
     const [builds, setBuilds] = useState(null);
+    const [compareMode, setCompareMode] = useState(false);
+    const [preuptie, setPreuptie] = useState(1);
 
     useEffect(() => {
         const fetchBuilds = async () => {
@@ -67,6 +69,19 @@ export default function EgoPage({ params }) {
 
     if (egosLoading || skillDataLoading) return null;
 
+    const handleSetUptie = (v) => {
+        if (v === "compare mode") setCompareMode(true);
+        else {
+            setUptie(v);
+            if (v < preuptie) setPreuptie(v);
+        }
+    }
+
+    const handleSetPreuptie = (v) => {
+        setPreuptie(v);
+        if (v > uptie) setUptie(v);
+    }
+
     const passives = skillData.passiveList;
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
@@ -81,7 +96,14 @@ export default function EgoPage({ params }) {
                 </div>
                 <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem", justifyContent: "center", padding: "0.5rem" }}>
                     <SinnerIcon num={egoData.sinnerId} style={{ height: "40px" }} />
-                    Threadspin: <UptieSelector value={uptie} setValue={setUptie} />
+                    Threadspin: {compareMode ?
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            <UptieSelector value={preuptie} setValue={handleSetPreuptie} />
+                            ➔
+                            <UptieSelector value={uptie} setValue={handleSetUptie} />
+                        </div> :
+                        <UptieSelector value={uptie} setValue={handleSetUptie} bottomOption={"compare mode"} />
+                    }
                 </div>
                 <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                     <EgoImg ego={egoData} type={"awaken"} style={{ width: "50%", maxWidth: "192px", height: "auto" }} />
@@ -146,19 +168,23 @@ export default function EgoPage({ params }) {
             <div style={{ display: "flex", flexDirection: "column", minWidth: "min(480px, 100%)", flex: 1, gap: "0.5rem" }}>
                 <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
                     {skillData.awakeningSkills.map((skill, i) => <div key={i} style={{ flex: 1, minWidth: "min(300px, 100%)" }}>
-                        <SkillCard skill={skill} uptie={uptie} type={"awakening"} />
+                        <SkillCard skill={skill} uptie={uptie} type={"awakening"} preuptie={compareMode ? preuptie : null} />
                     </div>)}
                 </div>
                 {"corrosionSkills" in skillData ?
                     <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
                         {skillData.corrosionSkills.map((skill, i) => <div key={i} style={{ flex: 1, minWidth: "min(300px, 100%)" }}>
-                            <SkillCard skill={skill} uptie={uptie} type={"corrosion"} />
+                            <SkillCard skill={skill} uptie={uptie} type={"corrosion"} preuptie={compareMode ? preuptie : null} />
                         </div>)}
                     </div> : null}
                 {uptie >= 2 && passives ?
                     <div style={{ display: "flex", flexDirection: "column" }}>
                         <div style={{ color: "#aaa", fontWeight: "bold", fontSize: "1.25rem" }}>Passives</div>
-                        {passives.map((passive, i) => <PassiveCard key={i} passive={passive} />)}
+                        {passives.map((passive, i) => {
+                            if (compareMode && preuptie < 2)
+                                return <PassiveCard key={i} passive={passive} background={"rgba(46, 160, 67, 0.35)"} />
+                            return <PassiveCard key={i} passive={passive} />
+                        })}
                     </div> :
                     null
                 }

@@ -13,10 +13,10 @@ function TierComponent({ tier }) {
         case 4: str = "IV"; break;
         default: str = ""; break;
     }
-    return <span style={{ fontFamily: "'Archivo Narrow', sans-serif", fontWeight: "bold", fontSize: "24px", color: "#ffd84d", transform: "scaleY(1.2)" }}>{str}</span>
+    return <span style={{ fontFamily: "'Archivo Narrow', sans-serif", fontWeight: "bold", fontSize: "1.5rem", color: "#ffd84d", transform: "scaleY(1.2)" }}>{str}</span>
 }
 
-function UptieSelector({ value, setValue, allowEmpty = false, emptyIcon = null, scale = null }) {
+function UptieSelector({ value, setValue, allowEmpty = false, emptyIcon = null, scale = null, bottomOption = null }) {
     const [isOpen, setIsOpen] = useState(false);
 
     const triggerRef = useRef(null);
@@ -37,19 +37,26 @@ function UptieSelector({ value, setValue, allowEmpty = false, emptyIcon = null, 
         <Select.Portal>
             <Select.Content className="uptie-select-content" style={{ width: allowEmpty ? "12.5rem" : "10rem" }} position="popper">
                 <Select.Viewport>
-                    <div className="uptie-select-grid" style={{ gridTemplateColumns: `repeat(${allowEmpty ? 5 : 4}, 1fr)` }}>
-                        {[1, 2, 3, 4].map((option) =>
-                            <Select.Item key={option} value={option} className="uptie-select-item">
-                                <div className="uptie-item-inner">
-                                    <TierComponent tier={option} />
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                        <div className="uptie-select-grid" style={{ gridTemplateColumns: `repeat(${allowEmpty ? 5 : 4}, 1fr)` }}>
+                            {[1, 2, 3, 4].map((option) =>
+                                <Select.Item key={option} value={option} className="uptie-select-item">
+                                    <div className="uptie-item-inner">
+                                        <TierComponent tier={option} />
+                                    </div>
+                                </Select.Item>
+                            )}
+                            {allowEmpty ? <Select.Item key={"cancel"} value={null} className="uptie-select-item">
+                                <div className="uptie-item-inner" style={{ height: "1.5rem", justifyContent: "center", color: "#ff4848", fontSize: "1rem", fontWeight: "bold" }}>
+                                    ✕
                                 </div>
-                            </Select.Item>
-                        )}
-                        {allowEmpty ? <Select.Item key={"cancel"} value={null} className="uptie-select-item">
-                            <div className="uptie-item-inner" style={{ height: "1.5rem", justifyContent: "center", color: "#ff4848", fontSize: "1rem", fontWeight: "bold" }}>
-                                ✕
-                            </div>
-                        </Select.Item> : null}
+                            </Select.Item> : null}
+                        </div>
+                        {
+                            bottomOption ? <Select.Item key={bottomOption} value={bottomOption} className="uptie-select-item">
+                                {bottomOption}
+                            </Select.Item> : null
+                        }
                     </div>
                 </Select.Viewport>
             </Select.Content>

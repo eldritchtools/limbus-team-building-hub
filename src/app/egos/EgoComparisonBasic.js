@@ -5,11 +5,14 @@ import SkillCard from "../components/SkillCard";
 import PassiveCard from "../components/PassiveCard";
 import { EgoSelector } from "../components/Selectors";
 import { selectStyleVariable } from "../styles";
+import UptieSelector from "../components/UptieSelector";
 
 const affinities = ["wrath", "lust", "sloth", "gluttony", "gloom", "pride", "envy"];
 
 function ComparisonCard({ ego }) {
     const [skillData, skillDataLoading] = useData(`egos/${ego.id}`);
+    const [uptie, setUptie] = useState(4);
+
     if (skillDataLoading)
         return <div style={{ display: "flex", flexDirection: "column", flex: "1", minWidth: "320px", border: "1px #aaa solid", borderRadius: "1rem", padding: "0.5rem", gap: "0.5rem" }}>
             <span style={{ fontSize: "1.2rem", textAlign: "center" }}>Loading...</span>
@@ -17,18 +20,19 @@ function ComparisonCard({ ego }) {
 
     const skills = [];
     skillData.awakeningSkills.forEach(s => {
-        skills.push(<SkillCard key={skills.length} skill={s} mini={true} type={"Awakening"} />)
+        skills.push(<SkillCard key={skills.length} skill={s} uptie={uptie} mini={true} type={"Awakening"} />)
     })
 
     if ("corrosionSkills" in skillData) {
         skillData.corrosionSkills.forEach(s => {
-            skills.push(<SkillCard key={skills.length} skill={s} mini={true} type={"Corrosion"} />)
+            skills.push(<SkillCard key={skills.length} skill={s} uptie={uptie} mini={true} type={"Corrosion"} />)
         })
     }
 
-    skillData.passiveList.forEach(p => {
-        skills.push(<PassiveCard key={skills.length} passive={p} mini={true} type={"Passive"} />)
-    });
+    if (uptie >= 2)
+        skillData.passiveList.forEach(p => {
+            skills.push(<PassiveCard key={skills.length} passive={p} mini={true} type={"Passive"} />)
+        });
 
     return <div style={{ display: "flex", flexDirection: "column", flex: "1", minWidth: "320px", border: "1px #aaa solid", borderRadius: "1rem", padding: "0.5rem", gap: "0.5rem" }}>
         <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: "100%" }}>
@@ -37,6 +41,7 @@ function ComparisonCard({ ego }) {
                 <span>{sinnerMapping[ego.sinnerId]}</span>
                 <span>{ego.name}</span>
             </div>
+            <UptieSelector value={uptie} setValue={setUptie} />
         </div>
         <div style={{ display: "flex", justifyContent: "center" }}>
             <EgoImg ego={ego} type={"awaken"} displayName={false} displayRarity={false} size={128} />

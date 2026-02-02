@@ -1,6 +1,7 @@
 import { affinityColorMapping, Icon } from "@eldritchtools/limbus-shared-library";
 import { capitalizeFirstLetter, ProcessedText } from "../utils";
 import Coin from "./Coin";
+import DiffedText from "./DiffedText";
 
 function SkillLabel({ skill, type, index }) {
     switch (type) {
@@ -18,10 +19,14 @@ function SkillLabel({ skill, type, index }) {
     }
 }
 
-export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "attack", index = 0, mini = false }) {
+export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "attack", index = 0, mini = false, preuptie }) {
     let skillData = skill.data.reduce((acc, dataTier) => dataTier.uptie <= uptie ? { ...acc, ...dataTier } : acc, {});
 
     if (Object.keys(skillData).length === 0) return null;
+
+    let preSkillData = preuptie ? skill.data.reduce((acc, dataTier) => dataTier.uptie <= preuptie ? { ...acc, ...dataTier } : acc, {}) : null;
+    let newSkill = preuptie && Object.keys(preSkillData).length === 0;
+    let diffedSkill = preuptie && !newSkill;
 
     let iconSize = mini ? "24px" : "32px";
     let coinSize = mini ? "18px" : "24px";
@@ -31,11 +36,16 @@ export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "
     return <div style={{
         width: "100%", height: "100%", display: "flex", flexDirection: "column",
         border: `1px ${affinityColorMapping[skillData.affinity]} solid`, borderRadius: "0.5rem",
-        padding: "0.5rem", boxSizing: "border-box", fontSize: mini ? "0.8rem" : "1rem"
+        padding: "0.5rem", boxSizing: "border-box", fontSize: mini ? "0.8rem" : "1rem",
+        backgroundColor: newSkill ? "rgba(46, 160, 67, 0.35)" : null
     }}>
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginBottom: "0.25rem" }}>
             <div style={{ display: "flex", flexDirection: "row", gap: mini ? "0.1rem" : "0.25rem", alignItems: "center" }}>
-                {skillData.affinity !== "none" ? <Icon path={skillData.affinity} style={{ width: iconSize }} /> : null}
+                {skillData.affinity !== "none" ?
+                    (diffedSkill && preSkillData.affinity === "none" ?
+                        <Icon path={skillData.affinity} style={{ width: iconSize, backgroundColor: "rgba(46, 160, 67, 0.35)", padding: "0 2px", borderRadius: "3px" }} /> :
+                        <Icon path={skillData.affinity} style={{ width: iconSize }} />) :
+                    null}
                 {skillData.defType !== "attack" ? <Icon path={capitalizeFirstLetter(skillData.defType)} style={{ width: iconSize }} /> : null}
                 {skillData.defType === "attack" || skillData.defType === "counter" ? <Icon path={capitalizeFirstLetter(skillData.atkType)} style={{ width: iconSize }} /> : null}
                 <div style={{ borderRadius: "5px", backgroundColor: affinityColorMapping[skillData.affinity], padding: "5px", color: "#ddd", textShadow: "black 1px 1px 5px", fontWeight: "bold" }}>
@@ -50,7 +60,12 @@ export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "
         <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: "0.1rem", marginBottom: "0.25rem" }}>
             <span style={{ display: "flex", height: iconSize, gap: "0.25rem", alignItems: "center", border: "1px #777 solid", borderRadius: "0.5rem", padding: "0 0.2rem" }}>
                 <span>
-                    Power: {skillData.baseValue} {skillData.coinValue < 0 ? skillData.coinValue : `+${skillData.coinValue}`}
+                    Power: {diffedSkill ? <DiffedText
+                        before={`${preSkillData.baseValue} ${preSkillData.coinValue < 0 ? preSkillData.coinValue : `+${preSkillData.coinValue}`}`}
+                        after={`${skillData.baseValue} ${skillData.coinValue < 0 ? skillData.coinValue : `+${skillData.coinValue}`}`}
+                    /> :
+                        `${skillData.baseValue} ${skillData.coinValue < 0 ? skillData.coinValue : `+${skillData.coinValue}`}`
+                    }
                 </span>
                 <span style={{ gap: "0" }}>
                     {skillData.coins.map((coin, i) => <Icon key={i} path={coin["type"] === "unbreakable" ? "unbreakable coin" : "coin"} style={{ height: coinSize }} />)}
@@ -74,12 +89,15 @@ export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "
                     null
             }
             <span style={{ display: "flex", height: iconSize, alignItems: "center", border: "1px #777 solid", borderRadius: "0.5rem", padding: "0 0.2rem" }}>
-                Atk Weight: {skillData.atkWeight}
+                Atk Weight: {diffedSkill ? <DiffedText before={`${preSkillData.atkWeight}`} after={`${skillData.atkWeight}`} /> : `${skillData.atkWeight}`}
             </span>
         </div>
         <div style={{ whiteSpace: "pre-wrap", lineHeight: "1.2", marginBottom: "0.25rem" }}>
             {skillData.desc ?
-                <ProcessedText text={skillData.desc} iconStyleOverride={iconStyleOverride} nameStyleOverride={nameStyleOverride} /> :
+                (diffedSkill ?
+                    <DiffedText before={preSkillData.desc.split("\n")} after={skillData.desc.split("\n")} iconStyleOverride={iconStyleOverride} nameStyleOverride={nameStyleOverride} /> :
+                    <ProcessedText text={skillData.desc} iconStyleOverride={iconStyleOverride} nameStyleOverride={nameStyleOverride} />
+                ) :
                 null
             }
         </div>
@@ -88,7 +106,20 @@ export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "
                 <div key={index} style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
                     <Coin num={index + 1} mini={mini} />
                     <div style={{ display: "flex", flex: 1, flexDirection: "column", whiteSpace: "pre-wrap", gap: "0.1rem" }}>
-                        {coin["descs"].map((desc, innerIndex) => <ProcessedText key={`${innerIndex}-text`} text={desc} iconStyleOverride={iconStyleOverride} nameStyleOverride={nameStyleOverride} />)}
+                        {diffedSkill ?
+                            <DiffedText
+                                before={preSkillData.coins[index]["descs"] ?? []}
+                                after={coin["descs"]}
+                                iconStyleOverride={iconStyleOverride}
+                                nameStyleOverride={nameStyleOverride}
+                            /> :
+                            coin["descs"].map((desc, innerIndex) =>
+                                <ProcessedText key={`${innerIndex}-text`}
+                                    text={desc}
+                                    iconStyleOverride={iconStyleOverride}
+                                    nameStyleOverride={nameStyleOverride}
+                                />)
+                        }
                     </div>
                 </div> : null
             )}

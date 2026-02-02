@@ -110,7 +110,7 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
     const [filters, filtersExclude] = useMemo(() => selectedMainFilters.reduce(([f, fe], filter) => {
         const exc = filter[0] === "-";
         let realFilter = exc ? filter.slice(1) : filter;
-        if (Number.isInteger(Number(realFilter))) realFilter = Number(realFilter);
+        if (Number.isInteger(Number(realFilter)) && Number(realFilter) > 0) realFilter = Number(realFilter);
 
         if (exc) {
             if (mainFiltersMapping[realFilter] in fe) fe[mainFiltersMapping[realFilter]].push(realFilter);

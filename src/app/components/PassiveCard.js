@@ -1,5 +1,6 @@
 import { Icon } from "@eldritchtools/limbus-shared-library";
 import { ProcessedText } from "../utils";
+import DiffedText from "./DiffedText";
 
 export function PassiveCost({ condition, iconSize, vertical = false }) {
     const costs = condition.requirement.map((cost, i) => {
@@ -15,7 +16,7 @@ export function PassiveCost({ condition, iconSize, vertical = false }) {
     </div>
 }
 
-export default function PassiveCard({ passive, mini = false, type }) {
+export default function PassiveCard({ passive, mini = false, type, pre, background }) {
     let iconSize = mini ? "24px" : "32px";
     let iconStyleOverride = mini ? { width: "24px", height: "24px" } : {};
     let nameStyleOverride = mini ? { fontSize: "0.8rem" } : {};
@@ -23,7 +24,8 @@ export default function PassiveCard({ passive, mini = false, type }) {
     return <div style={{
         width: "100%", height: "100%", display: "flex", flexDirection: "column",
         border: `1px #777 solid`, borderRadius: "0.5rem", textAlign: "start",
-        padding: "0.5rem", boxSizing: "border-box", fontSize: mini ? "0.8rem" : "1rem"
+        padding: "0.5rem", boxSizing: "border-box", fontSize: mini ? "0.8rem" : "1rem",
+        backgroundColor: background ?? null
     }}>
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginBottom: "0.5rem" }}>
             <div style={{ display: "flex", flexDirection: "row", gap: mini ? "0.1rem" : "0.25rem" }}>
@@ -37,7 +39,10 @@ export default function PassiveCard({ passive, mini = false, type }) {
             }
         </div>
         <div style={{ whiteSpace: "pre-wrap", lineHeight: "1.2" }}>
-            <ProcessedText text={passive.desc} iconStyleOverride={iconStyleOverride} nameStyleOverride={nameStyleOverride} />
+            {pre ?
+                <DiffedText before={pre.desc} after={passive.desc} iconStyleOverride={iconStyleOverride} nameStyleOverride={nameStyleOverride} /> :
+                <ProcessedText text={passive.desc} iconStyleOverride={iconStyleOverride} nameStyleOverride={nameStyleOverride} />
+            }
         </div>
     </div>;
 }

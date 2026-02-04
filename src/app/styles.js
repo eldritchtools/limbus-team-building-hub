@@ -20,7 +20,7 @@ const selectStyle = {
     option: (provided, state) => ({
         ...provided,
         backgroundColor: state.isFocused
-            ? "#444"
+            ? (state.isSelected ? "#555" : "#444" )
             : state.isSelected
                 ? "#555"
                 : "transparent",

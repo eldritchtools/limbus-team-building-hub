@@ -51,9 +51,13 @@ function EgoProfile({ ego, displayType, rank, threadspin }) {
     </div>
 
     const otherProps = {}
-    if (threadspin) otherProps.threadspin = threadspin
+    let tooltipId = ego.id;
+    if (threadspin) {
+        otherProps.threadspin = threadspin;
+        tooltipId = `${tooltipId}|${threadspin}`
+    }
 
-    return ego && displayType !== null ? <TooltipLink href={`/egos/${ego.id}`} tooltipId={"ego-tooltip"} tooltipContent={ego.id}>
+    return ego && displayType !== null ? <TooltipLink href={`/egos/${ego.id}`} tooltipId={"ego-tooltip"} tooltipContent={tooltipId}>
         <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", aspectRatio: "4/1" }}>
             <EgoImg ego={ego} banner={true} type={"awaken"} displayName={displayType === "names"} displayRarity={false} {...otherProps} />
         </div>

@@ -2,6 +2,7 @@ import { affinityColorMapping, Icon } from "@eldritchtools/limbus-shared-library
 import { capitalizeFirstLetter, ProcessedText } from "../utils";
 import Coin from "./Coin";
 import DiffedText from "./DiffedText";
+import { AtkWeight, DiffedAtkWeight } from "./AtkWeight";
 
 function SkillLabel({ skill, type, index }) {
     switch (type) {
@@ -88,8 +89,12 @@ export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "
                     </span> :
                     null
             }
-            <span style={{ display: "flex", height: iconSize, alignItems: "center", border: "1px #777 solid", borderRadius: "0.5rem", padding: "0 0.2rem" }}>
-                Atk Weight: {diffedSkill ? <DiffedText before={`${preSkillData.atkWeight}`} after={`${skillData.atkWeight}`} /> : `${skillData.atkWeight}`}
+            <span style={{ display: "flex", height: iconSize, alignItems: "center", border: "1px #777 solid", borderRadius: "0.5rem", padding: "0 0.2rem", gap: "0.2rem" }}>
+                Atk Weight: 
+                {diffedSkill ? 
+                    <DiffedAtkWeight preSkillData={preSkillData} postSkillData={skillData} /> : 
+                    <AtkWeight skillData={skillData} />
+                }
             </span>
         </div>
         <div style={{ whiteSpace: "pre-wrap", lineHeight: "1.2", marginBottom: "0.25rem" }}>

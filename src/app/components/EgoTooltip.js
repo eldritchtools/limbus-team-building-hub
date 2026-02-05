@@ -5,8 +5,14 @@ import { Tooltip } from "react-tooltip";
 import { tooltipStyle } from "../styles";
 import Link from "next/link";
 import { isTouchDevice } from "@eldritchtools/shared-components";
+import { AtkWeight } from "./AtkWeight";
 
-function EgoTooltipContent({ ego }) {
+function compileSkillData(skill, uptie) {
+    return skill.data.reduce((acc, dataTier) => dataTier.uptie <= uptie ? { ...acc, ...dataTier } : acc, {});
+}
+
+function EgoTooltipContent({ id, ego, uptie = 4 }) {
+    const [skillData, skillDataLoading] = useData(`egos/${id}`);
     const types = [];
 
     types.push(ego.awakeningType.affinity);
@@ -17,10 +23,29 @@ function EgoTooltipContent({ ego }) {
     if (ego.corrosionType && ego.awakeningType.type !== ego.corrosionType.type)
         types.push(ego.corrosionType.type);
 
+    const awakeningData = !skillDataLoading ? skillData.awakeningSkills.map(skill => compileSkillData(skill, uptie)) : null;
+    const corrosionData = (!skillDataLoading && ego.corrosionType) ? skillData.corrosionSkills.map(skill => compileSkillData(skill, uptie)) : null;
+
     return <div style={{ ...tooltipStyle, display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", flexDirection: "row", padding: "0.5rem", gap: "0.5rem", alignItems: "center" }}>
             <div><EgoImg ego={ego} type={"awaken"} displayName={true} displayRarity={true} style={{ width: "128px", height: "128px" }} /></div>
             <div style={{ display: "flex", flexDirection: "column", width: "192px", minHeight: "128px" }}>
+                {skillDataLoading ? null :
+                    <div style={{ display: "flex", gap: "0.2rem", alignItems: "center", paddingLeft: "0.2rem", paddingBottom: "0.2rem" }}>
+                        Atk #:
+                        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                            <div style={{ display: "flex", gap: "0.5rem" }}>
+                                {awakeningData.map((data, i) => <AtkWeight key={i} skillData={data} />)}
+                            </div>
+                            {corrosionData ?
+                                <div style={{ display: "flex", gap: "0.5rem" }}>
+                                    {corrosionData.map((data, i) => <AtkWeight key={i} skillData={data} />)}
+                                </div> :
+                                null
+                            }
+                        </div>
+                    </div>
+                }
                 <div style={{ flex: 1, display: "flex" }}>
                     {types.map(x => <KeywordIcon key={x} id={x} />)}
                 </div>
@@ -39,17 +64,22 @@ function EgoTooltipContent({ ego }) {
     </div>
 }
 
-function TooltipLoader({ id }) {
+function TooltipLoader({ id, uptie }) {
     const [egos, egosLoading] = useData("egos");
     if (!id || egosLoading) return null;
 
-    return <EgoTooltipContent ego={egos[id]} />
+    if (uptie) return <EgoTooltipContent id={id} ego={egos[id]} uptie={uptie} />
+    return <EgoTooltipContent id={id} ego={egos[id]} />
 }
 
 function EgoTooltip() {
     return <Tooltip
         id="ego-tooltip"
-        render={({ content }) => <TooltipLoader id={content} />}
+        render={({ content }) => {
+            const parts = content.split("|");
+            if (parts.length === 2) return <TooltipLoader id={parts[0]} uptie={Number(parts[1])} />
+            else return <TooltipLoader id={content} />
+        }}
         getTooltipContainer={() => document.body}
         style={{ backgroundColor: "transparent", zIndex: "9999" }}
         clickable={isTouchDevice()}

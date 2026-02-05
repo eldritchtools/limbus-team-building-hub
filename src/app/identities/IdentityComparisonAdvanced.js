@@ -12,6 +12,7 @@ import RangeInput from "../components/RangeInput";
 import { keywordToIdMapping } from "../keywordIds";
 import { generalTooltipProps } from "../components/GeneralTooltip";
 import { useBreakpoint } from "@eldritchtools/shared-components";
+import { AtkWeight } from "../components/AtkWeight";
 
 const options = {
     "stats": "Stats",
@@ -189,8 +190,8 @@ function ComparisonRow({ identity, skillList, compareType }) {
                             <Icon path={"defense level"} style={{ width: iconSize }} />
                         }
                         {skillData.levelCorrection < 0 ? skillData.levelCorrection : `+${skillData.levelCorrection}`}
-                        <span>
-                            Atk Weight: {skillData.atkWeight}
+                        <span style={{display: "flex", gap: "0.2rem"}}>
+                            Atk Weight: <AtkWeight skillData={skillData} />
                         </span>
                     </span>
                 </div>,

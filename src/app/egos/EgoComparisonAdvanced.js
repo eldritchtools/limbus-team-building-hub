@@ -11,6 +11,7 @@ import RangeInput from "../components/RangeInput";
 import { keywordToIdMapping } from "../keywordIds";
 import { generalTooltipProps } from "../components/GeneralTooltip";
 import { useBreakpoint } from "@eldritchtools/shared-components";
+import { AtkWeight } from "../components/AtkWeight";
 
 const options = {
     "stats": "Stats",
@@ -169,8 +170,8 @@ function ComparisonRow({ ego, skillList, compareType }) {
                     <span>
                         SP Cost: {skillData.spCost}
                     </span>
-                    <span>
-                        Atk Weight: {skillData.atkWeight}
+                    <span style={{display: "flex", gap: "0.2rem"}}>
+                        Atk Weight: <AtkWeight skillData={skillData} />
                     </span>
                 </div>,
 

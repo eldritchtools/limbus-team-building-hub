@@ -87,6 +87,8 @@ function computeSkill(skill, opts) {
         let coinReuses = 0;
         let critReuses = 0;
         let headReuses = 0;
+        let headCritReuses = 0;
+        let reuseHeadReuses = 0;
         let endBonuses = [];
         let newLastCoinBonuses = [];
         let lastCoinDamageAdder = 0;
@@ -136,6 +138,10 @@ function computeSkill(skill, opts) {
                             critReuses += bonus.value;
                         else if (bonus.extra?.cond === "heads")
                             headReuses += bonus.value;
+                        else if (bonus.extra?.cond === "heads-crit")
+                            headCritReuses += bonus.value;
+                        else if (bonus.extra?.cond === "reuse-heads")
+                            reuseHeadReuses += bonus.value;
                         else
                             coinReuses += bonus.value;
                         break;
@@ -217,18 +223,22 @@ function computeSkill(skill, opts) {
                 }
             });
 
+            console.log(p, newRoll, reuse, headsReuse, finalDamage);
             newDamage += finalDamage;
         }
 
         const lastCoinWithoutReuse = coinIndex === skill.coins.length - 1;
         simulateCoin(false, false, lastCoinWithoutReuse && coinReuses + (skill.applyCrits ? critReuses : 0) + headReuses === 0);
         let reuses = coinReuses + (skill.applyCrits ? critReuses : 0);
+        headReuses = headReuses + (skill.applyCrits ? headCritReuses : 0);
+        if (reuses + headReuses > 0) headReuses += reuseHeadReuses;
         for (let i = 0; i < reuses; i++) {
             simulateCoin(true, false, lastCoinWithoutReuse && i === reuses - 1 && headReuses === 0);
         }
         for (let i = 0; i < headReuses; i++) {
             simulateCoin(false, true, lastCoinWithoutReuse && i === headReuses - 1);
         }
+        console.log("coin end")
 
         return [clash + (p * (skill.coinPower + coinPowerBonus)), damage + newDamage, newRoll];
     }, [basePower, 0, basePower]);

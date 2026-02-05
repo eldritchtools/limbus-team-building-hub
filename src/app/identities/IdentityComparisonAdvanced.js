@@ -12,6 +12,7 @@ import RangeInput from "../components/RangeInput";
 import { keywordToIdMapping } from "../keywordIds";
 import { generalTooltipProps } from "../components/GeneralTooltip";
 import { useBreakpoint } from "@eldritchtools/shared-components";
+import { AtkWeight } from "../components/AtkWeight";
 
 const options = {
     "stats": "Stats",
@@ -161,7 +162,7 @@ function ComparisonRow({ identity, skillList, compareType }) {
                         {type === "atk" ?
                             (ind === 0 ?
                                 `Skill ${skill.tier}` :
-                                `Skill ${skill.tier}-${ind}`) :
+                                `Skill ${skill.tier}-${ind+1}`) :
                             `Defense`}
                     </div>
                     <div style={{ borderRadius: "5px", backgroundColor: affinityColorMapping[skillData.affinity], padding: "5px", color: "#ddd", textShadow: "black 1px 1px 5px", fontWeight: "bold" }}>
@@ -189,8 +190,8 @@ function ComparisonRow({ identity, skillList, compareType }) {
                             <Icon path={"defense level"} style={{ width: iconSize }} />
                         }
                         {skillData.levelCorrection < 0 ? skillData.levelCorrection : `+${skillData.levelCorrection}`}
-                        <span>
-                            Atk Weight: {skillData.atkWeight}
+                        <span style={{display: "flex", gap: "0.2rem"}}>
+                            Atk Weight: <AtkWeight skillData={skillData} />
                         </span>
                     </span>
                 </div>,
@@ -261,7 +262,7 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
         list.map(([identity, skills]) => {
             const pieces = [];
             skills.forEach(([t, skill, i]) => {
-                if (t === "atk") {
+                if (t === "atk" || t === "def") {
                     let skillData = skill.data.reduce((acc, dataTier) => ({ ...acc, ...dataTier }), {});
                     pieces.push(replaceStatusVariablesTextOnly(skillData.desc, statuses, skillTags));
                     if (skillData.coins) {

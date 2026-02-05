@@ -58,7 +58,7 @@ export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "
                 <SkillLabel skill={skill} type={type} index={index} />
             </div>
         </div>
-        <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: "0.1rem", marginBottom: "0.25rem" }}>
+        <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: "0.1rem", marginBottom: "0.25rem", alignItems: "center" }}>
             <span style={{ display: "flex", height: iconSize, gap: "0.25rem", alignItems: "center", border: "1px #777 solid", borderRadius: "0.5rem", padding: "0 0.2rem" }}>
                 <span>
                     Power: {diffedSkill ? <DiffedText
@@ -89,7 +89,7 @@ export default function SkillCard({ skill, uptie = 4, count = 0, level, type = "
                     </span> :
                     null
             }
-            <span style={{ display: "flex", height: iconSize, alignItems: "center", border: "1px #777 solid", borderRadius: "0.5rem", padding: "0 0.2rem", gap: "0.2rem" }}>
+            <span style={{ display: "flex", minHeight: iconSize, alignItems: "center", border: "1px #777 solid", borderRadius: "0.5rem", padding: "0 0.2rem", gap: "0.2rem" }}>
                 Atk Weight: 
                 {diffedSkill ? 
                     <DiffedAtkWeight preSkillData={preSkillData} postSkillData={skillData} /> : 

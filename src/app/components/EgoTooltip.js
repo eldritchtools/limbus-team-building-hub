@@ -76,8 +76,9 @@ function EgoTooltip() {
     return <Tooltip
         id="ego-tooltip"
         render={({ content }) => {
+            if (!content) return null;
             const parts = content.split("|");
-            if (parts.length === 2) return <TooltipLoader id={parts[0]} uptie={Number(parts[1])} />
+            if (parts.length > 1) return <TooltipLoader id={parts[0]} uptie={Number(parts[1])} />
             else return <TooltipLoader id={content} />
         }}
         getTooltipContainer={() => document.body}

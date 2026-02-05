@@ -24,7 +24,7 @@ function EgoTooltipContent({ id, ego, uptie = 4 }) {
         types.push(ego.corrosionType.type);
 
     const awakeningData = !skillDataLoading ? skillData.awakeningSkills.map(skill => compileSkillData(skill, uptie)) : null;
-    const corrosionData = (!skillDataLoading && ego.corrosionType) ? skillData.corrosionSkills.map(skill => compileSkillData(skill, uptie)) : null;
+    const corrosionData = (!skillDataLoading && skillData.corrosionSkills) ? skillData.corrosionSkills.map(skill => compileSkillData(skill, uptie)) : null;
 
     return <div style={{ ...tooltipStyle, display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", flexDirection: "row", padding: "0.5rem", gap: "0.5rem", alignItems: "center" }}>

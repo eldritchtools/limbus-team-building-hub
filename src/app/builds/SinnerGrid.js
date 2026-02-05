@@ -54,7 +54,7 @@ function EgoProfile({ ego, displayType, rank, threadspin }) {
     let tooltipId = ego.id;
     if (threadspin) {
         otherProps.threadspin = threadspin;
-        tooltipId = `${tooltipId}|${threadspin}`
+        tooltipId = `${tooltipId}|${threadspin}`;
     }
 
     return ego && displayType !== null ? <TooltipLink href={`/egos/${ego.id}`} tooltipId={"ego-tooltip"} tooltipContent={tooltipId}>

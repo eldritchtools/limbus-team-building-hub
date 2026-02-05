@@ -161,7 +161,7 @@ function ComparisonRow({ identity, skillList, compareType }) {
                         {type === "atk" ?
                             (ind === 0 ?
                                 `Skill ${skill.tier}` :
-                                `Skill ${skill.tier}-${ind}`) :
+                                `Skill ${skill.tier}-${ind+1}`) :
                             `Defense`}
                     </div>
                     <div style={{ borderRadius: "5px", backgroundColor: affinityColorMapping[skillData.affinity], padding: "5px", color: "#ddd", textShadow: "black 1px 1px 5px", fontWeight: "bold" }}>
@@ -261,7 +261,7 @@ function ComparisonList({ items, compareType, displayType, otherOpts }) {
         list.map(([identity, skills]) => {
             const pieces = [];
             skills.forEach(([t, skill, i]) => {
-                if (t === "atk") {
+                if (t === "atk" || t === "def") {
                     let skillData = skill.data.reduce((acc, dataTier) => ({ ...acc, ...dataTier }), {});
                     pieces.push(replaceStatusVariablesTextOnly(skillData.desc, statuses, skillTags));
                     if (skillData.coins) {

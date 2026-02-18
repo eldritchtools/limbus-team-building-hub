@@ -16,21 +16,21 @@ import { constructHp, constructPassive } from "../IdentityUtils";
 import DiffedText from "@/app/components/DiffedText";
 
 function NotesTab({ notes }) {
-    if (!notes || !notes.main) return <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>;
+    if (!notes || !notes.usage) return <div style={{ color: "#777", textAlign: "center" }}>Not yet available...</div>;
     if (!notes.other)
         return <div style={{ display: "flex", flexDirection: "column" }}>
-            {notes.main.map((str, i) => <div key={i} style={{ display: "flex", flexDirection: "row", gap: "0.25rem", lineHeight: "1.4" }}>
+            {notes.usage.map((str, i) => <div key={i} style={{ display: "flex", flexDirection: "row", gap: "0.25rem", lineHeight: "1.4" }}>
                 • <MarkdownRenderer content={str} />
             </div>)}
         </div>
 
     return <div style={{ display: "flex", flexDirection: "column" }}>
-        <div style={{ color: "#aaa", fontSize: "0.8rem" }}>Main</div>
-        {notes.main.map((str, i) => <div key={i} style={{ display: "flex", flexDirection: "row", gap: "0.25rem", lineHeight: "1.4" }}>
+        <div style={{ color: "#aaa", fontSize: "0.8rem" }}>Usage Tips</div>
+        {notes.usage.map((str, i) => <div key={i} style={{ display: "flex", flexDirection: "row", gap: "0.25rem", lineHeight: "1.4" }}>
             • <MarkdownRenderer content={str} />
         </div>)}
         <div style={{ height: "0.5rem" }} />
-        <div style={{ color: "#aaa", fontSize: "0.8rem" }}>Other</div>
+        <div style={{ color: "#aaa", fontSize: "0.8rem" }}>Other Details</div>
         {notes.other.map((str, i) => <div key={i} style={{ display: "flex", flexDirection: "row", gap: "0.25rem", lineHeight: "1.4" }}>
             • <MarkdownRenderer content={str} />
         </div>)}
@@ -178,7 +178,7 @@ export default function Identity({ params }) {
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", border: "1px #777 dotted", padding: "0.5rem", gap: "0.2rem" }}>
                     <div style={{ display: "flex", gap: "1rem", alignSelf: "center" }}>
-                        <div data-tooltip-id="identity-notes" style={{ ...tabStyle, fontSize: "1rem", color: activeTab === "notes" ? "#ddd" : "#777" }} onClick={() => setActiveTab("notes")}>Notes/Explanation</div>
+                        <div data-tooltip-id="identity-notes" style={{ ...tabStyle, fontSize: "1rem", color: activeTab === "notes" ? "#ddd" : "#777" }} onClick={() => setActiveTab("notes")}>Tips/Summary</div>
                         <div data-tooltip-id="identity-builds" style={{ ...tabStyle, fontSize: "1rem", color: activeTab === "builds" ? "#ddd" : "#777" }} onClick={() => setActiveTab("builds")}>Popular Builds</div>
                     </div>
                     <Tooltip id="identity-notes" style={{ ...tooltipStyle, maxWidth: "85%" }}>

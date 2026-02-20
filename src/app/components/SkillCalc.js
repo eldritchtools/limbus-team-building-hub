@@ -20,6 +20,7 @@ function computeSkill(skill, opts) {
     let clashBonus = 0;
     let offDefLevel = skill.offDefLevel;
     let lastCoinBonuses = [];
+    let typeConvert = 0;
 
     if (skill.bonusesEnabled && opts.cond !== "default")
         skill.bonuses?.forEach(bonus => {
@@ -46,6 +47,9 @@ function computeSkill(skill, opts) {
                         damageAdder += bonus.value;
                     }
                     break;
+                case "typeconverteddamage":
+                    typeConvert += bonus.value * (1 + ((opts.target[bonus.extra["type1"]] ?? 1) - 1) + ((opts.target[bonus.extra["type2"]] ?? 1) + 1));
+                    break;
                 case "critdamage":
                     critMultiplier += bonus.value;
                     break;
@@ -56,6 +60,15 @@ function computeSkill(skill, opts) {
                     break;
             }
         })
+
+    let resistMultiplier = 1;
+    if (typeConvert === 0) {
+        if (skill.atkType) resistMultiplier += (opts.target[skill.atkType] ?? 1) - 1;
+        if (skill.affinity !== "none") resistMultiplier += (opts.target[skill.affinity] ?? 1) - 1;
+    } else {
+        resistMultiplier = typeConvert;
+    }
+    resistMultiplier += (offDefLevel - (opts.target.def ?? LEVEL_CAP)) / (Math.abs(offDefLevel - (opts.target.def ?? LEVEL_CAP)) + 25);
 
     const evaluateValue = value => {
         if (typeof value === 'number')
@@ -92,6 +105,7 @@ function computeSkill(skill, opts) {
         let endBonuses = [];
         let newLastCoinBonuses = [];
         let lastCoinDamageAdder = 0;
+        let coinTypeConvert = 0;
 
         if (skill.bonusesEnabled && opts.cond === "all")
             coin.bonuses?.forEach(bonus => {
@@ -130,6 +144,9 @@ function computeSkill(skill, opts) {
                                 coinDamageAdder += evaluateValue(bonus.value);
                         }
                         break;
+                    case "typeconverteddamage":
+                        coinTypeConvert += bonus.value * (1 + ((opts.target[bonus.extra["type1"]] ?? 1) - 1) + ((opts.target[bonus.extra["type2"]] ?? 1) + 1));
+                        break;
                     case "critdamage":
                         coinCritMultiplier += evaluateValue(bonus.value);
                         break;
@@ -154,11 +171,6 @@ function computeSkill(skill, opts) {
         if (opts.type === "max") p = coinPower < 0 ? 0 : 1;
         else if (opts.type === "min") p = coinPower < 0 ? 1 : 0;
         else if (opts.type === "avg") p = 0.5 + (opts.sp / 100);
-
-        let resistMultiplier = 1;
-        if (skill.atkType) resistMultiplier += (opts.target[skill.atkType] ?? 1) - 1;
-        if (skill.affinity !== "none") resistMultiplier += (opts.target[skill.affinity] ?? 1) - 1;
-        resistMultiplier += (offDefLevel - (opts.target.def ?? LEVEL_CAP)) / (Math.abs(offDefLevel - (opts.target.def ?? LEVEL_CAP)) + 25);
 
         coinDamageMultiplier += p * coinHeadsDamageMultiplier;
         let newRoll = roll;
@@ -202,10 +214,17 @@ function computeSkill(skill, opts) {
                 damage *= headsReuseMultiplier;
             }
 
-            if (skill.applyCrits) {
-                damage *= (resistMultiplier + 0.2) * (coinDamageMultiplier + coinCritMultiplier);
+            let coinResistMultiplier = 1;
+            if (coinTypeConvert === 0) {
+                coinResistMultiplier = resistMultiplier;
             } else {
-                damage *= resistMultiplier * coinDamageMultiplier;
+                coinResistMultiplier = coinTypeConvert + (offDefLevel - (opts.target.def ?? LEVEL_CAP)) / (Math.abs(offDefLevel - (opts.target.def ?? LEVEL_CAP)) + 25);
+            }
+
+            if (skill.applyCrits) {
+                damage *= (coinResistMultiplier + 0.2) * (coinDamageMultiplier + coinCritMultiplier);
+            } else {
+                damage *= coinResistMultiplier * coinDamageMultiplier;
             }
 
             damage += coinDamageAdder;
@@ -223,7 +242,6 @@ function computeSkill(skill, opts) {
                 }
             });
 
-            console.log(p, newRoll, reuse, headsReuse, finalDamage);
             newDamage += finalDamage;
         }
 
@@ -238,7 +256,6 @@ function computeSkill(skill, opts) {
         for (let i = 0; i < headReuses; i++) {
             simulateCoin(false, true, lastCoinWithoutReuse && i === headReuses - 1);
         }
-        console.log("coin end")
 
         return [clash + (p * (skill.coinPower + coinPowerBonus)), damage + newDamage, newRoll];
     }, [basePower, 0, basePower]);

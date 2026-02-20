@@ -100,7 +100,16 @@ const selectStyleVariable = {
     }),
 };
 
-const tooltipStyle = { outlineStyle: "solid", outlineColor: "#ddd", outlineWidth: "1px", backgroundColor: "#000000", borderRadius: "1rem", zIndex: "9999", maxWidth: "90%" };
+const tooltipStyle = { 
+    outlineStyle: "solid", 
+    outlineColor: "#ddd", 
+    outlineWidth: "1px", 
+    backgroundColor: "#000000", 
+    borderRadius: "1rem", 
+    zIndex: "9999", 
+    width: "90vw",
+    maxWidth: "800px" 
+};
 
 const tabStyle = { fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.2s" };
 

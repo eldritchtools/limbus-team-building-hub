@@ -28,7 +28,7 @@ export default function PassiveCard({ passive, mini = false, type, pre, backgrou
         backgroundColor: background ?? null
     }}>
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-            <div style={{ display: "flex", flexDirection: "row", gap: mini ? "0.1rem" : "0.25rem" }}>
+            <div style={{ display: "flex", flexDirection: "row", gap: mini ? "0.1rem" : "0.25rem", flexWrap: "wrap" }}>
                 <div style={{ borderRadius: "5px", backgroundColor: "grey", padding: "5px", color: "#ddd", textShadow: "black 1px 1px 5px", fontWeight: "bold" }}>{passive.name}</div>
                 {"condition" in passive ? <PassiveCost condition={passive.condition} iconSize={iconSize} /> : null}
             </div>

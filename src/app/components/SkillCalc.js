@@ -22,6 +22,26 @@ function computeSkill(skill, opts) {
     let lastCoinBonuses = [];
     let typeConvert = 0;
 
+    const evaluateValue = value => {
+        if (typeof value === 'number')
+            return value;
+
+        let expr = value.slice(1);
+        const resolvedExpr = expr.replace(/\{([a-zA-Z_][a-zA-Z0-9_.]*)\}/g, (match, name) => {
+            let pieces = name.split(".");
+            if (pieces[0] === "res") {
+                return opts.target[pieces[1]] ?? 1;
+            }
+            return null;
+        });
+
+        try {
+            return new Function(`return ${resolvedExpr};`)();
+        } catch (err) {
+            throw new Error(`Invalid expression after substitution: ${resolvedExpr}`);
+        }
+    }
+
     if (skill.bonusesEnabled && opts.cond !== "default")
         skill.bonuses?.forEach(bonus => {
             switch (bonus.type) {
@@ -48,7 +68,7 @@ function computeSkill(skill, opts) {
                     }
                     break;
                 case "typeconverteddamage":
-                    typeConvert += bonus.value * (1 + ((opts.target[bonus.extra["type1"]] ?? 1) - 1) + ((opts.target[bonus.extra["type2"]] ?? 1) + 1));
+                    typeConvert += evaluateValue(bonus.value) * (1 + ((opts.target[bonus.extra["type1"]] ?? 1) - 1) + ((opts.target[bonus.extra["type2"]] ?? 1) - 1));
                     break;
                 case "critdamage":
                     critMultiplier += bonus.value;
@@ -69,26 +89,6 @@ function computeSkill(skill, opts) {
         resistMultiplier = typeConvert;
     }
     resistMultiplier += (offDefLevel - (opts.target.def ?? LEVEL_CAP)) / (Math.abs(offDefLevel - (opts.target.def ?? LEVEL_CAP)) + 25);
-
-    const evaluateValue = value => {
-        if (typeof value === 'number')
-            return value;
-
-        let expr = value.slice(1);
-        const resolvedExpr = expr.replace(/\{([a-zA-Z_][a-zA-Z0-9_.]*)\}/g, (match, name) => {
-            let pieces = name.split(".");
-            if (pieces[0] === "res") {
-                return opts.target[pieces[1]] ?? 1;
-            }
-            return null;
-        });
-
-        try {
-            return new Function(`return ${resolvedExpr};`)();
-        } catch (err) {
-            throw new Error(`Invalid expression after substitution: ${resolvedExpr}`);
-        }
-    }
 
     let [clash, damage] = skill.coins.reduce(([clash, damage, roll], coin, coinIndex) => {
         let coinPower = skill.coinPower + coinPowerBonus;
@@ -145,7 +145,7 @@ function computeSkill(skill, opts) {
                         }
                         break;
                     case "typeconverteddamage":
-                        coinTypeConvert += bonus.value * (1 + ((opts.target[bonus.extra["type1"]] ?? 1) - 1) + ((opts.target[bonus.extra["type2"]] ?? 1) + 1));
+                        coinTypeConvert += evaluateValue(bonus.value) * (1 + ((opts.target[bonus.extra["type1"]] ?? 1) - 1) + ((opts.target[bonus.extra["type2"]] ?? 1) - 1));
                         break;
                     case "critdamage":
                         coinCritMultiplier += evaluateValue(bonus.value);

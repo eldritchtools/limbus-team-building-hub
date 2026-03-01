@@ -3,7 +3,7 @@
 import Tag from "@/app/components/Tag";
 import { deleteBuild, getBuild } from "@/app/database/builds";
 import { KeywordIcon } from "@eldritchtools/limbus-shared-library";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/app/database/authProvider";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Modal } from "@/app/components/Modal";
@@ -27,6 +27,7 @@ import { buildsStore } from "@/app/database/localDB";
 import { DeleteSolid, EditSolid, ShareSolid } from "@/app/components/Symbols";
 import SinDistribution from "@/app/components/SinDistribution";
 import SocialsDisplay from "@/app/components/SocialsDisplay";
+import { constructTeamCode } from "@/app/components/TeamCodeEncoding";
 
 function isLocalId(id) {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -145,6 +146,8 @@ export default function BuildPage({ params }) {
         setDeleting(false);
     }
 
+    const teamCode = useMemo(() => loading ? "" : constructTeamCode(build.identity_ids, build.ego_ids, build.deployment_order), [build]);
+
     return loading ? <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontSize: "1.5rem", fontWeight: "bold" }}>
         Loading...
     </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", containerType: "inline-size" }}>
@@ -210,23 +213,20 @@ export default function BuildPage({ params }) {
                         alignment="start"
                     />
                 </div>
-                {build.team_code.trim().length > 0 ? <>
-                    <div>
-                        <span style={{ fontSize: "1.2rem", borderBottom: "1px #ddd dotted" }} {...generalTooltipProps("teamcode")}>Team Code</span>
-                    </div>
-                    <div style={{ position: "relative", width: "100%" }}>
-                        <textarea value={build.team_code} ref={teamCodeRef} readOnly={true} style={{ width: "100%", height: "3rem", cursor: "pointer" }} onClick={handleTeamCodeCopy} />
-                        {copySuccess !== '' ?
-                            <div className="copy-popup">
-                                <div className="copy-popup-box">
-                                    {copySuccess}
-                                </div>
-                            </div> :
-                            null
-                        }
-                    </div>
-                </> : null
-                }
+                <div>
+                    <span style={{ fontSize: "1.2rem", borderBottom: "1px #ddd dotted" }} {...generalTooltipProps("teamcode")}>Team Code</span>
+                </div>
+                <div style={{ position: "relative", width: "100%" }}>
+                    <textarea value={teamCode} ref={teamCodeRef} readOnly={true} style={{ width: "100%", height: "3rem", cursor: "pointer" }} onClick={handleTeamCodeCopy} />
+                    {copySuccess !== '' ?
+                        <div className="copy-popup">
+                            <div className="copy-popup-box">
+                                {copySuccess}
+                            </div>
+                        </div> :
+                        null
+                    }
+                </div>
                 {build.tags.length > 0 ?
                     <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
                         Tags: {build.tags.map((t, i) => <Tag key={i} tag={isLocalId(id) ? t : t.name} />)}

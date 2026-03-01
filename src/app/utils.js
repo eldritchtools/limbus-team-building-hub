@@ -1,4 +1,4 @@
-import { replaceStatusVariables } from "@eldritchtools/limbus-shared-library";
+import { ReplacedStatusesText } from "@eldritchtools/limbus-shared-library";
 
 const romanMapping = { 1: "I", 2: "II", 3: "III", 4: "IV", 5: "V", 6: "VI", 7: "VII", 8: "VIII", 9: "IX", 10: "X" };
 
@@ -46,7 +46,12 @@ function capitalizeFirstLetter(str) {
 function ProcessedText({ text, enableTooltips = true, iconStyleOverride = {}, nameStyleOverride = {} }) {
     let str = text.replaceAll("<style=\"highlight\">", "").replaceAll("</style>", "");
 
-    return replaceStatusVariables(str, enableTooltips, iconStyleOverride, nameStyleOverride);
+    return <ReplacedStatusesText 
+        templateText={str} 
+        includeTooltips={enableTooltips}
+        iconStyleOverride={iconStyleOverride}
+        nameStyleOverride={nameStyleOverride}
+    />
 }
 
 function ColorResist({ resist }) {

@@ -8,7 +8,8 @@ const tooltipContent = {
     "descSearch": "Only matches exact words within the description (excludes status descriptions). Filters out descriptions with no words matching any search words. Use \"search match score\" sorting to sort results based on relevancy (descending is most relevant first).",
     "groupedComp": "Combines all relevant skills/passives. Filters will pass if at least one skill/passive meets all of them. Sorting is based on the sum of the value across all skills/passives. When disabled, skills/passives are filtered and sorted independently from each other.",
     "includeExclude": "Included items follow the \"Strict Filtering\" setting.\nExcluded items require all of them to be excluded from the results.",
-    "twiceToExclude": "Select twice to exclude."
+    "twiceToExclude": "Select twice to exclude.",
+    "allIdEgoMenu": "Show a menu containing all identities or E.G.Os for faster selection."
 }
 
 function generalTooltipProps(typeOrString) {

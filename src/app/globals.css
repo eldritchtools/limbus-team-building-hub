@@ -101,23 +101,28 @@ a:active {
   color: #ffcc66; /* amber for click */
 }
 
-.dark-scrollable::-webkit-scrollbar {
+* {
+  scrollbar-color: #999 #2a2a2a; /* Firefox: thumb color, track color */
+}
+
+*::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-.dark-scrollable::-webkit-scrollbar-track {
+*::-webkit-scrollbar-track {
   background: #1a1a1a; /* dark track */
 }
 
-.dark-scrollable::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb {
   background: #444; /* medium-dark thumb */
   border-radius: 4px;
 }
 
-.dark-scrollable::-webkit-scrollbar-thumb:hover {
+*::-webkit-scrollbar-thumb:hover {
   background: #555; /* slightly lighter on hover */
 }
+
 
 /* Chrome, Safari, Edge, Opera */
 input[type="number"]::-webkit-outer-spin-button,

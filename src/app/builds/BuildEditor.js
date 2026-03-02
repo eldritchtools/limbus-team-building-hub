@@ -23,6 +23,7 @@ import { isTouchDevice } from "@eldritchtools/shared-components";
 import { buildsStore } from "../database/localDB";
 import SinDistribution from "../components/SinDistribution";
 import { constructTeamCode, parseTeamCode } from "../components/TeamCodeEncoding";
+import AllIdEgoSelector from "./AllIdEgoSelector";
 
 const egoRankMapping = {
     "ZAYIN": 0,
@@ -180,126 +181,6 @@ function isLocalId(id) {
     return !uuidRegex.test(id);
 }
 
-const keywordMapping = {
-    "Burn": "Combustion",
-    "Bleed": "Laceration",
-    "Tremor": "Vibration",
-    "Rupture": "Burst",
-    "Sinking": "Sinking",
-    "Poise": "Breath",
-    "Charge": "Charge"
-};
-
-function AllIdEgoSelector({ identityIds, egoIds, setIdentityId, setEgoId, identityOptions, egoOptions }) {
-    const [mode, setMode] = useState("id");
-    const [searchString, setSearchString] = useState("");
-    const [filters, setFilters] = useState([]);
-    const modeStyle = { fontSize: "1rem", fontWeight: "bold", cursor: "pointer", transition: "all 0.2s" };
-
-    const handleToggle = (filter, selected, excluded) => {
-        if (selected)
-            setFilters(p => p.map(x => x === filter ? `-${x}` : x));
-        else if (excluded)
-            setFilters(p => p.filter(x => `-${filter}` !== x));
-        else
-            setFilters(p => [...p, filter]);
-    }
-
-    const clearAll = () => {
-        setFilters([]);
-    }
-
-    const toggleComponent = (filter) => {
-        const selected = filters.includes(filter);
-        const excluded = !selected && filters.includes(`-${filter}`);
-
-        return <div key={filter} style={{
-            backgroundColor: selected ? "#3f3f3f" : (excluded ? "rgba(239,68,68, 0.8)" : "#1f1f1f"), height: "32px", display: "flex",
-            alignItems: "center", justifyContent: "center", padding: "0.1rem 0.2rem", cursor: "pointer",
-            borderBottom: selected ? "2px #4caf50 solid" : (excluded ? "2px #dc2626 solid" : "transparent"),
-            transition: "all 0.2s"
-        }}
-            onClick={() => handleToggle(filter, selected, excluded)}
-        >
-            {Number.isInteger(filter) ? <SinnerIcon num={filter} style={{ height: "32px" }} /> : <Icon path={filter} style={{ height: "32px" }} />}
-        </div>
-    }
-
-    const checkFilter = (obj, filter) => {
-        if (Number.isInteger(filter)) return obj.sinnerId === filter;
-        if ("skillKeywordList" in obj) return obj.skillKeywordList.includes(filter);
-        if ("statuses" in obj) return obj.statuses.includes(keywordMapping[filter]);
-        return false;
-    }
-
-    const list = useMemo(() => {
-        let result = [];
-
-        const [f, fe] = filters.reduce(([f, fe], filter) => {
-            const exc = filter[0] === "-";
-            let realFilter = exc ? filter.slice(1) : filter;
-            if (Number.isInteger(Number(realFilter)) && Number(realFilter) > 0) realFilter = Number(realFilter);
-
-            if (exc) fe.push(realFilter);
-            else f.push(realFilter);
-            return [f, fe];
-        }, [[], []]);
-
-        if (mode === "id") {
-            Object.entries(identityOptions).forEach(([id, data]) => {
-                if (identityIds.includes(id)) return;
-                if (searchString.length > 0 && !data.name.toLowerCase().includes(searchString.toLowerCase())) return;
-                if (f.length > 0 && !f.some(x => checkFilter(data, x))) return;
-                if (fe.length > 0 && fe.some(x => checkFilter(data, x))) return;
-                result.push(
-                    <div key={id} className="identity-select-item" onClick={() => setIdentityId(id, data.sinnerId - 1)}>
-                        <div className="identity-item-inner" data-tooltip-id="identity-tooltip" data-tooltip-content={id}>
-                            <IdentityImg identity={data} uptie={4} displayName={true} displayRarity={true} />
-                        </div>
-                    </div>
-                );
-            })
-        } else {
-            Object.entries(egoOptions).forEach(([id, data]) => {
-                if (egoIds.some(list => list.includes(id))) return;
-                if (searchString.length > 0 && !data.name.toLowerCase().includes(searchString.toLowerCase())) return;
-                if (f.length > 0 && !f.some(x => checkFilter(data, x))) return;
-                if (fe.length > 0 && fe.some(x => checkFilter(data, x))) return;
-                result.push(
-                    <div key={id} className="ego-select-item" onClick={() => setEgoId(id, data.sinnerId - 1, egoRankMapping[data.rank])}>
-                        <div className="ego-item-inner" data-tooltip-id="ego-tooltip" data-tooltip-content={id}>
-                            <EgoImg ego={data} type={"awaken"} displayName={true} displayRarity={true} />
-                        </div>
-                    </div>
-                );
-            })
-        }
-
-        return result;
-    }, [mode, identityIds, egoIds, setIdentityId, setEgoId, identityOptions, egoOptions, searchString, filters]);
-
-    return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "98%", border: "1px #aaa solid", borderRadius: "1rem", padding: "0.5rem" }}>
-        <div style={{ display: "flex", gap: "1rem", alignItems: "center", paddingLeft: "1rem" }}>
-            <div style={{ ...modeStyle, color: mode === "id" ? "#ddd" : "#777" }} onClick={() => setMode("id")}>Identities</div>
-            <div style={{ ...modeStyle, color: mode === "ego" ? "#ddd" : "#777" }} onClick={() => setMode("ego")}>E.G.Os</div>
-        </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.1rem", alignItems: "center" }}>
-            <input type="text" placeholder="Search..." value={searchString} onChange={(e) => setSearchString(e.target.value)} />
-            {Array.from({ length: 12 }, (_, i) => i + 1).map(x => toggleComponent(x))}
-            {["Burn", "Bleed", "Tremor", "Rupture", "Sinking", "Poise", "Charge"].map(x => toggleComponent(x))}
-
-            {<div style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }} onClick={clearAll}>
-                Clear All
-            </div>}
-        </div>
-        <div style={{maxHeight: "400px", overflowY: "auto", justifyContent: "center"}}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))" }}>
-                {list}
-            </div>
-        </div>
-    </div>
-}
-
 export default function BuildEditor({ mode, buildId }) {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
@@ -325,7 +206,7 @@ export default function BuildEditor({ mode, buildId }) {
     const { user } = useAuth();
     const router = useRouter();
 
-    const [identities, identitiesLoading] = useData("identities_mini");
+    const [identities, identitiesLoading] = useData("identities");
     const [egos, egosLoading] = useData("egos");
 
     useEffect(() => {

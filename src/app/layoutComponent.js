@@ -15,9 +15,10 @@ import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
 import { CalcTooltip } from "./components/CalcTooltip";
 
-TimeAgo.addDefaultLocale(en)
+TimeAgo.addDefaultLocale(en);
 
 const paths = [
+    { path: "/", title: "Home" },
     { path: "/builds", title: "Explore Team Builds" },
     {
         path: "/my-profile", title: "My Profile", subpaths: [

@@ -331,19 +331,22 @@ function MainFilterSelector({ selectedMainFilters, setSelectedMainFilters }) {
         setSelectedMainFilters([]);
     }
 
-    const toggleComponent = (filter) => {
+    const toggleComponent = (category, filter) => {
         const selected = selectedMainFilters.includes(filter);
         const excluded = !selected && selectedMainFilters.includes(`-${filter}`);
 
         return <div key={filter} style={{
-            backgroundColor: selected ? "#3f3f3f" : (excluded ? "rgba(239,68,68, 0.8)" : "#1f1f1f"), height: "32px", display: "flex",
+            backgroundColor: selected ? "#3f3f3f" : (excluded ? "rgba(239,68,68, 0.8)" : "#1f1f1f"), display: "flex",
             alignItems: "center", justifyContent: "center", padding: "0.1rem 0.2rem", cursor: "pointer",
             borderBottom: selected ? "2px #4caf50 solid" : (excluded ? "2px #dc2626 solid" : "transparent"),
             transition: "all 0.2s"
         }}
             onClick={() => handleToggle(filter, selected, excluded)}
         >
-            {Number.isInteger(filter) ? <SinnerIcon num={filter} style={{ height: "32px" }} /> : <Icon path={filter} style={{ height: "32px" }} />}
+            {category === "sinner" ?
+                <SinnerIcon num={filter} style={{ height: "32px" }} /> :
+                <Icon path={filter} style={{ height: (category === "tier" && filter[0] !== "0") ? "24px" : "32px" }} />
+            }
         </div>
     }
 
@@ -353,19 +356,19 @@ function MainFilterSelector({ selectedMainFilters, setSelectedMainFilters }) {
                 if (category === "tier") {
                     return <div key={category} style={{ display: "flex", flexDirection: "column", borderBottom: "1px #777 dotted" }}>
                         <div style={{ display: "flex", justifyContent: "center", padding: "0.2rem" }}>
-                            {list.slice(0, 3).map(filter => toggleComponent(filter))}
+                            {list.slice(0, 3).map(filter => toggleComponent(category, filter))}
                         </div>
                         <div style={{ display: "flex", justifyContent: "center", padding: "0.2rem" }}>
-                            {list.slice(3, 5).map(filter => toggleComponent(filter))}
+                            {list.slice(3, 5).map(filter => toggleComponent(category, filter))}
                         </div>
                     </div>
                 } else if (category === "sinner") {
                     return <div key={category} style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", padding: "0.2rem", borderBottom: "1px #777 dotted" }}>
-                        {list.map(filter => toggleComponent(filter))}
+                        {list.map(filter => toggleComponent(category, filter))}
                     </div>
                 } else {
                     return <div key={category} style={{ display: "flex", justifyContent: "center", padding: "0.2rem", borderBottom: "1px #777 dotted" }}>
-                        {list.map(filter => toggleComponent(filter))}
+                        {list.map(filter => toggleComponent(category, filter))}
                     </div>
                 }
             })

@@ -4,17 +4,24 @@ import { getFilteredBuilds, getPopularBuilds } from "../database/builds";
 import SearchComponent from "./SearchComponent";
 import { tabStyle } from "../styles";
 import BuildsGrid from "../components/BuildsGrid";
+import { useSearchParams } from "next/navigation";
 
 export default function BuildsPage() {
     const [builds, setBuilds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState(null);
     const [refreshCounter, setRefreshCounter] = useState(0);
+    const searchParams = useSearchParams();
 
     useEffect(() => {
-        const saved = localStorage.getItem("buildsActiveTab");
-        setActiveTab(saved ?? "popular");
-    }, []);
+        const mode = searchParams.get('mode');
+        if(["popular", "recent", "random"].includes(mode)) {
+            setActiveTab(mode);
+        } else {
+            const saved = localStorage.getItem("buildsActiveTab");
+            setActiveTab(saved ?? "popular");
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         if (!activeTab) return;

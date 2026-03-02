@@ -4,7 +4,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import * as Select from "@radix-ui/react-select";
 import { getBuild, insertBuild, updateBuild } from "../database/builds";
 import "./buildSelector.css";
-import { affinityColorMapping, EgoImg, IdentityImg, KeywordIcon, RarityImg, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
+import { affinityColorMapping, EgoImg, Icon, IdentityImg, KeywordIcon, RarityImg, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
 import { keywordIdMapping, keywordToIdMapping } from "../keywordIds";
 import TagSelector, { tagToTagSelectorOption } from "../components/TagSelector";
 import { useAuth } from "../database/authProvider";
@@ -23,6 +23,7 @@ import { isTouchDevice } from "@eldritchtools/shared-components";
 import { buildsStore } from "../database/localDB";
 import SinDistribution from "../components/SinDistribution";
 import { constructTeamCode, parseTeamCode } from "../components/TeamCodeEncoding";
+import AllIdEgoSelector from "./AllIdEgoSelector";
 
 const egoRankMapping = {
     "ZAYIN": 0,
@@ -192,6 +193,7 @@ export default function BuildEditor({ mode, buildId }) {
     const [youtubeVideo, setYoutubeVideo] = useState('');
     const [tags, setTags] = useState([]);
     const [uptieLevelToggle, setUptieLevelToggle] = useState(false);
+    const [allIdEgoToggle, setAllIdEgoToggle] = useState(false);
     const [identityUpties, setIdentityUpties] = useState(Array.from({ length: 12 }, () => ""));
     const [identityLevels, setIdentityLevels] = useState(Array.from({ length: 12 }, () => ""));
     const [egoThreadspins, setEgoThreadspins] = useState(Array.from({ length: 12 }, () => Array.from({ length: 5 }, () => "")));
@@ -204,8 +206,8 @@ export default function BuildEditor({ mode, buildId }) {
     const { user } = useAuth();
     const router = useRouter();
 
-    const [identities, identitiesLoading] = useData("identities_mini");
-    const [egos, egosLoading] = useData("egos_mini");
+    const [identities, identitiesLoading] = useData("identities");
+    const [egos, egosLoading] = useData("egos");
 
     useEffect(() => {
         if (mode === "edit") {
@@ -367,38 +369,51 @@ export default function BuildEditor({ mode, buildId }) {
         {identitiesLoading || egosLoading ? null :
             (
                 displayType === "edit" ?
-                    <div className="sinner-grid" style={{ alignSelf: "center", width: "98%", paddingBottom: "1rem" }}>
-                        {Array.from({ length: 12 }, (_, index) =>
-                            <div key={index} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem" }}>
-                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", boxSizing: "border-box" }}>
-                                    <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
-                                        <IdentitySelector value={identities[identityIds[index]] || null} setValue={v => setIdentityId(v, index)} options={identityOptions[index + 1]} num={index + 1} />
-                                        <DeploymentComponent order={deploymentOrder} setOrder={setDeploymentOrder} activeSinners={activeSinners} sinnerId={index + 1} />
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                        <div className="sinner-grid" style={{ alignSelf: "center", width: "98%", paddingBottom: "1rem" }}>
+                            {Array.from({ length: 12 }, (_, index) =>
+                                <div key={index} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem" }}>
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", boxSizing: "border-box" }}>
+                                        <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
+                                            <IdentitySelector value={identities[identityIds[index]] || null} setValue={v => setIdentityId(v, index)} options={identityOptions[index + 1]} num={index + 1} />
+                                            <DeploymentComponent order={deploymentOrder} setOrder={setDeploymentOrder} activeSinners={activeSinners} sinnerId={index + 1} />
+                                        </div>
+                                        <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
+                                            {Array.from({ length: 5 }, (_, rank) =>
+                                                <EgoSelector key={rank} value={egos[egoIds[index][rank]] || null} setValue={v => setEgoId(v, index, rank)} options={egoOptions[index + 1][rank]} rank={rank} />
+                                            )}
+                                        </div>
                                     </div>
-                                    <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
-                                        {Array.from({ length: 5 }, (_, rank) =>
-                                            <EgoSelector key={rank} value={egos[egoIds[index][rank]] || null} setValue={v => setEgoId(v, index, rank)} options={egoOptions[index + 1][rank]} rank={rank} />
-                                        )}
-                                    </div>
+                                    {uptieLevelToggle ? <>
+                                        <div style={{ display: "flex" }}>
+                                            <NumberInputWithButtons value={identityLevels[index]} setValue={v => setIdentityLevel(v, index)} max={LEVEL_CAP} allowEmpty={true} />
+                                            <UptieSelector value={identityUpties[index]} setValue={v => setIdentityUptie(v, index)} allowEmpty={true} />
+                                        </div>
+                                        <div style={{ display: "flex" }}>
+                                            {Array.from({ length: 5 }, (_, rank) =>
+                                                <UptieSelector
+                                                    key={rank}
+                                                    value={egoThreadspins[index][rank]}
+                                                    setValue={v => setEgoThreadspin(v, index, rank)}
+                                                    allowEmpty={true}
+                                                    emptyIcon={<RarityImg rarity={egoRankReverseMapping[rank]} alt={true} style={{ width: "100%", height: "auto" }} />}
+                                                />)}
+                                        </div>
+                                    </> : null}
                                 </div>
-                                {uptieLevelToggle ? <>
-                                    <div style={{ display: "flex" }}>
-                                        <NumberInputWithButtons value={identityLevels[index]} setValue={v => setIdentityLevel(v, index)} max={LEVEL_CAP} allowEmpty={true} />
-                                        <UptieSelector value={identityUpties[index]} setValue={v => setIdentityUptie(v, index)} allowEmpty={true} />
-                                    </div>
-                                    <div style={{ display: "flex" }}>
-                                        {Array.from({ length: 5 }, (_, rank) =>
-                                            <UptieSelector
-                                                key={rank}
-                                                value={egoThreadspins[index][rank]}
-                                                setValue={v => setEgoThreadspin(v, index, rank)}
-                                                allowEmpty={true}
-                                                emptyIcon={<RarityImg rarity={egoRankReverseMapping[rank]} alt={true} style={{ width: "100%", height: "auto" }} />}
-                                            />)}
-                                    </div>
-                                </> : null}
-                            </div>
-                        )}
+                            )}
+                        </div>
+                        {
+                            allIdEgoToggle ?
+                                <AllIdEgoSelector
+                                    identityIds={identityIds}
+                                    egoIds={egoIds}
+                                    setIdentityId={setIdentityId}
+                                    setEgoId={setEgoId}
+                                    identityOptions={identities}
+                                    egoOptions={egos}
+                                /> : null
+                        }
                     </div> :
                     <SinnerGrid
                         identityIds={identityIds}
@@ -413,13 +428,20 @@ export default function BuildEditor({ mode, buildId }) {
 
             )}
         <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", border: "1px #aaa solid", borderRadius: "1rem", padding: "0.5rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", border: "1px #aaa solid", gap: "0.5rem", borderRadius: "1rem", padding: "0.5rem" }}>
                 <button
                     className={uptieLevelToggle ? "toggle-button-active" : "toggle-button"}
                     onClick={() => setUptieLevelToggle(p => !p)}
                     {...generalTooltipProps("optionaluptieorlevel")}
                 >
                     Toggle Uptie and Level Inputs
+                </button>
+                <button
+                    className={allIdEgoToggle ? "toggle-button-active" : "toggle-button"}
+                    onClick={() => setAllIdEgoToggle(p => !p)}
+                    {...generalTooltipProps("allIdEgoMenu")}
+                >
+                    Toggle All Ids & E.G.Os Menu
                 </button>
             </div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", border: "1px #aaa solid", borderRadius: "1rem", padding: "0.5rem" }}>
@@ -483,8 +505,8 @@ export default function BuildEditor({ mode, buildId }) {
             null}
         <span style={{ fontSize: "1.2rem" }}>Tags</span>
         <TagSelector selected={tags} onChange={setTags} creatable={true} />
-        {user && !isPublished ? 
-            <div style={{color: "#aaa"}}>
+        {user && !isPublished ?
+            <div style={{ color: "#aaa" }}>
                 {"Drafts can still be shared through the link, but aren't searchable and don't allow comments."}
             </div> :
             null

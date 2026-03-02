@@ -142,5 +142,16 @@ async function getBuildsCountForSitemap() {
     return count;
 }
 
+async function getHomepageBuilds() {
+    const { data, error } = await getSupabase()
+        .rpc('get_homepage_builds_v1', {
+            popular_limit: 5,
+            newest_limit: 5,
+            showcase_limit: 5
+        });
 
-export { getPopularBuilds, getFilteredBuilds, getBuild, insertBuild, updateBuild, deleteBuild, pinComment, unpinComment, getBuildsForSitemap, getBuildsCountForSitemap };
+    if (error) throw (error);
+    return { popular: data.popular, newest: data.newest, showcase: data.showcase };
+}
+
+export { getPopularBuilds, getFilteredBuilds, getBuild, insertBuild, updateBuild, deleteBuild, pinComment, unpinComment, getBuildsForSitemap, getBuildsCountForSitemap, getHomepageBuilds };

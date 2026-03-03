@@ -31,6 +31,14 @@ const egosMainFilters = {
     "skillType": ["Slash", "Pierce", "Blunt"]
 }
 
+const egoRankMapping = {
+    "ZAYIN": 0,
+    "TETH": 1,
+    "HE": 2,
+    "WAW": 3,
+    "ALEPH": 4
+}
+
 const mainFiltersMapping = {};
 Object.entries(idsMainFilters).forEach(([type, list]) => list.forEach(filter => { mainFiltersMapping[filter] = type; }));
 Object.entries(egosMainFilters).forEach(([type, list]) => list.forEach(filter => { mainFiltersMapping[filter] = type; }));

@@ -206,6 +206,7 @@ export default function BuildEditor({ mode, buildId }) {
     const { user } = useAuth();
     const router = useRouter();
 
+    const [identitiesMini, identitiesMiniLoading] = useData("identities_mini");
     const [identities, identitiesLoading] = useData("identities");
     const [egos, egosLoading] = useData("egos");
 
@@ -266,9 +267,9 @@ export default function BuildEditor({ mode, buildId }) {
     const setIdentityUptie = (uptie, index) => setIdentityUpties(prev => prev.map((x, i) => i === index ? uptie : x));
     const setEgoThreadspin = (uptie, index, rank) => setEgoThreadspins(prev => prev.map((x, i) => i === index ? x.map((y, r) => r === rank ? uptie : y) : x));
 
-    const keywordOptions = useMemo(() => identitiesLoading ? {} : identityIds.reduce((acc, id) => {
+    const keywordOptions = useMemo(() => identitiesMiniLoading ? {} : identityIds.reduce((acc, id) => {
         if (id) {
-            [...identities[id].types, ...identities[id].affinities, ...(identities[id].skillKeywordList ?? [])].forEach(x => {
+            [...identitiesMini[id].types, ...identitiesMini[id].affinities, ...(identitiesMini[id].skillKeywordList ?? [])].forEach(x => {
                 if (x in acc)
                     acc[x] += 1;
                 else
@@ -276,7 +277,7 @@ export default function BuildEditor({ mode, buildId }) {
             })
         }
         return acc;
-    }, {}), [identityIds, identities, identitiesLoading]);
+    }, {}), [identityIds, identitiesMini, identitiesMiniLoading]);
 
     const handleSave = async (isPublished) => {
         if (title === "") {

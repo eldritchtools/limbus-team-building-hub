@@ -40,7 +40,7 @@ export default function ProfilePage({ params }) {
 
     useEffect(() => {
         setBuildsLoading(true);
-        getFilteredBuilds({ "username_exact": parsedUsername }, true, "recency", false, page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
+        getFilteredBuilds({ "username_exact": parsedUsername, "ignore_block_discovery": true }, true, "recency", false, page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
     }, [parsedUsername, page]);
 
     if (checkingUser) {

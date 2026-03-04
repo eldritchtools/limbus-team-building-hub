@@ -9,7 +9,8 @@ import {
   BookmarkIcon as BookmarkIconSolid,
   ShareIcon as ShareIconSolid,
   PencilIcon as PencilIconSolid,
-  TrashIcon as TrashIconSolid
+  TrashIcon as TrashIconSolid,
+  EyeIcon as EyeIconSolid
 } from '@heroicons/react/24/solid'
 
 
@@ -56,4 +57,8 @@ export function EditSolid({ size = 20, text }) {
 
 export function DeleteSolid({ size = 20, text }) {
     return constructSymbol(TrashIconSolid, size, text);
+}
+
+export function ViewSolid({ size = 20, text }) {
+    return constructSymbol(EyeIconSolid, size, text);
 }

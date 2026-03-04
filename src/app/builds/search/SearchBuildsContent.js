@@ -20,7 +20,7 @@ export default function SearchBuildsContent() {
 
     const sortBy = useMemo(() => searchParams.get("sortBy") || "score", [searchParams]);
     const strictFiltering = useMemo(() => searchParams.get("strictFiltering") === "true" || false, [searchParams])
-    const options = useMemo(() => { return { ...filters, sortBy: sortBy, strictFiltering: strictFiltering } }, [filters, sortBy, strictFiltering]);
+    const options = useMemo(() => { return { ...filters, sortBy: sortBy, strictFiltering: strictFiltering, "ignore_block_discovery": true } }, [filters, sortBy, strictFiltering]);
 
     const [builds, setBuilds] = useState([]);
     const [page, setPage] = useState(1);

@@ -93,9 +93,9 @@ export default function UsernameSetup() {
             setSyncing(true);
             setError("");
             for (const build of localBuilds) {
-                const { id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, extra_opts } = build;
+                const { id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, extra_opts, block_discovery } = build;
                 try {
-                    const data = await insertBuild(user.id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, extra_opts, false);
+                    const data = await insertBuild(user.id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, extra_opts, block_discovery, false);
                     if (data) await buildsStore.remove(id);
                 } catch (err) {
                     setError("Failed to sync a build, try again or cancel syncing.");

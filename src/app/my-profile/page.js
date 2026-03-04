@@ -88,7 +88,7 @@ export default function ProfilePage() {
             case "published":
                 if (user) {
                     setBuildsLoading(true);
-                    getFilteredBuilds({ "user_id": user.id }, true, "recency", false, page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
+                    getFilteredBuilds({ "user_id": user.id, "ignore_block_discovery": true }, true, "recency", false, page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
                 } else {
                     setBuilds([]);
                 }
@@ -96,7 +96,7 @@ export default function ProfilePage() {
             case "drafts":
                 if (user) {
                     setBuildsLoading(true);
-                    getFilteredBuilds({ "user_id": user.id }, false, "recency", false, page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
+                    getFilteredBuilds({ "user_id": user.id, "ignore_block_discovery": true }, false, "recency", false, page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
                 } else {
                     const fetchBuilds = async () => {
                         const builds = await buildsStore.getAll();

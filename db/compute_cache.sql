@@ -14,7 +14,7 @@ BEGIN
     'recent' AS ranking_type,
     NOW() AS computed_at
   FROM public.builds b
-  WHERE b.is_published
+  WHERE b.is_published AND b.block_discovery = false
   ORDER BY b.score DESC
   LIMIT 100;
 END;

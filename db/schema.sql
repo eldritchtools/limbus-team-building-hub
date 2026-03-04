@@ -39,7 +39,9 @@ CREATE TABLE public.builds (
   like_count INTEGER DEFAULT 0,
   comment_count INTEGER DEFAULT 0,
   score NUMERIC DEFAULT 0,
-  is_published BOOLEAN DEFAULT TRUE
+  is_published BOOLEAN DEFAULT TRUE,
+  view_count INTEGER NOT NULL DEFAULT 0,
+  block_discovery BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 ALTER TABLE public.builds

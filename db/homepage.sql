@@ -28,6 +28,7 @@ BEGIN
   FROM public.builds b
   WHERE b.is_published = TRUE
     AND b.like_count >= 1
+    AND b.block_discovery = FALSE
     AND b.id NOT IN (
       SELECT build_id
       FROM public.homepage_showcase
@@ -50,7 +51,7 @@ SELECT cron.schedule(
   $$SELECT public.add_homepage_showcase_build();$$
 );
 
-CREATE OR REPLACE FUNCTION public.get_homepage_builds_v1(
+CREATE OR REPLACE FUNCTION public.get_homepage_builds_v2(
   popular_limit INTEGER DEFAULT 3,
   newest_limit INTEGER DEFAULT 3,
   showcase_limit INTEGER DEFAULT 3
@@ -75,7 +76,7 @@ BEGIN
       SELECT json_agg(n)
       FROM (
         SELECT *
-        FROM public.get_filtered_builds_v6(
+        FROM public.get_filtered_builds_v7(
           sort_by := 'recency',
           limit_count := newest_limit,
           offset_count := 0
@@ -90,7 +91,7 @@ BEGIN
         FROM public.homepage_showcase hs
         LIMIT showcase_limit
       ) ids(show_ids),
-      LATERAL public.get_filtered_builds_v6(
+      LATERAL public.get_filtered_builds_v7(
         build_id_filter := ids.show_ids,
         limit_count := showcase_limit
       ) s

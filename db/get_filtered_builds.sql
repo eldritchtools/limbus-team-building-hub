@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_filtered_builds_v6(
+CREATE OR REPLACE FUNCTION public.get_filtered_builds_v7(
   title_filter TEXT DEFAULT NULL,
   username_filter TEXT DEFAULT NULL,
   username_exact_filter TEXT DEFAULT NULL,
@@ -15,7 +15,8 @@ CREATE OR REPLACE FUNCTION public.get_filtered_builds_v6(
   sort_by TEXT DEFAULT 'score',
   limit_count INTEGER DEFAULT 20,
   offset_count INTEGER DEFAULT 0,
-  strict_filter BOOLEAN DEFAULT FALSE
+  strict_filter BOOLEAN DEFAULT FALSE,
+  ignore_block_discovery BOOLEAN DEFAULT FALSE
 )
 RETURNS TABLE (
   id UUID,
@@ -65,6 +66,10 @@ BEGIN
     AND (user_id_filter IS NULL OR b.user_id = user_id_filter)
     AND (build_id_filter IS NULL OR b.id = ANY(build_id_filter))
     AND b.is_published = p_published
+    AND (
+        ignore_block_discovery = TRUE
+        OR b.block_discovery = FALSE
+    )
     AND (
       tag_filter IS NULL
       OR (

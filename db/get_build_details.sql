@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_build_details_v3(
+CREATE OR REPLACE FUNCTION public.get_build_details_v4(
   p_build_id UUID,
   p_for_edit BOOLEAN DEFAULT FALSE
 )
@@ -6,17 +6,30 @@ RETURNS JSONB AS $$
 DECLARE
   build_data JSONB;
   owner_id UUID;
+  v_user_id uuid := auth.uid();
 BEGIN
-  IF p_for_edit THEN
-    SELECT user_id INTO owner_id FROM public.builds WHERE id = p_build_id;
-    IF owner_id IS NULL THEN
-      RAISE EXCEPTION 'Build not found';
-    END IF;
+  select user_id into owner_id
+  from public.builds
+  where id = p_build_id;
+  
+  if owner_id is null then
+    raise exception 'Build not found';
+  end if;
+  
+  if p_for_edit and owner_id != v_user_id then
+    raise exception 'Unauthorized to edit this build';
+  end if;
 
-    IF owner_id != auth.uid() THEN
-      RAISE EXCEPTION 'Unauthorized to edit this build';
-    END IF;
-  END IF;
+  if not p_for_edit then
+    update public.builds
+    set view_count = view_count + 1
+    where id = p_build_id
+      and is_published = true
+      and (
+        v_user_id is null
+        or owner_id <> v_user_id
+      );
+  end if;
 
   IF p_for_edit THEN
     SELECT jsonb_build_object(
@@ -34,7 +47,8 @@ BEGIN
       'keyword_ids', b.keyword_ids,
       'tags', COALESCE(jsonb_agg(DISTINCT t.name) FILTER (WHERE t.id IS NOT NULL), '[]'::JSONB),
       'extra_opts', b.extra_opts,
-      'is_published', b.is_published
+      'is_published', b.is_published,
+      'block_discovery', b.block_discovery
     )
     INTO build_data
     FROM public.builds b
@@ -71,6 +85,11 @@ BEGIN
       'published_at', b.published_at,
       'updated_at', b.updated_at,
       'is_published', b.is_published,
+      'view_count',
+        case
+          when owner_id = v_user_id then b.view_count
+          else null
+        end,
       'pinned_comment', CASE
         WHEN pc.id IS NULL THEN NULL
         ELSE jsonb_build_object(

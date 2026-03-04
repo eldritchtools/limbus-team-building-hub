@@ -72,7 +72,9 @@ export default function BuildsPage() {
             </div> :
             <div style={{ display: "flex", flexDirection: "column" }}>
                 {activeTab === "popular" ?
-                    <p style={{ color: "#aaa", fontSize: "1rem", textAlign: "center", alignSelf: "center", marginBottom: "0.5rem" }}>Most popular builds are recomputed every few hours.</p> :
+                    <p style={{ color: "#aaa", fontSize: "1rem", textAlign: "center", alignSelf: "center", marginTop: 0, marginBottom: "0.5rem" }}>
+                        Most popular builds are recomputed every few hours.
+                    </p> :
                     null}
                 <BuildsGrid builds={builds} />
             </div>}

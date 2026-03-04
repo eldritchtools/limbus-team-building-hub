@@ -24,7 +24,7 @@ import { generalTooltipProps } from "@/app/components/GeneralTooltip";
 import { useBreakpoint } from "@eldritchtools/shared-components";
 import DisplayTypeButton from "../DisplayTypeButton";
 import { buildsStore } from "@/app/database/localDB";
-import { DeleteSolid, EditSolid, ShareSolid } from "@/app/components/Symbols";
+import { DeleteSolid, EditSolid, ShareSolid, ViewSolid } from "@/app/components/Symbols";
 import SinDistribution from "@/app/components/SinDistribution";
 import SocialsDisplay from "@/app/components/SocialsDisplay";
 import { constructTeamCode } from "@/app/components/TeamCodeEncoding";
@@ -217,7 +217,7 @@ export default function BuildPage({ params }) {
                     <span style={{ fontSize: "1.2rem", borderBottom: "1px #ddd dotted" }} {...generalTooltipProps("teamcode")}>Team Code</span>
                 </div>
                 <div style={{ position: "relative", width: "100%" }}>
-                    <textarea value={teamCode} ref={teamCodeRef} readOnly={true} style={{ width: "100%", height: "3rem", cursor: "pointer" }} onClick={handleTeamCodeCopy} />
+                    <textarea value={teamCode} ref={teamCodeRef} readOnly={true} style={{ width: "min(100%, 85vw)", height: "3rem", cursor: "pointer" }} onClick={handleTeamCodeCopy} />
                     {copySuccess !== '' ?
                         <div className="copy-popup">
                             <div className="copy-popup-box">
@@ -252,7 +252,16 @@ export default function BuildPage({ params }) {
                             </button> : null
                     }
                 </div>
-                {build.user_socials.length > 0 ?
+                <div style={{ display: "flex", alignItems: "center" }}>
+                    {
+                        user && user.id === build.user_id ?
+                            <div>
+                                <ViewSolid text={`${build.view_count ?? "-"} views`} />
+                            </div>
+                            : null
+                    }
+                </div>
+                {build.user_socials?.length > 0 ?
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "start", gap: "0.25rem" }}>
                         <span>Connect with {build.username}:</span>
                         <SocialsDisplay socials={build.user_socials} expandDirection="column" align="start" />

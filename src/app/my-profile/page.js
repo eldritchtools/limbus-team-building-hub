@@ -10,7 +10,7 @@ import BuildsGrid from "../components/BuildsGrid";
 import { useSearchParams } from "next/navigation";
 import { updateUser } from "../database/users";
 import MarkdownEditorWrapper from "../components/Markdown/MarkdownEditorWrapper";
-import { buildsStore, savesStore } from "../database/localDB";
+import { buildsStore, listsStore, savesStore } from "../database/localDB";
 import DropdownButton from "../components/DropdownButton";
 import { SocialIcon, socialsData } from "../lib/userSocials";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
@@ -149,7 +149,7 @@ export default function ProfilePage() {
                     } else {
                         const fetchLists = async () => {
                             const lists = await listsStore.getAll();
-                            setLists(lists);
+                            setLists(lists.map(x => ({...x, items: x.items.map(build => build.build)})));
                         }
                         fetchLists();
                     }

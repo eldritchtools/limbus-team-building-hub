@@ -14,6 +14,11 @@ import BuildEntry from "../components/BuildEntry";
 import { tabStyle } from "../styles";
 import { getFilteredBuilds } from "../database/builds";
 
+function isLocalId(id) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return !uuidRegex.test(id);
+}
+
 function BuildItem({ build, note, index, isFirst, isLast, swapBuilds, removeBuild, setBuildNote }) {
     return <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center", width: "100%" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "2rem", paddingRight: "1rem" }}>
@@ -173,13 +178,14 @@ export default function CuratedListEditor({ mode, listId }) {
     useEffect(() => {
         if (mode === "edit") {
             const handleList = list => {
+                console.log(list);
                 if (!list) router.back();
                 if (list.username || isLocalId(listId)) {
                     setTitle(list.title);
                     setBody(list.body);
                     setShortDesc(list.short_desc);
                     setBuilds(list.items);
-                    setTags(list.tags.map(t => tagToTagSelectorOption(t.name)));
+                    setTags(list.tags.map(t => tagToTagSelectorOption(t?.name ?? t)));
                     setIsPublished(list.is_published);
                     setBlockDiscovery(list.block_discovery ?? false);
                     setLoading(false);
@@ -214,7 +220,7 @@ export default function CuratedListEditor({ mode, listId }) {
 
         setSaving(true);
         if (user) {
-            const trimmedBuilds = builds.map(({ build, note }) => ({ build_id: build.id, note: note }))
+            const trimmedBuilds = builds.map(({ build, note }) => ({ build_id: build.id, note: note }));
             if (mode === "edit") {
                 const data = await updateCuratedList(listId, title, body, shortDesc, trimmedBuilds, tagsConverted, blockDiscovery, isPublished);
                 router.push(`/curated-lists/${data}`);

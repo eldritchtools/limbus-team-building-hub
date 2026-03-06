@@ -30,7 +30,7 @@ function BuildList({ builds, viewMode, isMobile }) {
                 <div key={build.build.id} style={{ display: "flex", flexDirection: "column", gap: "0", alignItems: "center", width: "100%" }}>
                     <BuildEntry build={build.build} size={"M"} />
                     {build.note.length > 0 ?
-                        <div style={{ width: "100%", alignSelf: "start", marginTop: isMobile ? "0.5rem" : "1rem" }}>
+                        <div style={{ alignSelf: "center", marginTop: isMobile ? "0.5rem" : "1rem" }}>
                             <MarkdownRenderer content={build.note} />
                         </div> :
                         null

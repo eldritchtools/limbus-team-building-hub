@@ -28,5 +28,5 @@
     align-items: start;
     padding: 1rem; 
     z-index: 2;
-    /* pointer-events: none; */
+    pointer-events: none;
 }

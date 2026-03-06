@@ -9,6 +9,7 @@
     text-align: left;
     background: #1c1a17;
     transition: all 0.2s ease;
+    pointer-events: all;
     /* margin-top: 14px; */
     /* margin-left: 0px; */
 }

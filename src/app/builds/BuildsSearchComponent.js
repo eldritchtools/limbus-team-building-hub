@@ -7,7 +7,7 @@ import { useState } from "react";
 import { keywordIconConvert, keywordToIdMapping } from "../keywordIds";
 import { EgoSelector, IdentitySelector } from "../components/Selectors";
 import Link from "next/link";
-import "./SearchComponent.css";
+import "./BuildsSearchComponent.css";
 import { generalTooltipProps } from "../components/GeneralTooltip";
 
 function KeywordSelector({ selectedKeywords, setSelectedKeywords }) {
@@ -29,7 +29,7 @@ function KeywordSelector({ selectedKeywords, setSelectedKeywords }) {
         const excluded = !selected && selectedKeywords.includes(`-${filter}`);
 
         return <div key={filter} style={{
-            backgroundColor: selected ? "#3f3f3f" : (excluded ? "rgba(239,68,68, 0.8)" : "#1f1f1f"), height: "32px", display: "flex",
+            backgroundColor: selected ? "#3f3f3f" : (excluded ? "rgba(239,68,68, 0.8)" : "transparent"), height: "32px", display: "flex",
             alignItems: "center", justifyContent: "center", padding: "0.1rem 0.2rem", cursor: "pointer",
             borderBottom: selected ? "2px #4caf50 solid" : (excluded ? "2px #dc2626 solid" : "transparent"),
             transition: "all 0.2s"
@@ -46,7 +46,7 @@ function KeywordSelector({ selectedKeywords, setSelectedKeywords }) {
     </div>
 }
 
-export default function SearchComponent({ options = {} }) {
+export default function BuildsSearchComponent({ options = {}, inPage = false, setFilters }) {
     const [title, setTitle] = useState(options.title || "");
     const [username, setUsername] = useState(options.username || "");
     const [tags, setTags] = useState((options.tags || []).map(t => tagToTagSelectorOption(t)));
@@ -69,8 +69,12 @@ export default function SearchComponent({ options = {} }) {
         if (sortBy !== "score") searchFilters.sortBy = sortBy;
         if (strictFiltering) searchFilters.strictFiltering = true;
 
-        const params = new URLSearchParams(searchFilters);
-        window.location.href = `/builds/search?${params.toString()}`;
+        if (inPage) {
+            setFilters(searchFilters);
+        } else {
+            const params = new URLSearchParams(searchFilters);
+            window.location.href = `/builds/search?${params.toString()}`;
+        }
     };
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -128,7 +132,10 @@ export default function SearchComponent({ options = {} }) {
         </div>
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginTop: "0.2rem" }}>
             <button style={{ fontSize: "1.2rem", cursor: "pointer" }} onClick={applyFilters}>Search Builds</button>
-            or <Link className="text-link" href={"/builds/new"}>create a build</Link>
+            {!inPage ?
+                <span>or <Link className="text-link" href={"/builds/new"}>create a build</Link></span> :
+                null
+            }
         </div>
     </div>
 }

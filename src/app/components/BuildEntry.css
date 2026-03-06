@@ -13,14 +13,14 @@
     /* margin-left: 0px; */
 }
 
-.build-entry:hover:not(:has(.build-buttons-container > *:hover)) {
+.build-entry:hover:not(:has(.build-buttons-container > *:hover, .tag:hover, .username:hover)) {
     background: #3a3a3a;
 }
 
 .build-entry-link {
     position: absolute;
     inset: 0;
-    z-index: 1;
+    z-index: 3;
 }
 
 /* Horizontal version on top */
@@ -61,7 +61,7 @@
     flex-direction: column;
     align-items: start;
     padding: 6px 2px 6px 18px;
-    z-index: 2;
+    z-index: 4;
     pointer-events: none;
 }
 
@@ -78,7 +78,7 @@
     grid-template-columns: repeat(3, 1fr);
     border-top: 2px #7c6a55 dashed;
     background: #1c1a17;
-    z-index: 2;
+    z-index: 4;
     height: 2.25rem;
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;

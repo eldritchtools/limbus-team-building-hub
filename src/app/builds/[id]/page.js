@@ -229,7 +229,7 @@ export default function BuildPage({ params }) {
                 </div>
                 {build.tags.length > 0 ?
                     <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
-                        Tags: {build.tags.map((t, i) => <Tag key={i} tag={isLocalId(id) ? t : t.name} />)}
+                        Tags: {build.tags.map((t, i) => <Tag key={i} tag={isLocalId(id) ? t : t.name} type={"builds"} />)}
                     </div> :
                     null
                 }
@@ -256,7 +256,7 @@ export default function BuildPage({ params }) {
                     {
                         user && user.id === build.user_id ?
                             <div>
-                                <ViewSolid text={`${build.view_count ?? "-"} views`} />
+                                <ViewSolid text={`${build.view_count !== null ? build.view_count.toLocaleString() : "-"} views`} />
                             </div>
                             : null
                     }

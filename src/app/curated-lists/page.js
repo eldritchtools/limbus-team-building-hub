@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getFilteredBuilds, getPopularBuilds } from "../database/builds";
-import BuildsSearchComponent from "./BuildsSearchComponent";
+import ListsSearchComponent from "./ListsSearchComponent";
 import { tabStyle } from "../styles";
-import BuildsGrid from "../components/BuildsGrid";
 import { useSearchParams } from "next/navigation";
+import CuratedList from "../components/CuratedList";
+import { searchCuratedLists } from "../database/curatedLists";
 
-export default function BuildsPage() {
-    const [builds, setBuilds] = useState([]);
+export default function CuratedListsPage() {
+    const [lists, setLists] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState(null);
     const [refreshCounter, setRefreshCounter] = useState(0);
@@ -15,11 +15,11 @@ export default function BuildsPage() {
 
     useEffect(() => {
         const mode = searchParams.get('mode');
-        if(["popular", "recent", "random"].includes(mode)) {
+        if (["recent", "random"].includes(mode)) {
             setActiveTab(mode);
         } else {
-            const saved = localStorage.getItem("buildsActiveTab");
-            setActiveTab(saved ?? "popular");
+            const saved = localStorage.getItem("listsActiveTab");
+            setActiveTab(saved ?? "recent");
         }
     }, [searchParams]);
 
@@ -28,16 +28,14 @@ export default function BuildsPage() {
 
         let canceled = false;
 
-        const fetchBuilds = async () => {
+        const fetchLists = async () => {
             try {
                 setLoading(true);
-                const data = activeTab === "popular" ?
-                    await getPopularBuilds() :
-                    activeTab === "recent" ?
-                        await getFilteredBuilds({}, true, "recency", false, 1, 24) :
-                        await getFilteredBuilds({}, true, "random", false, 1, 24);
+                const data = activeTab === "recent" ?
+                    await searchCuratedLists({}, true, "new", 1, 10) :
+                    await searchCuratedLists({}, true, "random", 1, 10)
                 if (!canceled) {
-                    setBuilds(data || []);
+                    setLists(data || []);
                 }
             } catch (err) {
                 if (!canceled) console.error(err);
@@ -46,37 +44,37 @@ export default function BuildsPage() {
             }
         };
 
-        fetchBuilds();
-        localStorage.setItem("buildsActiveTab", activeTab);
+        fetchLists();
+        localStorage.setItem("listsActiveTab", activeTab);
         return () => {
             canceled = true;
         };
     }, [activeTab, refreshCounter]);
 
     const handleTabClick = (tab) => {
-        if (activeTab === tab) setRefreshCounter(p => p+1);
+        if (activeTab === tab) setRefreshCounter(p => p + 1);
         else setActiveTab(tab);
     }
 
     return <div style={{ display: "flex", flexDirection: "column", textAlign: "center", gap: "0.5rem" }}>
-        <BuildsSearchComponent />
+        <ListsSearchComponent />
         <div style={{ border: "1px #777 solid" }} />
         <div style={{ display: "flex", flexDirection: "row", gap: "1rem", alignSelf: "center", marginTop: "0.5rem", marginBottom: "0.5rem" }}>
-            <div style={{ ...tabStyle, color: activeTab === "popular" ? "#ddd" : "#777" }} onClick={() => handleTabClick("popular")}>Popular</div>
+            {/* <div style={{ ...tabStyle, color: activeTab === "popular" ? "#ddd" : "#777" }} onClick={() => handleTabClick("popular")}>Popular</div> */}
             <div style={{ ...tabStyle, color: activeTab === "recent" ? "#ddd" : "#777" }} onClick={() => handleTabClick("recent")}>New</div>
             <div style={{ ...tabStyle, color: activeTab === "random" ? "#ddd" : "#777" }} onClick={() => handleTabClick("random")}>Random</div>
         </div>
         {loading ?
             <div style={{ color: "#9ca3af" }}>
-                {"Loading builds..."}
+                {"Loading curated lists..."}
             </div> :
-            <div style={{ display: "flex", flexDirection: "column" }}>
-                {activeTab === "popular" ?
-                    <p style={{ color: "#aaa", fontSize: "1rem", textAlign: "center", alignSelf: "center", marginTop: 0, marginBottom: "0.5rem" }}>
-                        Most popular builds are recomputed every few hours.
-                    </p> :
-                    null}
-                <BuildsGrid builds={builds} />
-            </div>}
+            (lists.length === 0 ?
+                <div>
+                    No published curated lists.
+                </div> :
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    {lists.map(list => <CuratedList key={list.id} list={list} />)}
+                </div>
+            )}
     </div>;
 }

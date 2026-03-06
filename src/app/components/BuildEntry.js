@@ -26,7 +26,7 @@ function isLocalId(id) {
     return !uuidRegex.test(id);
 }
 
-export default function BuildEntry({ build, size, complete = true }) {
+export default function BuildEntry({ build, size, complete = true, clickable = true }) {
     const extraProps = {};
     if (build.extra_opts) {
         const extraOpts = decodeBuildExtraOpts(build.extra_opts, ["iu"])
@@ -39,7 +39,7 @@ export default function BuildEntry({ build, size, complete = true }) {
     if (!sizes) return null;
 
     return <div className="build-entry" style={{ width: sizes.width }}>
-        <Link href={`/builds/${build.id}`} className="build-entry-link" />
+        {clickable ? <Link href={`/builds/${build.id}`} className="build-entry-link" /> : null}
 
         {build.keyword_ids.length > 0 ?
             <div className="build-icon-rails">
@@ -64,7 +64,7 @@ export default function BuildEntry({ build, size, complete = true }) {
                 <IdentityImgSpread identityIds={build.identity_ids} scale={sizes.scale} deploymentOrder={build.deployment_order} activeSinners={build.active_sinners} {...extraProps} />
             </div>
             {complete ? <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
-                {build.tags.map((t, i) => t ? <Tag key={i} tag={t} /> : null)}
+                {build.tags.map((t, i) => t ? <Tag key={i} tag={t} type={"builds"} /> : null)}
             </div> : null}
         </div>
         {complete ?

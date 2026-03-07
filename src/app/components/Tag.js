@@ -4,11 +4,11 @@ import { useMemo } from "react";
 import "./tag.css";
 import Link from "next/link";
 
-export default function Tag({ tag }) {
+export default function Tag({ tag, type }) {
     const path = useMemo(() => {
         const search = new URLSearchParams({ tags: [tag] });
-        return `/builds/search?${search.toString()}`;
-    }, [tag]);
+        return `/${type}/search?${search.toString()}`;
+    }, [tag, type]);
 
-    return <Link className="tag" href={path}>{tag}</Link>
+    return <Link className="tag" href={path} prefetch={false}>{tag}</Link>
 }

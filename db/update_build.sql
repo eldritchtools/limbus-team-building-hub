@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION update_build_with_tags_v2(
+CREATE OR REPLACE FUNCTION update_build_with_tags_v3(
   p_build_id UUID,
   p_user_id UUID,
   p_title TEXT,
@@ -12,6 +12,7 @@ CREATE OR REPLACE FUNCTION update_build_with_tags_v2(
   p_youtube_video_id TEXT,
   p_tags TEXT[],
   p_extra_opts TEXT,
+  p_block_discovery BOOLEAN,
   p_published BOOLEAN
 )
 RETURNS VOID
@@ -53,6 +54,7 @@ BEGIN
     youtube_video_id = p_youtube_video_id,
     extra_opts = p_extra_opts,
     is_published = p_published,
+    block_discovery = p_block_discovery,
     published_at = CASE
       WHEN was_published = FALSE AND p_published = TRUE AND published_at IS NULL
       THEN NOW()
@@ -72,12 +74,12 @@ BEGIN
     _tag_ids := array_append(_tag_ids, _tag_id);
   END LOOP;
 
-    DELETE FROM public.build_tags
-    WHERE build_id = p_build_id
-    AND build_tags.tag_id NOT IN (SELECT unnest(_tag_ids));
+  DELETE FROM public.build_tags
+  WHERE build_id = p_build_id
+  AND build_tags.tag_id NOT IN (SELECT unnest(_tag_ids));
 
-    INSERT INTO public.build_tags (build_id, tag_id)
-    SELECT p_build_id, unnest(_tag_ids)
-    ON CONFLICT DO NOTHING;
+  INSERT INTO public.build_tags (build_id, tag_id)
+  SELECT p_build_id, unnest(_tag_ids)
+  ON CONFLICT DO NOTHING;
 END;
 $$;

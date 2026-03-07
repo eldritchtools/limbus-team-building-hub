@@ -1,0 +1,32 @@
+.curated-list {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    transition: all 0.2s ease;
+    /* margin-top: 14px; */
+    /* margin-left: 0px; */
+    width: 100%;
+    border-top: 1px #777 dotted;
+    border-bottom: 1px #777 dotted;
+    border-radius: 1rem;
+}
+
+.curated-list:hover:not(:has(.build-entry:hover, .tag:hover, .username:hover)) {
+    background: #3a3a3a;
+}
+
+.curated-list-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.curated-list-contents {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: start;
+    padding: 1rem; 
+    z-index: 2;
+    pointer-events: none;
+}

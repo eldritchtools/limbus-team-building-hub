@@ -24,7 +24,7 @@ const options = {
 function ComparisonCardBase({ ego, content }) {
     return <div style={{ display: "flex", flexDirection: "column", padding: "0.5rem", width: "320px", maxHeight: "480px", border: "1px #777 solid", borderRadius: "0.25rem", boxSizing: "border-box", alignItems: "center", gap: "0.2rem" }}>
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", height: "128px" }}>
-            <Link href={`/egos/${ego.id}`}>
+            <Link href={`/egos/${ego.id}`} prefetch={false}>
                 <EgoImg ego={ego} type={"awaken"} displayName={true} displayRarity={true} size={128} />
             </Link>
         </div>
@@ -41,7 +41,7 @@ function ComparisonRowBase({ ego, content }) {
             {i === 0 ?
                 <td key={0} rowSpan={content.length} style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid", verticalAlign: "middle" }}>
                     <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", padding: "0.2rem" }}>
-                        <Link href={`/egos/${ego.id}`}>
+                        <Link href={`/egos/${ego.id}`} prefetch={false}>
                             <EgoImg ego={ego} type={"awaken"} displayName={true} displayRarity={true} size={128} />
                         </Link>
                     </div>

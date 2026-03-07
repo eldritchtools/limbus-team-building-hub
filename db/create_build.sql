@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION create_build_with_tags_v2(
+CREATE OR REPLACE FUNCTION create_build_with_tags_v3(
   p_user_id uuid,
   p_title TEXT,
   p_body TEXT,
@@ -11,6 +11,7 @@ CREATE OR REPLACE FUNCTION create_build_with_tags_v2(
   p_youtube_video_id TEXT,
   p_tags TEXT[],
   p_extra_opts TEXT,
+  p_block_discovery BOOLEAN,
   p_published BOOLEAN
 )
 RETURNS uuid
@@ -20,8 +21,8 @@ DECLARE
   tag_name TEXT;
   tag_id INT;
 BEGIN
-  INSERT INTO builds (user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, extra_opts, is_published, published_at)
-  VALUES (p_user_id, p_title, p_body, p_identity_ids, p_ego_ids, p_keyword_ids, p_deployment_order, p_active_sinners, p_team_code, p_youtube_video_id, p_extra_opts, p_published, CASE WHEN p_published THEN NOW() ELSE NULL END)
+  INSERT INTO builds (user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, extra_opts, block_discovery, is_published, published_at)
+  VALUES (p_user_id, p_title, p_body, p_identity_ids, p_ego_ids, p_keyword_ids, p_deployment_order, p_active_sinners, p_team_code, p_youtube_video_id, p_extra_opts, p_block_discovery, p_published, CASE WHEN p_published THEN NOW() ELSE NULL END)
   RETURNING id INTO new_build_id;
 
   FOREACH tag_name IN ARRAY p_tags LOOP

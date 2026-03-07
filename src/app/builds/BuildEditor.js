@@ -4,7 +4,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import * as Select from "@radix-ui/react-select";
 import { getBuild, insertBuild, updateBuild } from "../database/builds";
 import "./buildSelector.css";
-import { affinityColorMapping, EgoImg, Icon, IdentityImg, KeywordIcon, RarityImg, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
+import { affinityColorMapping, EgoImg, IdentityImg, KeywordIcon, RarityImg, SinnerIcon, useData } from "@eldritchtools/limbus-shared-library";
 import { keywordIdMapping, keywordToIdMapping } from "../keywordIds";
 import TagSelector, { tagToTagSelectorOption } from "../components/TagSelector";
 import { useAuth } from "../database/authProvider";
@@ -198,6 +198,8 @@ export default function BuildEditor({ mode, buildId }) {
     const [identityLevels, setIdentityLevels] = useState(Array.from({ length: 12 }, () => ""));
     const [egoThreadspins, setEgoThreadspins] = useState(Array.from({ length: 12 }, () => Array.from({ length: 5 }, () => "")));
     const [isPublished, setIsPublished] = useState(false);
+    const [otherSettings, setOtherSettings] = useState(false);
+    const [blockDiscovery, setBlockDiscovery] = useState(false);
     const [loading, setLoading] = useState(mode === "edit");
     const [message, setMessage] = useState("");
     const [saving, setSaving] = useState(false);
@@ -226,6 +228,7 @@ export default function BuildEditor({ mode, buildId }) {
                     setYoutubeVideo(build.youtube_video_id ?? '');
                     setTags(build.tags.map(t => tagToTagSelectorOption(t)));
                     setIsPublished(build.is_published);
+                    setBlockDiscovery(build.block_discovery ?? false);
                     setLoading(false);
 
                     if (build.extra_opts) {
@@ -304,10 +307,10 @@ export default function BuildEditor({ mode, buildId }) {
         setSaving(true);
         if (user) {
             if (mode === "edit") {
-                const data = await updateBuild(buildId, user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, extraOpts, isPublished);
+                const data = await updateBuild(buildId, user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, extraOpts, blockDiscovery, isPublished);
                 router.push(`/builds/${data}`);
             } else {
-                const data = await insertBuild(user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, extraOpts, isPublished);
+                const data = await insertBuild(user.id, title, body, identityIds, egoIds, keywordsConverted, deploymentOrder, activeSinners, teamCode, youtubeVideoId, tagsConverted, extraOpts, blockDiscovery, isPublished);
                 router.push(`/builds/${data}`);
             }
         } else {
@@ -324,6 +327,7 @@ export default function BuildEditor({ mode, buildId }) {
                 like_count: 0,
                 comment_count: 0,
                 tags: tagsConverted,
+                block_discovery: blockDiscovery,
                 is_published: false,
                 created_at: createdAt ?? Date.now(),
                 updated_at: Date.now(),
@@ -506,6 +510,25 @@ export default function BuildEditor({ mode, buildId }) {
             null}
         <span style={{ fontSize: "1.2rem" }}>Tags</span>
         <TagSelector selected={tags} onChange={setTags} creatable={true} />
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <div>
+                <button className={otherSettings ? "toggle-button-active" : "toggle-button"} onClick={() => setOtherSettings(p => !p)}>
+                    Other Settings
+                </button>
+            </div>
+            {otherSettings ?
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                    <div style={{ fontSize: "0.8rem", color: "#aaa" }}>
+                        Hide from discovery related features (popular, new, random, etc). Can still be found via search or on profiles.
+                    </div>
+                    <label style={{display: "flex", alignItems: "center"}}>
+                        <input type="checkbox" checked={blockDiscovery} onChange={e => setBlockDiscovery(e.target.checked)} />
+                        <div>Block Discovery</div>
+                    </label>
+                </div> :
+                null
+            }
+        </div>
         {user && !isPublished ?
             <div style={{ color: "#aaa" }}>
                 {"Drafts can still be shared through the link, but aren't searchable and don't allow comments."}

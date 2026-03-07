@@ -2,9 +2,34 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getFilteredBuilds } from "../../database/builds";
-import SearchComponent from "../SearchComponent";
+import BuildsSearchComponent from "../BuildsSearchComponent";
 import { keywordToIdMapping } from "../../keywordIds";
 import BuildsGrid from "../../components/BuildsGrid";
+
+export function prepareBuildFilters(filters) {
+    return Object.entries(filters).reduce((acc, [f, v]) => {
+        if (f === "title" || f === "username" || f === "tags") acc[f] = v;
+        else if (f === "identities" || f === "egos") {
+            const [include, exclude] = v.reduce(([i, e], x) => {
+                if (x[0] === "-") e.push(parseInt(x.slice(1)));
+                else i.push(parseInt(x));
+                return [i, e];
+            }, [[], []]);
+            if (include.length > 0) acc[f] = include;
+            if (exclude.length > 0) acc[`${f}_exclude`] = exclude;
+        }
+        else if (f === "keywords") {
+            const [include, exclude] = v.reduce(([i, e], x) => {
+                if (x[0] === "-") e.push(keywordToIdMapping[x.slice(1)]);
+                else i.push(keywordToIdMapping[x]);
+                return [i, e];
+            }, [[], []]);
+            if (include.length > 0) acc[f] = include;
+            if (exclude.length > 0) acc[`${f}_exclude`] = exclude;
+        }
+        return acc;
+    }, {});
+}
 
 export default function SearchBuildsContent() {
     const searchParams = useSearchParams();
@@ -30,31 +55,9 @@ export default function SearchBuildsContent() {
         const fetchBuilds = async () => {
             try {
                 setLoading(true);
-                const newFilters = Object.entries(filters).reduce((acc, [f, v]) => {
-                    if (f === "title" || f === "username") acc[f] = v;
-                    else if (f === "tags") acc[f] = v.split(",");
-                    else if (f === "identities" || f === "egos") {
-                        const [include, exclude] = v.reduce(([i, e], x) => {
-                            if (x[0] === "-") e.push(parseInt(x.slice(1)));
-                            else i.push(parseInt(x));
-                            return [i, e];
-                        }, [[], []]);
-                        if (include.length > 0) acc[f] = include;
-                        if (exclude.length > 0) acc[`${f}_exclude`] = exclude;
-                    }
-                    else if (f === "keywords") {
-                        const [include, exclude] = v.reduce(([i, e], x) => {
-                            if (x[0] === "-") e.push(keywordToIdMapping[x.slice(1)]);
-                            else i.push(keywordToIdMapping[x]);
-                            return [i, e];
-                        }, [[], []]);
-                        if (include.length > 0) acc[f] = include;
-                        if (exclude.length > 0) acc[`${f}_exclude`] = exclude;
-                    }
-                    return acc;
-                }, {});
-
-                const data = await getFilteredBuilds(newFilters, true, sortBy, strictFiltering, page, 24);
+                const newFilters = prepareBuildFilters(filters);
+                
+                const data = await getFilteredBuilds({...newFilters, "ignore_block_discovery": true}, true, sortBy, strictFiltering, page, 24);
 
                 setBuilds(data || []);
                 setLoading(false);
@@ -67,7 +70,7 @@ export default function SearchBuildsContent() {
     }, [searchParams, filters, page, sortBy, strictFiltering]);
 
     return <div style={{ display: "flex", flexDirection: "column", textAlign: "center", gap: "1rem" }}>
-        <SearchComponent options={options} />
+        <BuildsSearchComponent options={options} />
         <div style={{ border: "1px #777 solid" }} />
 
         {loading ?

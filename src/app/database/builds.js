@@ -25,20 +25,21 @@ async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", 
     if ("egos_exclude" in filters) options["ego_exclude"] = filters["egos_exclude"];
     if ("keywords" in filters) options["keyword_filter"] = filters["keywords"];
     if ("keywords_exclude" in filters) options["keyword_exclude"] = filters["keywords_exclude"];
+    if ("ignore_block_discovery" in filters) options["ignore_block_discovery"] = filters["ignore_block_discovery"];
     options.p_published = isPublished;
     options.sort_by = sortBy;
     options.strict_filter = strictFiltering;
     options.limit_count = pageSize;
     options.offset_count = start;
 
-    const { data, error } = await getSupabase().rpc('get_filtered_builds_v6', options);
+    const { data, error } = await getSupabase().rpc('get_filtered_builds_v7', options);
 
     if (error) throw (error);
     return data;
 }
 
 async function getBuild(id, forEdit = false) {
-    const { data, error } = await getSupabase().rpc("get_build_details_v3", {
+    const { data, error } = await getSupabase().rpc("get_build_details_v4", {
         p_build_id: id,
         p_for_edit: forEdit,
     });
@@ -47,8 +48,8 @@ async function getBuild(id, forEdit = false) {
     return data;
 }
 
-async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, extra_opts, is_published) {
-    const { data, error } = await getSupabase().rpc('create_build_with_tags_v2', {
+async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, extra_opts, block_discovery, is_published) {
+    const { data, error } = await getSupabase().rpc('create_build_with_tags_v3', {
         p_user_id: user_id,
         p_title: title,
         p_body: body,
@@ -61,6 +62,7 @@ async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_
         p_youtube_video_id: youtube_video_id,
         p_tags: tags,
         p_extra_opts: extra_opts,
+        p_block_discovery: block_discovery,
         p_published: is_published
     });
 
@@ -68,8 +70,8 @@ async function insertBuild(user_id, title, body, identity_ids, ego_ids, keyword_
     return data;
 }
 
-async function updateBuild(build_id, user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, extra_opts, is_published) {
-    const { error } = await getSupabase().rpc('update_build_with_tags_v2', {
+async function updateBuild(build_id, user_id, title, body, identity_ids, ego_ids, keyword_ids, deployment_order, active_sinners, team_code, youtube_video_id, tags, extra_opts, block_discovery, is_published) {
+    const { error } = await getSupabase().rpc('update_build_with_tags_v3', {
         p_build_id: build_id,
         p_user_id: user_id,
         p_title: title,
@@ -83,6 +85,7 @@ async function updateBuild(build_id, user_id, title, body, identity_ids, ego_ids
         p_youtube_video_id: youtube_video_id,
         p_tags: tags,
         p_extra_opts: extra_opts,
+        p_block_discovery: block_discovery,
         p_published: is_published
     });
 
@@ -144,7 +147,7 @@ async function getBuildsCountForSitemap() {
 
 async function getHomepageBuilds() {
     const { data, error } = await getSupabase()
-        .rpc('get_homepage_builds_v1', {
+        .rpc('get_homepage_builds_v2', {
             popular_limit: 5,
             newest_limit: 5,
             showcase_limit: 5

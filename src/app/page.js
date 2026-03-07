@@ -68,12 +68,12 @@ export default function Home() {
                                         <div>{date}</div>
                                         <div style={{ display: "flex" }}>
                                             {list.map(obj => obj.id[0] === "1" ?
-                                                <Link key={obj.id} href={`/identities/${obj.id}`}>
+                                                <Link key={obj.id} href={`/identities/${obj.id}`} prefetch={false}>
                                                     <div style={{ width: "128px", height: "128px" }}>
                                                         <IdentityImg identity={obj} uptie={4} displayName={true} displayRarity={true} />
                                                     </div>
                                                 </Link> :
-                                                <Link key={obj.id} href={`/egos/${obj.id}`}>
+                                                <Link key={obj.id} href={`/egos/${obj.id}`} prefetch={false}>
                                                     <div style={{ width: "128px", height: "128px" }}>
                                                         <EgoImg ego={obj} type={"awaken"} displayName={true} displayRarity={true} />
                                                     </div>

@@ -210,7 +210,7 @@ export default function MarkdownRenderer({ content }) {
                         case "build":
                             return <BuildItem id={tokenValues[0]} />;
                         case "user":
-                            return <Link href={`/profiles/${tokenValues[0]}`}>{tokenValues[0]}</Link>;
+                            return <Link href={`/profiles/${tokenValues[0]}`} prefetch={false}>{tokenValues[0]}</Link>;
                         case "sinner":
                             try {
                                 return <span>{sinnerMapping[parseInt(tokenValues[0])]}</span>;

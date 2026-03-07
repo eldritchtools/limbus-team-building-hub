@@ -12,7 +12,7 @@ function isLocalId(id) {
 
 export default function CuratedList({ list }) {
     return <div className="curated-list">
-        <Link href={`/curated-lists/${list.id}`} className="curated-list-link" />
+        <Link href={`/curated-lists/${list.id}`} className="curated-list-link" prefetch={false} />
 
         <div className="curated-list-contents">
             <h3 style={{ margin: 0 }}>{list.title}</h3>

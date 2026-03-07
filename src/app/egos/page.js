@@ -43,7 +43,7 @@ function SkillTypeIcons({ skill }) {
 
 function EgoDetails({ id, ego }) {
     const wrapCell = contents => <td style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid", verticalAlign: "middle" }}>
-        <Link key={id} href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "128px" }}>
+        <Link key={id} href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "128px" }} prefetch={false}>
             {contents}
         </Link>
     </td>
@@ -239,7 +239,7 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
 
     if (displayType === "icon") {
         const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(128px, 1fr))", width: "100%", gap: "0.5rem" }}>
-            {list.map(([id, ego]) => <div key={id}><Link href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }}>
+            {list.map(([id, ego]) => <div key={id}><Link href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }} prefetch={false}>
                 <div className="clickable-ego">
                     <EgoImg ego={ego} type={"awaken"} displayName={true} displayRarity={true} />
                 </div>
@@ -263,7 +263,7 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
         }
     } else if (displayType === "card") {
         const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, min(420px, 100%))", width: "100%", gap: "0.5rem", justifyContent: "center" }}>
-            {list.map(([id, ego]) => <div key={id}><Link href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }}><EgoCard key={id} ego={ego} /></Link></div>)}
+            {list.map(([id, ego]) => <div key={id}><Link href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }} prefetch={false}><EgoCard key={id} ego={ego} /></Link></div>)}
         </div>
 
         if (separateSinners) {

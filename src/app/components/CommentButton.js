@@ -14,7 +14,7 @@ const style = {
 export default function CommentButton({ buildId, count, iconSize }) {
     const text = count === 1 ? "1 Comment" : `${count} Comments`;
     
-    return <Link href={`/builds/${buildId}#comments`} style={style}>
+    return <Link href={`/builds/${buildId}#comments`} style={style} prefetch={false}>
         <CommentSolid text={text} size={iconSize} />
     </Link>
 }

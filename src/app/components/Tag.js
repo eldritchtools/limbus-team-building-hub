@@ -10,5 +10,5 @@ export default function Tag({ tag, type }) {
         return `/${type}/search?${search.toString()}`;
     }, [tag, type]);
 
-    return <Link className="tag" href={path}>{tag}</Link>
+    return <Link className="tag" href={path} prefetch={false}>{tag}</Link>
 }

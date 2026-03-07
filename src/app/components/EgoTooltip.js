@@ -60,7 +60,7 @@ function EgoTooltipContent({ id, ego, uptie = 4 }) {
                 </div>
             </div>
         </div>
-        {isTouchDevice() ? <Link href={`/egos/${ego.id}`} style={{ alignSelf: "center", fontSize: "1.2rem" }}>Go to page</Link> : null}
+        {isTouchDevice() ? <Link href={`/egos/${ego.id}`} style={{ alignSelf: "center", fontSize: "1.2rem" }} prefetch={false}>Go to page</Link> : null}
     </div>
 }
 

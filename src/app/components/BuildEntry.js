@@ -39,7 +39,7 @@ export default function BuildEntry({ build, size, complete = true, clickable = t
     if (!sizes) return null;
 
     return <div className="build-entry" style={{ width: sizes.width }}>
-        {clickable ? <Link href={`/builds/${build.id}`} className="build-entry-link" /> : null}
+        {clickable ? <Link href={`/builds/${build.id}`} className="build-entry-link" prefetch={false} /> : null}
 
         {build.keyword_ids.length > 0 ?
             <div className="build-icon-rails">

@@ -11,6 +11,7 @@ export default function TooltipLink({ href, tooltipId, tooltipContent, className
         href={href}
         data-tooltip-id={tooltipId}
         data-tooltip-content={tooltipContent}
+        prefetch={false}
         {...props}
     >
         {children}

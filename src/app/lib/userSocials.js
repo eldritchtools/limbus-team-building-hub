@@ -2,8 +2,8 @@ import { FaDiscord, FaEnvelope, FaGlobe, FaReddit, FaTwitch, FaYoutube } from "r
 import { FaXTwitter } from "react-icons/fa6";
 import { SiBluesky, SiKofi, SiPatreon, SiSteam, SiTiktok } from "react-icons/si";
 import { generalTooltipProps } from "../components/GeneralTooltip";
-import Link from "next/link";
 import "./userSocials.css";
+import NoPrefetchLink from "../NoPrefetchLink";
 
 export const socialsData = {
     "web": {
@@ -128,7 +128,7 @@ export function SocialIcon({ type, value, includeText, iconSize = 1, textSize = 
 
     return <div {...generalTooltipProps(tooltipText)}>
         {link && hrefValue ?
-            <Link className="hoverable-social" href={hrefValue} prefetch={false}>{content}</Link> :
+            <NoPrefetchLink className="hoverable-social" href={hrefValue}>{content}</NoPrefetchLink> :
             <div className="social">{content}</div>
         }
     </div>

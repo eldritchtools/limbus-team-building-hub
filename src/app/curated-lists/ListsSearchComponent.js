@@ -3,8 +3,8 @@
 import { selectStyleVariable } from "../styles";
 import TagSelector, { tagToTagSelectorOption } from "../components/TagSelector";
 import { useState } from "react";
-import Link from "next/link";
 import "./ListsSearchComponent.css";
+import NoPrefetchLink from "../NoPrefetchLink";
 
 export default function ListsSearchComponent({ options = {} }) {
     const [searchString, setSearchString] = useState(options.search || "");
@@ -28,7 +28,7 @@ export default function ListsSearchComponent({ options = {} }) {
         </div>
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginTop: "0.2rem" }}>
             <button style={{ fontSize: "1.2rem", cursor: "pointer" }} onClick={applyFilters}>Search Curated Lists</button>
-            or <Link className="text-link" href={"/curated-lists/new"}>create a curated list</Link>
+            or <NoPrefetchLink className="text-link" href={"/curated-lists/new"}>create a curated list</NoPrefetchLink>
         </div>
     </div>
 }

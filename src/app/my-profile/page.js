@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { getFilteredBuilds } from "../database/builds";
 import { useAuth } from "../database/authProvider";
 import { getSaves } from "../database/saves";
@@ -16,6 +15,7 @@ import { SocialIcon, socialsData } from "../lib/userSocials";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { searchCuratedLists } from "../database/curatedLists";
 import CuratedList from "../components/CuratedList";
+import NoPrefetchLink from "../NoPrefetchLink";
 
 function SocialsComponent({ socials, setSocials }) {
     const swapOrder = (i1, i2) => {
@@ -349,7 +349,7 @@ export default function ProfilePage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", maxWidth: "1600px" }}>
                     <h2 style={headerStyle}>Details</h2>
                     <div>
-                        View your profile <Link className="text-link" href={`profiles/${profile.username}`}>here</Link>.
+                        View your profile <NoPrefetchLink className="text-link" href={`profiles/${profile.username}`}>here</NoPrefetchLink>.
                     </div>
                     <h4 style={headerStyle}>Username</h4>
                     <span style={subHeaderStyle}>Name to display across the site. This must be updated separately from the rest of the profile.</span>
@@ -386,12 +386,12 @@ export default function ProfilePage() {
         </h2>
         <div style={{ display: "flex", marginBottom: "1rem", gap: "1rem" }}>
             {mainActiveTab === "builds" ?
-                <Link href="/builds/new" style={{ textDecoration: "none" }}>
+                <NoPrefetchLink href="/builds/new" style={{ textDecoration: "none" }}>
                     <div style={{ fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", color: "#777" }}>+New Build</div>
-                </Link> :
-                <Link href="/curated-lists/new" style={{ textDecoration: "none" }}>
+                </NoPrefetchLink> :
+                <NoPrefetchLink href="/curated-lists/new" style={{ textDecoration: "none" }}>
                     <div style={{ fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", color: "#777" }}>+New Curated List</div>
-                </Link>
+                </NoPrefetchLink>
             }
             {user ?
                 <div style={{ ...tabStyle, color: activeTab === "published" ? "#ddd" : "#777" }} onClick={() => {setActiveTab("published"); setPage(1);}}>Published</div> :

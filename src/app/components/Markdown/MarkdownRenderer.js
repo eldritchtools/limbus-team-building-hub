@@ -4,7 +4,6 @@ import { Gift, Icon, Status, useData } from "@eldritchtools/limbus-shared-librar
 import { keywordIconConvert } from "../../keywordIds";
 import { sinnerMapping } from "../../utils";
 import { Tooltip } from "react-tooltip";
-import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
@@ -21,6 +20,7 @@ import "katex/dist/katex.min.css";
 import { isTouchDevice } from "@eldritchtools/shared-components";
 import TooltipLink from "../TooltipLink";
 import { convertMarkdownAlias } from "./MarkdownAliases";
+import NoPrefetchLink from "@/app/NoPrefetchLink";
 
 function tokenExtractionPlugin() {
     return (tree) => {
@@ -210,7 +210,7 @@ export default function MarkdownRenderer({ content }) {
                         case "build":
                             return <BuildItem id={tokenValues[0]} />;
                         case "user":
-                            return <Link href={`/profiles/${tokenValues[0]}`} prefetch={false}>{tokenValues[0]}</Link>;
+                            return <NoPrefetchLink href={`/profiles/${tokenValues[0]}`}>{tokenValues[0]}</NoPrefetchLink>;
                         case "sinner":
                             try {
                                 return <span>{sinnerMapping[parseInt(tokenValues[0])]}</span>;

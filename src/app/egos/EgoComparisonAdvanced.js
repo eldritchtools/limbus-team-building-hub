@@ -1,7 +1,6 @@
 import { affinityColorMapping, EgoImg, Icon, replaceStatusVariablesTextOnly, SinnerIcon, useData, useDataMultiple } from "@eldritchtools/limbus-shared-library";
 import DropdownButton from "../components/DropdownButton";
 import { useState } from "react";
-import Link from "next/link";
 import AutoScroller from "../components/AutoScroller";
 import { capitalizeFirstLetter, ColorResist, paragraphScore, ProcessedText, sinnerMapping } from "../utils";
 import SkillCard from "../components/SkillCard";
@@ -12,6 +11,7 @@ import { keywordToIdMapping } from "../keywordIds";
 import { generalTooltipProps } from "../components/GeneralTooltip";
 import { useBreakpoint } from "@eldritchtools/shared-components";
 import { AtkWeight } from "../components/AtkWeight";
+import NoPrefetchLink from "../NoPrefetchLink";
 
 const options = {
     "stats": "Stats",
@@ -24,9 +24,9 @@ const options = {
 function ComparisonCardBase({ ego, content }) {
     return <div style={{ display: "flex", flexDirection: "column", padding: "0.5rem", width: "320px", maxHeight: "480px", border: "1px #777 solid", borderRadius: "0.25rem", boxSizing: "border-box", alignItems: "center", gap: "0.2rem" }}>
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", height: "128px" }}>
-            <Link href={`/egos/${ego.id}`} prefetch={false}>
+            <NoPrefetchLink href={`/egos/${ego.id}`}>
                 <EgoImg ego={ego} type={"awaken"} displayName={true} displayRarity={true} size={128} />
-            </Link>
+            </NoPrefetchLink>
         </div>
         <div style={{ border: "1px #777 solid", width: "90%" }} />
         <div style={{ maxHeight: "320px", width: "100%" }}>
@@ -41,9 +41,9 @@ function ComparisonRowBase({ ego, content }) {
             {i === 0 ?
                 <td key={0} rowSpan={content.length} style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid", verticalAlign: "middle" }}>
                     <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", padding: "0.2rem" }}>
-                        <Link href={`/egos/${ego.id}`} prefetch={false}>
+                        <NoPrefetchLink href={`/egos/${ego.id}`}>
                             <EgoImg ego={ego} type={"awaken"} displayName={true} displayRarity={true} size={128} />
-                        </Link>
+                        </NoPrefetchLink>
                     </div>
                 </td> :
                 null

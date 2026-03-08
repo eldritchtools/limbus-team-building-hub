@@ -1,10 +1,10 @@
-import Link from "next/link";
 import "./Username.css";
+import NoPrefetchLink from "../NoPrefetchLink";
 
 export default function Username({username, flair, style={}}){
     if (flair) 
         return <span style={{whiteSpace: "wrap"}}>
-            <Link href={`/profiles/${username}`} className="username" prefetch={false} style={style}>{username}</Link> <em style={{color: "#aaa"}}>({flair})</em>
+            <NoPrefetchLink href={`/profiles/${username}`} className="username" style={style}>{username}</NoPrefetchLink> <em style={{color: "#aaa"}}>({flair})</em>
         </span>
-    return <Link href={`/profiles/${username}`} className="username" prefetch={false} style={style}>{username}</Link>
+    return <NoPrefetchLink href={`/profiles/${username}`} className="username" style={style}>{username}</NoPrefetchLink>
 }

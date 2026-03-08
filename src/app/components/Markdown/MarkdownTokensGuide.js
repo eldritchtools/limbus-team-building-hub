@@ -1,8 +1,8 @@
-import Link from "next/link";
 import DropdownButton from "../DropdownButton";
 import { EgoSelector, GiftSelector, IdentitySelector, KeywordSelector, SinnerSelector, StatusSelector } from "../Selectors";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { useEffect, useState } from "react";
+import NoPrefetchLink from "@/app/NoPrefetchLink";
 
 const options = {
     "none": "Select a type",
@@ -142,7 +142,7 @@ function GuideAssembler({ guideTab, editorRef, onChange, guideValue, setGuideVal
 export default function MarkdownTokensGuide({ editorRef, onChange, guideTab, setGuideTab, guideValue, setGuideValue }) {
     return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         <div>You can reference things like statuses or keywords with tokens like {"{keyword:Burn}"} to show icons or tooltips when hovering over them.</div>
-        <div>Choose a type below to search for tokens you might like to use or <Link href={"/markdown-tokens"} target="_blank" rel="noopener noreferrer">click here</Link> for more details on tokens.</div>
+        <div>Choose a type below to search for tokens you might like to use or <NoPrefetchLink href={"/markdown-tokens"} target="_blank" rel="noopener noreferrer">click here</NoPrefetchLink> for more details on tokens.</div>
         <div>An autocomplete system is available for the following token types: identity, ego, status, giftname, gifticons, keyword, sinner. To trigger it, just start typing {"\"{type:\""}.</div>
         <div>Token type: <DropdownButton value={guideTab} setValue={x => { setGuideTab(x); setGuideValue(null); }} options={options} /></div>
         <GuideAssembler guideTab={guideTab} editorRef={editorRef} onChange={onChange} guideValue={guideValue} setGuideValue={setGuideValue} />

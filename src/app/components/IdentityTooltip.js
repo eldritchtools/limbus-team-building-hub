@@ -3,8 +3,8 @@
 import { IdentityImg, KeywordIcon, useData } from "@eldritchtools/limbus-shared-library";
 import { Tooltip } from "react-tooltip";
 import { tooltipStyle } from "../styles";
-import Link from "next/link";
 import { isTouchDevice } from "@eldritchtools/shared-components";
+import NoPrefetchLink from "../NoPrefetchLink";
 
 function IdentityTooltipContent({ identity }) {
     return <div style={{...tooltipStyle, display: "flex", flexDirection: "column"}}>
@@ -24,7 +24,7 @@ function IdentityTooltipContent({ identity }) {
                 </div>
             </div>
         </div>
-        {isTouchDevice() ? <Link href={`/identities/${identity.id}`} style={{alignSelf: "center", fontSize: "1.2rem"}} prefetch={false}>Go to page</Link> : null}
+        {isTouchDevice() ? <NoPrefetchLink href={`/identities/${identity.id}`} style={{alignSelf: "center", fontSize: "1.2rem"}}>Go to page</NoPrefetchLink> : null}
     </div>
 }
 

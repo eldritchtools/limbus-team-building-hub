@@ -75,3 +75,46 @@ CREATE POLICY "comments are viewable by everyone"
 ON public.comments
 FOR SELECT
 USING (true);
+
+CREATE OR REPLACE FUNCTION public.cleanup_target_rows()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_type target_type_enum := TG_ARGV[0]::target_type_enum;
+BEGIN
+
+  DELETE FROM public.likes l
+  USING (SELECT OLD.id AS id) t
+  WHERE l.target_id = t.id
+    AND l.target_type = v_type;
+
+  DELETE FROM public.saves s
+  USING (SELECT OLD.id AS id) t
+  WHERE s.target_id = t.id
+    AND s.target_type = v_type;
+
+  DELETE FROM public.comments c
+  USING (SELECT OLD.id AS id) t
+  WHERE c.target_id = t.id
+    AND c.target_type = v_type;
+
+  DELETE FROM public.notifications n
+  USING (SELECT OLD.id AS id) t
+  WHERE n.target_id = t.id
+    AND n.target_type = v_type;
+
+  RETURN OLD;
+END;
+$$;
+
+CREATE TRIGGER trg_cleanup_build
+AFTER DELETE ON public.builds
+FOR EACH ROW
+EXECUTE FUNCTION public.cleanup_target_rows('build');
+
+CREATE TRIGGER trg_cleanup_build_list
+AFTER DELETE ON public.build_lists
+FOR EACH ROW
+EXECUTE FUNCTION public.cleanup_target_rows('build_list');

@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_saved_builds_v2(
+CREATE OR REPLACE FUNCTION public.get_saved_builds_v3(
   p_user_id UUID,
   limit_count INTEGER DEFAULT 20,
   offset_count INTEGER DEFAULT 0
@@ -35,11 +35,11 @@ BEGIN
     b.keyword_ids,
     s.created_at
   FROM public.saves AS s
-  LEFT JOIN public.builds AS b ON b.id = s.build_id
+  LEFT JOIN public.builds AS b ON b.id = s.target_id AND s.target_type = 'build'
   LEFT JOIN public.users u ON b.user_id = u.id
   LEFT JOIN public.build_tags bt ON b.id = bt.build_id
   LEFT JOIN public.tags t ON bt.tag_id = t.id
-  WHERE s.user_id = p_user_id
+  WHERE s.user_id = p_user_id AND s.target_type = 'build'
   GROUP BY b.id, u.username, u.flair, s.created_at
   ORDER BY s.created_at DESC
   LIMIT limit_count

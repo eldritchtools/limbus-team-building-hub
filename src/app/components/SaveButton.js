@@ -1,21 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRequestsCache } from "../database/RequestsCacheProvider";
 import { useAuth } from "../database/authProvider";
-import { savesStore } from "../database/localDB";
+import { savedListsStore, savesStore } from "../database/localDB";
 import { SaveOutline, SaveSolid } from "./Symbols";
 
-function NormalSaveButton({ buildId, user, buildEntryVersion, iconSize }) {
-    const { savedMap, toggleSave, fetchUserData } = useRequestsCache();
+function NormalSaveButton({ targetType, targetId, user, buildEntryVersion, iconSize }) {
+    const { checkSaved, toggleSave, fetchUserData } = useRequestsCache();
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => { if (user) fetchUserData([buildId]) }, [fetchUserData, buildId, user]);
-    const saved = useMemo(() => savedMap[buildId], [savedMap, buildId]);
+    useEffect(() => { if (user) fetchUserData(targetType, [targetId]) }, [fetchUserData, targetType, targetId, user]);
+    const saved = useMemo(() => checkSaved(targetType, targetId), [checkSaved, targetType, targetId]);
 
     if (saved === undefined || saved === null) return null;
 
     const handleClick = async () => {
         setLoading(true);
-        await toggleSave(buildId);
+        await toggleSave(targetType, targetId);
         setLoading(false);
     };
 
@@ -38,26 +38,34 @@ function isLocalId(id) {
     return !uuidRegex.test(id);
 }
 
-function LocalSaveButton({ buildId, buildEntryVersion, iconSize }) {
+function LocalSaveButton({ targetType, targetId, buildEntryVersion, iconSize }) {
     const [saved, setSaved] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const store = useMemo(() => {
+        switch(targetType) {
+            case "build": return savesStore;
+            case "build_list": return savedListsStore;
+            default: return null;
+        }
+    }, [targetType])
+
     useEffect(() => {
         const fetchSaved = async () => {
-            setSaved(await savesStore.get(buildId) !== undefined);
+            setSaved(await store.get(targetId) !== undefined);
         }
         fetchSaved();
-    }, [buildId]);
+    }, [store, targetId]);
 
-    if (isLocalId(buildId)) return null;
+    if (isLocalId(targetId)) return null;
 
     const handleClick = async () => {
         setLoading(true);
         if (saved) {
-            await savesStore.remove(buildId);
+            await store.remove(targetId);
             setSaved(false);
         } else {
-            await savesStore.save({ id: buildId });
+            await store.save({ id: targetId });
             setSaved(true);
         }
         setLoading(false);
@@ -77,9 +85,9 @@ function LocalSaveButton({ buildId, buildEntryVersion, iconSize }) {
     }
 }
 
-export default function SaveButton({ buildId, buildEntryVersion=false, iconSize }) {
+export default function SaveButton({ targetType, targetId, buildEntryVersion=false, iconSize }) {
     const { user } = useAuth();
-    if (!user) return <LocalSaveButton buildId={buildId} buildEntryVersion={buildEntryVersion} iconSize={iconSize} />;
-    else return <NormalSaveButton buildId={buildId} user={user} buildEntryVersion={buildEntryVersion} iconSize={iconSize} />
+    if (!user) return <LocalSaveButton targetType={targetType} targetId={targetId} buildEntryVersion={buildEntryVersion} iconSize={iconSize} />;
+    else return <NormalSaveButton targetType={targetType} targetId={targetId} user={user} buildEntryVersion={buildEntryVersion} iconSize={iconSize} />
 
 }

@@ -5,6 +5,7 @@ async function searchCuratedLists(filters, isPublished = true, sortBy = "score",
 
     const options = {};
     if ("query" in filters) options["p_query"] = filters["query"];
+    if ("list_ids" in filters) options["list_id_filter"] = filters["list_id"];
     if ("user_id" in filters) options["user_id_filter"] = filters["user_id"];
     if ("username_exact" in filters) options["username_exact_filter"] = filters["username_exact"];
     if ("tags" in filters) options["tag_filter"] = filters["tags"];
@@ -14,14 +15,14 @@ async function searchCuratedLists(filters, isPublished = true, sortBy = "score",
     options.p_limit = pageSize;
     options.p_offset = start;
 
-    const { data, error } = await getSupabase().rpc('search_build_lists', options);
+    const { data, error } = await getSupabase().rpc('search_build_lists_v2', options);
 
     if (error) throw (error);
     return data;
 }
 
 async function getCuratedList(id) {
-    const { data, error } = await getSupabase().rpc("get_build_list", {
+    const { data, error } = await getSupabase().rpc("get_build_list_v2", {
         p_list_id: id,
     });
 
@@ -67,6 +68,29 @@ async function deleteCuratedList(list_id) {
     return { deleted: true };
 }
 
+
+async function pinCuratedListComment(listId, commentId) {
+    const { error } = await getSupabase().from('build_lists').update({ pinned_comment_id: commentId }).eq('id', listId);
+
+    if (error) {
+        console.error('Error pinning comment:', error);
+        return null;
+    }
+
+    return true;
+}
+
+async function unpinCuratedListComment(listId) {
+    const { error } = await getSupabase().from('build_lists').update({ pinned_comment_id: null }).eq('id', listId)
+
+    if (error) {
+        console.error('Error unpinning comment:', error);
+        return null;
+    }
+
+    return true;
+}
+
 async function getCuratedListsForSitemap(page, count) {
     const offset = (page - 1) * count;
     const { data, error } = await getSupabase()
@@ -90,4 +114,4 @@ async function getCuratedListsCountForSitemap() {
     return count;
 }
 
-export { searchCuratedLists, getCuratedList, insertCuratedList, updateCuratedList, deleteCuratedList, getCuratedListsForSitemap, getCuratedListsCountForSitemap };
+export { searchCuratedLists, getCuratedList, insertCuratedList, updateCuratedList, deleteCuratedList, pinCuratedListComment, unpinCuratedListComment, getCuratedListsForSitemap, getCuratedListsCountForSitemap };

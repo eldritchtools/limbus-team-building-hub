@@ -12,12 +12,18 @@ function constructActorStr(actors) {
     return `${actors[0]}`;
 }
 
+const targetTypeMapping = {
+    "build": "build",
+    "build_list": "curated list"
+}
+
 function constructNotifMessage(notif) {
     const actorsStr = constructActorStr(notif.actors);
+    const type = targetTypeMapping[notif.target_type];
 
     return notif.type === "comment" ?
-        `${actorsStr} commented on your build ${notif.build_title}` :
-        `${actorsStr} replied to your comment to the build ${notif.build_title}`;
+        `${actorsStr} commented on your ${type} ${notif.title}` :
+        `${actorsStr} replied to your comment to the ${type} ${notif.title}`;
 }
 
 export default function Notification({ notif, updateNotif }) {
@@ -26,7 +32,16 @@ export default function Notification({ notif, updateNotif }) {
     const handleNotifClick = async (notif) => {
         await setNotificationRead(notif.id);
         if (updateNotif && !notif.is_read) updateNotif({ ...notif, is_read: true });
-        router.push(`/builds/${notif.build_id}`);
+        switch(notif.target_type) {
+            case "build":
+                router.push(`/builds/${notif.target_id}`);
+                return;
+            case "build_list":
+                router.push(`/curated-lists/${notif.target_id}`);
+                return;
+            default:
+                return
+        }
     }
 
     return <div onClick={() => handleNotifClick(notif)} className={notif.is_read ? "notif-read" : "notif"}>

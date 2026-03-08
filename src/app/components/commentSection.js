@@ -8,14 +8,14 @@ import MarkdownEditorWrapper from "@/app/components/Markdown/MarkdownEditorWrapp
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import "./builds.css";
-import "../../pageButton.css";
+import "../pageButton.css";
 import MarkdownRenderer from "@/app/components/Markdown/MarkdownRenderer";
 import Username from "@/app/components/Username";
 import ReactTimeAgo from "react-time-ago";
-import { pinComment, unpinComment } from "@/app/database/builds";
+import { pinBuildComment, unpinBuildComment } from "@/app/database/builds";
+import { pinCuratedListComment, unpinCuratedListComment } from "../database/curatedLists";
 
-function CommentInput({ buildId, parentId = null, editId = null, initialValue = "", onEdit, onPost, onCancel }) {
+function CommentInput({ targetType, targetId, parentId = null, editId = null, initialValue = "", onEdit, onPost, onCancel }) {
     const [body, setBody] = useState(initialValue);
     const [loading, setLoading] = useState(false);
 
@@ -24,12 +24,12 @@ function CommentInput({ buildId, parentId = null, editId = null, initialValue = 
         setLoading(true);
 
         if (editId) {
-            await updateComment(editId, body);
+            await updateComment(targetType, editId, body);
             setBody("");
             setLoading(false);
             onEdit?.(body);
         } else {
-            const data = await addComment(buildId, body, parentId);
+            const data = await addComment(targetType, targetId, body, parentId);
             setBody("");
             setLoading(false);
             onPost?.(data);
@@ -45,7 +45,7 @@ function CommentInput({ buildId, parentId = null, editId = null, initialValue = 
     </div>;
 }
 
-function Comment({ comment, buildId, buildOwnerId, pinned, onPost, onEdit, onDelete, onPin }) {
+function Comment({ comment, targetType, targetId, buildOwnerId, pinned, onPost, onEdit, onDelete, onPin }) {
     const [replying, setReplying] = useState(false);
     const [editing, setEditing] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -64,13 +64,21 @@ function Comment({ comment, buildId, buildOwnerId, pinned, onPost, onEdit, onDel
 
     async function handlePin() {
         setPinLoading(true);
-        if (await (pinComment(buildId, comment.id))) onPin(comment);
+        if (targetType === "build") {
+            if (await (pinBuildComment(targetId, comment.id))) onPin(comment);
+        } else if (targetType === "build_list") {
+            if (await (pinCuratedListComment(targetId, comment.id))) onPin(comment);
+        }
         setPinLoading(false);
     }
 
     async function handleUnpin() {
         setPinLoading(true);
-        if (await (unpinComment(buildId))) onPin(null);
+        if (targetType === "build") {
+            if (await (unpinBuildComment(targetId))) onPin(null);
+        } else if (targetType === "build_list") {
+            if (await (unpinCuratedListComment(targetId))) onPin(null);
+        }
         setPinLoading(false);
     }
 
@@ -95,10 +103,10 @@ function Comment({ comment, buildId, buildOwnerId, pinned, onPost, onEdit, onDel
             )}
 
             {editing ?
-                <CommentInput buildId={buildId} initialValue={comment.body} parentId={comment.parent_id}
+                <CommentInput targetType={targetType} targetId={targetId} initialValue={comment.body} parentId={comment.parent_id}
                     editId={comment.id} onEdit={(body) => { setEditing(false); onEdit(comment.id, body); }} onCancel={() => setEditing(false)} /> :
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
-                    <div style={{ fontSize: "0.8rem" }}>by <Username username={comment.username} flair={comment.user_flair}/> • <ReactTimeAgo date={comment.created_at} locale="en-US" timeStyle="mini" /> {comment.edited ? `(edited)` : null}</div>
+                    <div style={{ fontSize: "0.8rem" }}>by <Username username={comment.username} flair={comment.user_flair} /> • <ReactTimeAgo date={comment.created_at} locale="en-US" timeStyle="mini" /> {comment.edited ? `(edited)` : null}</div>
                     <MarkdownRenderer content={comment.body} />
 
                     <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
@@ -117,7 +125,8 @@ function Comment({ comment, buildId, buildOwnerId, pinned, onPost, onEdit, onDel
 
                     {replying && (
                         <CommentInput
-                            buildId={buildId}
+                            targetType={targetType}
+                            targetId={targetId}
                             parentId={comment.id}
                             onPost={(newComment) => {
                                 setReplying(false);
@@ -142,7 +151,7 @@ function Comment({ comment, buildId, buildOwnerId, pinned, onPost, onEdit, onDel
     );
 }
 
-function CommentSection({ buildId, ownerId, commentCount, pinnedComment = null }) {
+function CommentSection({ targetType, targetId, ownerId, commentCount, pinnedComment = null }) {
     const [comments, setComments] = useState([]);
     const [pinned, setPinned] = useState(pinnedComment);
     const [loading, setLoading] = useState(false);
@@ -152,53 +161,51 @@ function CommentSection({ buildId, ownerId, commentCount, pinnedComment = null }
     useEffect(() => {
         const loadComments = async () => {
             setLoading(true);
-            const comments = await getComments(buildId, page);
+            const comments = await getComments(targetType, targetId, page);
             setComments(comments);
             setLoading(false);
         }
 
         loadComments();
-    }, [buildId, page]);
+    }, [targetType, targetId, page]);
 
     const onPost = (comment) => { setComments(p => [{ ...comment, username: profile.username, flair: profile.flair }, ...p]) };
     const onEdit = (id, body) => setComments(p => p.map(c => c.id === id ? { ...c, body: body, edited: true } : c));
     const onDelete = id => setComments(p => p.filter(c => c.id !== id));
     const onPin = (comment) => setPinned(comment);
 
-    return (
-        <section style={{ display: "flex", flexDirection: "column" }}>
-            <h3 style={{ fontSize: "1.2rem", marginBottom: "0.5rem" }}>Comments ({commentCount})</h3>
+    return <section style={{ display: "flex", flexDirection: "column" }}>
+        <h3 style={{ fontSize: "1.2rem", marginBottom: "0.5rem" }}>Comments ({commentCount})</h3>
 
-            {pinned ? <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", paddingBottom: "1rem" }}>
-                <span style={{ fontWeight: "bold", paddingLeft: "1rem" }}>📌 Pinned Comment</span>
-                <Comment comment={pinned} buildId={buildId} buildOwnerId={ownerId} pinned={true} onPost={onPost} onEdit={onEdit} onDelete={onDelete} onPin={onPin} />
-            </div> : null}
+        {pinned ? <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", paddingBottom: "1rem" }}>
+            <span style={{ fontWeight: "bold", paddingLeft: "1rem" }}>📌 Pinned Comment</span>
+            <Comment comment={pinned} targetType={targetType} targetId={targetId} buildOwnerId={ownerId} pinned={true} onPost={onPost} onEdit={onEdit} onDelete={onDelete} onPin={onPin} />
+        </div> : null}
 
-            {user ?
-                <CommentInput buildId={buildId} onPost={onPost} /> :
-                <div style={{ color: "#aaa", fontWeight: "bold", textAlign: "center" }}>Login to create comments</div>
-            }
+        {user ?
+            <CommentInput targetType={targetType} targetId={targetId} onPost={onPost} /> :
+            <div style={{ color: "#aaa", fontWeight: "bold", textAlign: "center" }}>Login to create comments</div>
+        }
 
-            <div style={{ height: "0.5rem" }} />
+        <div style={{ height: "0.5rem" }} />
 
-            {loading ?
-                <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading...</p> :
-                comments.length === 0 ?
-                    <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>{page === 1 ? "No comments yet." : "No more comments."}</p> :
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                        {comments.map((c, i) => <Comment key={i} comment={c} buildId={buildId} buildOwnerId={ownerId} onPost={onPost} onEdit={onEdit} onDelete={onDelete} onPin={onPin} />)}
+        {loading ?
+            <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading...</p> :
+            comments.length === 0 ?
+                <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>{page === 1 ? "No comments yet." : "No more comments."}</p> :
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    {comments.map((c, i) => <Comment key={i} comment={c} targetType={targetType} targetId={targetId} buildOwnerId={ownerId} onPost={onPost} onEdit={onEdit} onDelete={onDelete} onPin={onPin} />)}
 
-                        <div style={{ display: "flex", gap: "0.5rem", alignSelf: "end" }}>
-                            <button className="page-button" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>
-                            {[-2, -1, 0, 1, 2].filter(x => page + x > 0 && page + x <= Math.ceil(commentCount / 20)).map(x =>
-                                <button key={x} className="page-button" disabled={x === 0} onClick={() => setPage(page + x)}>{page + x}</button>
-                            )}
-                            <button className="page-button" disabled={page >= commentCount / 20} onClick={() => setPage(p => p + 1)}>Next</button>
-                        </div>
+                    <div style={{ display: "flex", gap: "0.5rem", alignSelf: "end" }}>
+                        <button className="page-button" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>
+                        {[-2, -1, 0, 1, 2].filter(x => page + x > 0 && page + x <= Math.ceil(commentCount / 20)).map(x =>
+                            <button key={x} className="page-button" disabled={x === 0} onClick={() => setPage(page + x)}>{page + x}</button>
+                        )}
+                        <button className="page-button" disabled={page >= commentCount / 20} onClick={() => setPage(p => p + 1)}>Next</button>
                     </div>
-            }
-        </section>
-    );
+                </div>
+        }
+    </section>
 }
 
 export default CommentSection;

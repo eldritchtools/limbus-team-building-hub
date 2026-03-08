@@ -69,9 +69,9 @@ export default function BuildEntry({ build, size, complete = true, clickable = t
         </div>
         {complete ?
             <div className="build-buttons-container">
-                <LikeButton buildId={build.id} likeCount={build.like_count} buildEntryVersion={true} iconSize={sizes.buttonIconSize} />
-                <CommentButton buildId={build.id} count={build.comment_count} iconSize={sizes.buttonIconSize} />
-                <SaveButton buildId={build.id} buildEntryVersion={true} iconSize={sizes.buttonIconSize} />
+                <LikeButton targetType={"build"} targetId={build.id} likeCount={build.like_count} buildEntryVersion={true} iconSize={sizes.buttonIconSize} />
+                <CommentButton targetPath={"builds"} targetId={build.id} count={build.comment_count} buildEntryVersion={true} iconSize={sizes.buttonIconSize} />
+                <SaveButton targetType={"build"} targetId={build.id} buildEntryVersion={true} iconSize={sizes.buttonIconSize} />
             </div>
             : null}
     </div>

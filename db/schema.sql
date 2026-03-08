@@ -56,15 +56,17 @@ ADD CONSTRAINT youtube_id_format CHECK (
 
 CREATE TABLE public.likes (
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
-  build_id UUID REFERENCES public.builds(id) ON DELETE CASCADE,
+  target_type target_type_enum,
+  target_id UUID,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  PRIMARY KEY (user_id, build_id)
+  PRIMARY KEY (user_id, target_id)
 );
 
 CREATE TABLE public.comments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  build_id UUID REFERENCES public.builds(id) ON DELETE CASCADE,
+  target_id UUID REFERENCES public.builds(id) ON DELETE CASCADE,
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+  target_type target_type_enum,
   body TEXT NOT NULL,
   deleted BOOLEAN DEFAULT FALSE,
   edited BOOLEAN DEFAULT FALSE,
@@ -81,9 +83,10 @@ ON DELETE SET NULL;
 
 CREATE TABLE public.saves (
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
-  build_id UUID REFERENCES public.builds(id) ON DELETE CASCADE,
+  target_type target_type_enum,
+  target_id UUID,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  PRIMARY KEY (user_id, build_id)
+  PRIMARY KEY (user_id, target_id)
 );
 
 CREATE TABLE public.tags (
@@ -102,11 +105,17 @@ CREATE TABLE public.notifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   actor_ids UUID[] DEFAULT '{}',
-  build_id UUID REFERENCES builds(id) ON DELETE CASCADE,
+  target_type target_type_enum,
+  target_id UUID,
   type TEXT NOT NULL CHECK (type IN ('comment', 'reply')),
   parent_comment_id UUID REFERENCES comments(id),
   is_read BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TYPE target_type_enum AS ENUM (
+  'build',
+  'build_list'
 );
 
 -- ========================
@@ -128,8 +137,8 @@ CREATE TABLE public.popular_builds_cache (
 CREATE INDEX idx_builds_created_at ON public.builds (created_at DESC);
 CREATE INDEX idx_builds_like_count ON public.builds (like_count DESC);
 
-CREATE INDEX idx_comments_build_id ON public.comments (build_id);
-CREATE INDEX idx_comments_created_at ON public.comments (created_at DESC);
+CREATE INDEX idx_likes_target ON public.likes (target_type, target_id);
+CREATE INDEX idx_comments_target_created_at ON public.comments (target_type, target_id, created_at) WHERE deleted = false;
 CREATE INDEX idx_saves_user_id ON public.saves(user_id);
 
 CREATE INDEX idx_tags_name ON public.tags (name);
@@ -150,87 +159,107 @@ CREATE INDEX idx_popular_builds_cache_ranking_type ON public.popular_builds_cach
 -- 6. TRIGGERS & FUNCTIONS
 -- ========================
 
--- Function: update like count and score when likes change
-CREATE OR REPLACE FUNCTION public.update_build_like_stats()
+CREATE OR REPLACE FUNCTION public.update_target_stats()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  build_id_to_update UUID;
-  new_like_count INT;
+    tgt_type target_type_enum;
+    tgt_id UUID;
+    new_like_count INT;
+    new_comment_count INT;
 BEGIN
-  build_id_to_update := COALESCE(NEW.build_id, OLD.build_id);
+    tgt_type := COALESCE(NEW.target_type, OLD.target_type);
+    tgt_id   := COALESCE(NEW.target_id, OLD.target_id);
 
-  -- compute the like count once
-  SELECT COUNT(*) INTO new_like_count
-  FROM public.likes
-  WHERE build_id = build_id_to_update;
+    -- Handle builds
+    IF tgt_type = 'build' THEN
+        IF TG_TABLE_NAME = 'likes' THEN
+            SELECT COUNT(*) INTO new_like_count
+            FROM public.likes
+            WHERE target_type = 'build' AND target_id = tgt_id;
 
-  UPDATE public.builds
-  SET
-    like_count = new_like_count,
-    score = (new_like_count * 2 + comment_count) / POWER( (EXTRACT(EPOCH FROM (NOW() - COALESCE(published_at, created_at))) / 86400) + 2, 1.05 )
-  WHERE id = build_id_to_update;
+            SELECT comment_count INTO new_comment_count
+            FROM public.builds
+            WHERE id = tgt_id;
+        ELSIF TG_TABLE_NAME = 'comments' THEN
+            SELECT COUNT(*) INTO new_comment_count
+            FROM public.comments
+            WHERE target_type = 'build' AND target_id = tgt_id AND NOT deleted;
 
-  RETURN NULL;
+            SELECT like_count INTO new_like_count
+            FROM public.builds
+            WHERE id = tgt_id;
+        END IF;
+
+        UPDATE public.builds
+        SET
+            like_count = new_like_count,
+            comment_count = new_comment_count,
+            score = (new_like_count * 2 + new_comment_count)
+                    / POWER((EXTRACT(EPOCH FROM (NOW() - COALESCE(published_at, created_at))) / 86400) + 2, 1.05)
+        WHERE id = tgt_id;
+
+    -- Handle build lists
+    ELSIF tgt_type = 'build_list' THEN
+        IF TG_TABLE_NAME = 'likes' THEN
+            SELECT COUNT(*) INTO new_like_count
+            FROM public.likes
+            WHERE target_type = 'build_list' AND target_id = tgt_id;
+
+            SELECT comment_count INTO new_comment_count
+            FROM public.build_lists
+            WHERE id = tgt_id;
+        ELSIF TG_TABLE_NAME = 'comments' THEN
+            SELECT COUNT(*) INTO new_comment_count
+            FROM public.comments
+            WHERE target_type = 'build_list' AND target_id = tgt_id AND NOT deleted;
+
+            SELECT like_count INTO new_like_count
+            FROM public.build_lists
+            WHERE id = tgt_id;
+        END IF;
+
+        UPDATE public.build_lists
+        SET
+            like_count = new_like_count,
+            comment_count = new_comment_count,
+            score = (new_like_count * 2 + new_comment_count)
+                    / POWER((EXTRACT(EPOCH FROM (NOW() - COALESCE(published_at, created_at))) / 86400) + 2, 1.05)
+        WHERE id = tgt_id;
+    END IF;
+
+    RETURN NULL;
 END;
 $$;
 
+-- Likes triggers
+DROP TRIGGER IF EXISTS trg_like_insert ON public.likes;
+DROP TRIGGER IF EXISTS trg_like_delete ON public.likes;
 
-
--- Triggers for like insert/delete
 CREATE TRIGGER trg_like_insert
 AFTER INSERT ON public.likes
-FOR EACH ROW EXECUTE FUNCTION public.update_build_like_stats();
+FOR EACH ROW EXECUTE FUNCTION public.update_target_stats();
 
 CREATE TRIGGER trg_like_delete
 AFTER DELETE ON public.likes
-FOR EACH ROW EXECUTE FUNCTION public.update_build_like_stats();
+FOR EACH ROW EXECUTE FUNCTION public.update_target_stats();
 
+-- Comments triggers
+DROP TRIGGER IF EXISTS trg_comment_insert ON public.comments;
+DROP TRIGGER IF EXISTS trg_comment_delete ON public.comments;
+DROP TRIGGER IF EXISTS trg_comment_update ON public.comments;
 
--- Function: update comment count and score when comments change
-CREATE OR REPLACE FUNCTION public.update_build_comment_stats()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  build_id_to_update UUID;
-  new_comment_count INT;
-BEGIN
-  build_id_to_update := COALESCE(NEW.build_id, OLD.build_id);
-
-  -- compute the comment count once
-  SELECT COUNT(*) INTO new_comment_count
-  FROM public.comments
-  WHERE build_id = build_id_to_update AND NOT deleted;
-
-  UPDATE public.builds
-  SET
-    comment_count = new_comment_count,
-    score = (like_count * 2 + new_comment_count) / POWER( (EXTRACT(EPOCH FROM (NOW() - COALESCE(published_at, created_at))) / 86400) + 2, 1.05 )
-
-  WHERE id = build_id_to_update;
-
-  RETURN NULL;
-END;
-$$;
-
-
--- Triggers for comment insert/delete
 CREATE TRIGGER trg_comment_insert
 AFTER INSERT ON public.comments
-FOR EACH ROW EXECUTE FUNCTION public.update_build_comment_stats();
+FOR EACH ROW EXECUTE FUNCTION public.update_target_stats();
 
 CREATE TRIGGER trg_comment_delete
 AFTER DELETE ON public.comments
-FOR EACH ROW EXECUTE FUNCTION public.update_build_comment_stats();
+FOR EACH ROW EXECUTE FUNCTION public.update_target_stats();
 
--- Update = handle soft deletes (deleted flag toggled)
 CREATE TRIGGER trg_comment_update
 AFTER UPDATE OF deleted ON public.comments
-FOR EACH ROW
-EXECUTE FUNCTION public.update_build_comment_stats();
+FOR EACH ROW EXECUTE FUNCTION public.update_target_stats();

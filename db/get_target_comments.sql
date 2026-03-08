@@ -1,5 +1,6 @@
-CREATE OR REPLACE FUNCTION public.get_build_comments_v2(
-  p_build_id UUID,
+CREATE OR REPLACE FUNCTION public.get_target_comments_v1(
+  p_target_id UUID,
+  p_target_type target_type_enum,
   p_limit INT DEFAULT 20,
   p_offset INT DEFAULT 0
 )
@@ -35,7 +36,7 @@ AS $$
   JOIN public.users AS u ON c.user_id = u.id
   LEFT JOIN public.comments AS p ON p.id = c.parent_id
   LEFT JOIN public.users AS pu ON pu.id = p.user_id
-  WHERE c.build_id = p_build_id
+  WHERE c.target_id = p_target_id AND c.target_type = p_target_type
     AND NOT c.deleted
   ORDER BY c.created_at DESC
   LIMIT p_limit OFFSET p_offset;

@@ -9,7 +9,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Modal } from "@/app/components/Modal";
 import { keywordIdMapping } from "@/app/keywordIds";
 import Username from "@/app/components/Username";
-import CommentSection from "./commentSection";
+import CommentSection from "../../components/commentSection";
 import SinnerGrid from "../SinnerGrid";
 
 import "./builds.css";
@@ -234,8 +234,8 @@ export default function BuildPage({ params }) {
                     null
                 }
                 <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", flexWrap: "wrap" }}>
-                    <LikeButton buildId={id} likeCount={likeCount} />
-                    <SaveButton buildId={id} />
+                    <LikeButton targetType={"build"} targetId={id} likeCount={likeCount} />
+                    <SaveButton targetType={"build"} targetId={id} />
                     <button onClick={() => setShareOpen(true)}>
                         <ShareSolid text={"Share"} />
                     </button>
@@ -274,7 +274,7 @@ export default function BuildPage({ params }) {
         <div style={{ border: "1px #777 solid" }} />
         {build.is_published ?
             <div id="comments" style={{ width: "clamp(300px, 100%, 1200px)", alignSelf: "center" }}>
-                <CommentSection buildId={id} ownerId={build.user_id} commentCount={commentCount} pinnedComment={build.pinned_comment} />
+                <CommentSection targetType={"build"} targetId={id} ownerId={build.user_id} commentCount={commentCount} pinnedComment={build.pinned_comment} />
             </div> :
             <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>No comments while the build is not published.</p>
         }

@@ -162,8 +162,14 @@ export default function ProfilePage() {
                         setListsLoading(true);
                         const fetchSaves = async () => {
                             const saves = await savedListsStore.getAll();
-                            searchCuratedLists({ "list_ids": saves.map(x => x.id) }, true, "new", page, 10)
-                                .then(l => { setLists(l); setListsLoading(false); })
+                            if (saves.length === 0) {
+                                setLists([]);
+                                setListsLoading(false);
+                            }
+                            else {
+                                searchCuratedLists({ "list_ids": saves.map(x => x.id) }, true, "new", page, 10)
+                                    .then(l => { setLists(l); setListsLoading(false); })
+                            }
                         }
                         fetchSaves();
                     }

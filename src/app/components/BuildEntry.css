@@ -14,7 +14,7 @@
     /* margin-left: 0px; */
 }
 
-.build-entry:hover:not(:has(.build-buttons-container > *:hover, .tag:hover, .username:hover)) {
+.build-entry:hover:not(:has(.build-buttons-container > *:hover, .tag:hover, .username:hover, .build-icon-rails:hover)) {
     background: #3a3a3a;
 }
 
@@ -55,6 +55,7 @@
     top: 8px;
     left: -16px;
     padding: 4px 0 4px 0;
+    z-index: 5;
 }
 
 .build-contents {

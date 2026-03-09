@@ -15,9 +15,9 @@ import CommentButton from "./CommentButton";
 import NoPrefetchLink from "../NoPrefetchLink";
 
 function getSizes(size, isMobile) {
-    if (isMobile || size === "S") return { width: "300px", iconSize: 24, buttonIconSize: 16, scale: 0.175 };
-    if (size === "M") return { width: "460px", iconSize: 28, buttonIconSize: 20, scale: 0.275 };
-    if (size === "L") return { width: "640px", iconSize: 28, buttonIconSize: 20, scale: 0.375 }
+    if (isMobile || size === "S") return { width: "300px", iconSize: 24, buttonIconSize: 16, scale: 0.175, maxRailIcons: 5 };
+    if (size === "M") return { width: "460px", iconSize: 28, buttonIconSize: 20, scale: 0.275, maxRailIcons: 7 };
+    if (size === "L") return { width: "640px", iconSize: 28, buttonIconSize: 20, scale: 0.375, maxRailIcons: 10 }
     return null;
 }
 
@@ -38,12 +38,18 @@ export default function BuildEntry({ build, size, complete = true, clickable = t
 
     if (!sizes) return null;
 
+    const hiddenIcons = build.keyword_ids.length - sizes.maxRailIcons;
+
     return <div className="build-entry" style={{ width: sizes.width }}>
         {clickable ? <NoPrefetchLink href={`/builds/${build.id}`} className="build-entry-link" /> : null}
 
         {build.keyword_ids.length > 0 ?
             <div className="build-icon-rails">
-                {build.keyword_ids.map(id => <KeywordIcon key={id} id={keywordIdMapping[id]} size={sizes.iconSize} />)}
+                {build.keyword_ids.slice(0, sizes.maxRailIcons).map(id => <KeywordIcon key={id} id={keywordIdMapping[id]} size={sizes.iconSize} />)}
+                {hiddenIcons > 0 ? <span style={{
+                    width: sizes.iconSize, height: sizes.iconSize, display: "flex",
+                    alignItems: "center", justifyContent: "center", fontWeight: "bold", color: "#7c6a55"
+                }}>+{hiddenIcons}</span> : null}
             </div> :
             null
         }

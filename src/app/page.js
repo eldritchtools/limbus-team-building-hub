@@ -51,11 +51,14 @@ export default function Home() {
                 <br /> <br />
                 Use the sidebar or click on the links below to get started.
             </p>
-            <div style={{ display: "flex", flexWrap: "wrap", border: "1px solid #aaa", borderRadius: "0.5rem", padding: "1rem", gap: "1rem" }}>
-                <NoPrefetchLink className="text-link" href={"/builds"}>Explore Builds</NoPrefetchLink>
-                <NoPrefetchLink className="text-link" href={"/builds/new"}>Create a build</NoPrefetchLink>
-                <NoPrefetchLink className="text-link" href={"/identities"}>Identities</NoPrefetchLink>
-                <NoPrefetchLink className="text-link" href={"/egos"}>E.G.Os</NoPrefetchLink>
+            <div style={{ border: "1px solid #aaa", borderRadius: "0.5rem", overflowX: "auto", maxWidth: "100%" }}>
+                <div style={{ display: "flex", flexWrap: "nowrap", width: "max-content", gap: "1rem", padding: "1rem", boxSizing: "border-box" }}>
+                    <NoPrefetchLink className="text-link" href={"/builds"}>Explore Builds</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/builds/new"}>Create a build</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/curated-lists"}>Explore Curated Lists</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/identities"}>Identities</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/egos"}>E.G.Os</NoPrefetchLink>
+                </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", width: "100%", border: "1px solid #aaa", borderRadius: "0.5rem", padding: "1rem", boxSizing: "border-box" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "start", gap: "0.5rem", width: "100%" }}>

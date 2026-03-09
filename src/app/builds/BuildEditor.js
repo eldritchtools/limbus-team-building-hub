@@ -13,7 +13,7 @@ import MarkdownEditorWrapper from "../components/Markdown/MarkdownEditorWrapper"
 import "./SinnerGrid.css";
 import { extractYouTubeId } from "../YoutubeUtils";
 import NumberInputWithButtons from "../components/NumberInputWithButtons";
-import { LEVEL_CAP } from "../utils";
+import { isLocalId, LEVEL_CAP } from "../utils";
 import UptieSelector from "../components/UptieSelector";
 import { generalTooltipProps } from "../components/GeneralTooltip";
 import { decodeBuildExtraOpts, encodeBuildExtraOpts } from "../components/BuildExtraOpts";
@@ -174,11 +174,6 @@ function DeploymentComponent({ order, setOrder, activeSinners, sinnerId }) {
             <span style={{ fontSize: `clamp(0.6rem, 20cqw, 1.5rem)`, color: "#29fee9" }}>Backup {index + 1}</span>
         </button>
     }
-}
-
-function isLocalId(id) {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return !uuidRegex.test(id);
 }
 
 export default function BuildEditor({ mode, buildId }) {
@@ -358,6 +353,9 @@ export default function BuildEditor({ mode, buildId }) {
     return loading ? <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontSize: "1.5rem", fontWeight: "bold" }}>
         Loading...
     </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", containerType: "inline-size" }}>
+        <h2 style={{ fontSize: "1.2rem", margin: 0 }}>
+            {mode === "edit" ? "Editing" : "Creating"} Build
+        </h2>
         {!user ?
             <div style={{ color: "rgba(255, 99, 71, 0.85)" }}>When not logged in, builds are saved locally on this device. After logging in, you can sync them to your account. Builds that are not synced cannot be accessed while logged in.</div>
             : null

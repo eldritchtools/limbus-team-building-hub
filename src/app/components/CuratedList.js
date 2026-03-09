@@ -7,6 +7,7 @@ import NoPrefetchLink from "../NoPrefetchLink";
 import LikeButton from "./LikeButton";
 import CommentButton from "./CommentButton";
 import SaveButton from "./SaveButton";
+import ContributeButton from "./ContributeButton";
 
 function isLocalId(id) {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -44,10 +45,11 @@ export default function CuratedList({ list }) {
                 </div> :
                 null
             }
-            <div style={{display: "flex", gap: "0.5rem", pointerEvents: "all"}}>
+            <div style={{ display: "flex", gap: "0.5rem", pointerEvents: "all" }}>
                 <LikeButton targetType={"build_list"} targetId={list.id} likeCount={list.like_count} iconSize={20} />
                 <CommentButton targetPath={"curated-lists"} targetId={list.id} count={list.comment_count} iconSize={20} />
                 <SaveButton targetType={"build_list"} targetId={list.id} iconSize={20} />
+                {list.submission_mode === "open" ? <ContributeButton listId={list.id} iconSize={20} /> : null}
             </div>
         </div>
     </div>

@@ -13,6 +13,7 @@ create table public.build_lists (
   search_vector tsvector,
   view_count INTEGER NOT NULL DEFAULT 0,
   block_discovery BOOLEAN NOT NULL DEFAULT FALSE,
+  submission_mode build_list_submission_mode DEFAULT 'closed',
 
   created_at TIMESTAMPTZ DEFAULT NOW(),
   published_at TIMESTAMPTZ DEFAULT NULL,
@@ -31,7 +32,8 @@ create table public.build_list_items (
 
   note TEXT,
   position INTEGER NOT NULL,
-
+  
+  submitted_by UUID REFERENCES public.users(id),
   created_at TIMESTAMPTZ DEFAULT NOW(),
 
   UNIQUE (list_id, build_id),
@@ -102,7 +104,7 @@ with check (
   )
 );
 
-create or replace function public.search_build_lists_v2(
+create or replace function public.search_build_lists_v3(
   p_query text default null,
   list_id_filter UUID[] DEFAULT NULL,
   username_exact_filter TEXT DEFAULT NULL,
@@ -120,6 +122,7 @@ returns table (
   user_flair TEXT,
   title text,
   short_desc text,
+  submission_mode build_list_submission_mode,
   created_at timestamptz,
   published_at timestamptz,
   tags TEXT[],
@@ -158,6 +161,7 @@ begin
       u.flair,
       bl.title,
       bl.short_desc,
+      bl.submission_mode,
       bl.created_at,
       bl.published_at,
       bl.search_vector,
@@ -229,6 +233,7 @@ begin
     l.flair AS user_flair,
     l.title,
     l.short_desc,
+    l.submission_mode,
     l.created_at,
     l.published_at,
     COALESCE(lt.tags, ARRAY[]::TEXT[]) AS tags,
@@ -252,6 +257,7 @@ begin
     l.flair,
     l.title,
     l.short_desc,
+    l.submission_mode,
     l.created_at,
     l.published_at,
     lt.tags,
@@ -263,13 +269,14 @@ begin
 end;
 $$;
 
-create or replace function public.create_build_list(
+create or replace function public.create_build_list_v2(
   p_title text,
   p_body text,
   p_short_desc text,
   p_is_published boolean,
   p_block_discovery boolean,
   p_items jsonb,
+  p_submission_mode build_list_submission_mode,
   p_tags TEXT[]
 )
 returns uuid
@@ -295,6 +302,7 @@ begin
     title,
     body,
     short_desc,
+    submission_mode,
     is_published,
     block_discovery,
     published_at,
@@ -305,6 +313,7 @@ begin
     p_title,
     p_body,
     p_short_desc,
+    p_submission_mode,
     p_is_published,
     p_block_discovery,
     case when p_is_published then now() else null end,
@@ -323,13 +332,15 @@ begin
       list_id,
       build_id,
       note,
-      position
+      position,
+      submitted_by
     )
     values (
       v_list_id,
       (v_item->>'build_id')::uuid,
       v_item->>'note',
-      v_position
+      v_position,
+      (v_item->>'submitted_by')::uuid
     );
 
     v_position := v_position + 1;
@@ -350,11 +361,12 @@ begin
 end;
 $$;
 
-create or replace function public.update_build_list(
+create or replace function public.update_build_list_v2(
   p_list_id uuid,
   p_title text,
   p_body text,
   p_short_desc text,
+  p_submission_mode build_list_submission_mode,
   p_is_published boolean,
   p_block_discovery boolean,
   p_items jsonb,
@@ -390,6 +402,7 @@ begin
   set title = p_title,
       body = p_body,
       short_desc = p_short_desc,
+      submission_mode = p_submission_mode,
       is_published = p_is_published,
       block_discovery = p_block_discovery,
       published_at = case when p_is_published then coalesce(published_at, now()) else null end,
@@ -412,13 +425,15 @@ begin
       list_id,
       build_id,
       note,
-      position
+      position,
+      submitted_by
     )
     values (
       p_list_id,
       (v_item->>'build_id')::uuid,
       v_item->>'note',
-      v_position
+      v_position,
+      (v_item->>'submitted_by')::uuid
     );
 
     v_position := v_position + 1;
@@ -445,7 +460,7 @@ begin
 end;
 $$;
 
-create or replace function public.get_build_list_v2(
+create or replace function public.get_build_list_v3(
   p_list_id uuid
 )
 returns jsonb
@@ -471,6 +486,7 @@ begin
       bl.title,
       bl.body,
       bl.short_desc,
+      bl.submission_mode,
       bl.is_published,
       bl.created_at,
       bl.published_at,
@@ -541,7 +557,10 @@ begin
       jsonb_agg(
         jsonb_build_object(
           'build', to_jsonb(b),
-          'note', bli.note
+          'note', bli.note,
+          'submitted_by', bli.submitted_by,
+          'submitted_by_username', u_submit.username,
+          'submitted_by_flair', u_submit.flair
         )
         ORDER BY array_position(lb.build_ids, b.id)
       ) AS items
@@ -550,6 +569,8 @@ begin
       ON bli.list_id = lb.list_id
     LEFT JOIN builds b
       ON b.id = bli.build_id
+    LEFT JOIN public.users u_submit
+      ON bli.submitted_by = u_submit.id
   )
 
   SELECT jsonb_build_object(
@@ -560,6 +581,7 @@ begin
     'title', l.title,
     'body', l.body,
     'short_desc', l.short_desc,
+    'submission_mode', l.submission_mode,
     'is_published', l.is_published,
     'created_at', l.created_at,
     'published_at', l.published_at,
@@ -633,3 +655,95 @@ with check (
   )
 );
 
+CREATE TABLE public.build_list_submissions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  list_id uuid NOT NULL REFERENCES public.build_lists(id) ON DELETE CASCADE,
+  build_id uuid NOT NULL REFERENCES public.builds(id) ON DELETE CASCADE,
+
+  submitted_by uuid NOT NULL REFERENCES public.users(id),
+  submitted_at timestamptz NOT NULL DEFAULT now(),
+
+  note text,
+  submitter_note text,
+
+  status text NOT NULL DEFAULT 'pending',
+
+  reviewed_by uuid REFERENCES public.users(id),
+  reviewed_at timestamptz
+);
+
+CREATE UNIQUE INDEX uniq_user_submission
+ON build_list_submissions(list_id, build_id, submitted_by)
+WHERE status = 'pending';
+
+CREATE INDEX idx_submission_list_status
+ON build_list_submissions(list_id, status, submitted_at DESC);
+
+CREATE TYPE build_list_submission_mode AS ENUM (
+  'closed',
+  'open'
+);
+
+ALTER TABLE public.build_lists
+ADD COLUMN submission_mode build_list_submission_mode
+DEFAULT 'closed';
+
+ALTER TABLE public.build_list_submissions
+ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "users can submit published builds to open lists"
+ON public.build_list_submissions
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  submitted_by = auth.uid()
+
+  AND EXISTS (
+    SELECT 1
+    FROM public.build_lists bl
+    WHERE bl.id = build_list_submissions.list_id
+      AND bl.submission_mode = 'open'
+  )
+
+  AND EXISTS (
+    SELECT 1
+    FROM public.builds b
+    WHERE b.id = build_list_submissions.build_id
+      AND b.is_published = TRUE
+  )
+);
+
+CREATE POLICY "users can view their own submissions"
+ON public.build_list_submissions
+FOR SELECT
+TO authenticated
+USING (
+  submitted_by = auth.uid()
+);
+
+CREATE POLICY "list owners can view submissions"
+ON public.build_list_submissions
+FOR SELECT
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM public.build_lists bl
+    WHERE bl.id = build_list_submissions.list_id
+      AND bl.user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "list owners can update submissions"
+ON public.build_list_submissions
+FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM public.build_lists bl
+    WHERE bl.id = build_list_submissions.list_id
+      AND bl.user_id = auth.uid()
+  )
+);

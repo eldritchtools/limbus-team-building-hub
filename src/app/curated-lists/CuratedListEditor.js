@@ -7,17 +7,10 @@ import { useRouter } from "next/navigation";
 import MarkdownEditorWrapper from "../components/Markdown/MarkdownEditorWrapper";
 import { listsStore } from "../database/localDB";
 import { getCuratedList, insertCuratedList, updateCuratedList } from "../database/curatedLists";
-import { Modal } from "../components/Modal";
-import BuildsSearchComponent from "../builds/BuildsSearchComponent";
-import { prepareBuildFilters } from "../builds/search/SearchBuildsContent";
 import BuildEntry from "../components/BuildEntry";
-import { tabStyle } from "../styles";
-import { getFilteredBuilds } from "../database/builds";
-
-function isLocalId(id) {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return !uuidRegex.test(id);
-}
+import Username from "../components/Username";
+import SelectBuildModal from "../components/SelectBuildModal";
+import { isLocalId } from "../utils";
 
 function BuildItem({ build, note, index, isFirst, isLast, swapBuilds, removeBuild, setBuildNote }) {
     return <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center", width: "100%" }}>
@@ -30,20 +23,23 @@ function BuildItem({ build, note, index, isFirst, isLast, swapBuilds, removeBuil
             </button>
             <button onClick={() => swapBuilds(index + 1)} disabled={isLast}>∨</button>
         </div>
-        <BuildEntry build={build} size={"M"} complete={false} clickable={false} />
+        <div style={{ display: "flex", flexDirection: "column" }}>
+            {build.submitted_by ?
+                <div style={{ display: "flex" }}>
+                    Submitted by: <Username username={build.submitted_by_username} flair={build.submitted_by_flair} />
+                </div> :
+                null
+            }
+            <BuildEntry build={build} size={"M"} complete={false} clickable={false} />
+        </div>
         <div style={{ minWidth: "min(100ch, 90vw)", flex: 1, marginLeft: "auto", marginRight: "auto" }}>
             <MarkdownEditorWrapper value={note} onChange={setBuildNote} placeholder={"Add any notes for this build here..."} />
         </div>
     </div>
 }
 
-function BuildList({ builds, setBuilds, user }) {
+function BuildList({ builds, setBuilds }) {
     const [addBuildOpen, setAddBuildOpen] = useState(false);
-    const [filters, setFilters] = useState({});
-    const [searchBuilds, setSearchBuilds] = useState([]);
-    const [page, setPage] = useState(1);
-    const [loading, setLoading] = useState(true);
-    const [searchMode, setSearchMode] = useState("search");
 
     const swapBuilds = (a, b) => {
         setBuilds(p => {
@@ -66,35 +62,6 @@ function BuildList({ builds, setBuilds, user }) {
         setBuilds(p => p.map(x => x.build.id === id ? { ...x, note: v } : x))
     }
 
-    useEffect(() => {
-        const fetchBuilds = async () => {
-            try {
-                setLoading(true);
-
-                if (searchMode === "search") {
-                    const sortBy = filters["sortBy"] || "score";
-                    const strictFiltering = filters["strictFiltering"] || false;
-                    const newFilters = prepareBuildFilters(filters);
-
-                    const data = await getFilteredBuilds({ ...newFilters, "ignore_block_discovery": true }, true, sortBy, strictFiltering, page, 24);
-
-                    setSearchBuilds(data || []);
-                } else if (searchMode === "user") {
-                    if (user) {
-                        const data = await getFilteredBuilds({ "user_id": user.id, "ignore_block_discovery": true }, true, "recency", false, page, 24);
-                        setSearchBuilds(data || []);
-                    }
-                }
-                setLoading(false);
-            } catch (err) {
-                console.error("Error loading builds:", err);
-            }
-        };
-
-        fetchBuilds();
-
-    }, [filters, page, setBuilds, searchMode, user]);
-
     return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         <div>
             <button onClick={() => { setAddBuildOpen(true); }}>
@@ -114,48 +81,16 @@ function BuildList({ builds, setBuilds, user }) {
                 setBuildNote={v => setBuildNote(build.build.id, v)}
             />
         )}
-        <Modal isOpen={addBuildOpen} onClose={() => setAddBuildOpen(false)}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1rem", maxHeight: "90vh", overflowY: "auto", width: "980px", maxWidth: "80vw" }}>
-                <div style={{ display: "flex", flexDirection: "row", gap: "1rem", alignSelf: "center", marginTop: "0.5rem", marginBottom: "0.5rem" }}>
-                    <div style={{ ...tabStyle, color: searchMode === "search" ? "#ddd" : "#777" }} onClick={() => setSearchMode("search")}>Search Builds</div>
-                    <div style={{ ...tabStyle, color: searchMode === "user" ? "#ddd" : "#777" }} onClick={() => setSearchMode("user")}>My Published Builds</div>
-                </div>
-                {searchMode === "search" ?
-                    <BuildsSearchComponent inPage={true} setFilters={setFilters} /> :
-                    (!user ?
-                        <span>Locally saved builds are not supported.</span> :
-                        null
-                    )
-                }
-                <span style={{ textAlign: "center" }}>Adding the same build more than once is not supported.</span>
-                <div style={{ border: "1px #777 solid" }} />
 
-                {loading ?
-                    <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading builds...</p> :
-                    searchBuilds.length === 0 ?
-                        <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>
-                            {page === 1 ? "No published builds yet." : "No more builds."}
-                        </p> :
-                        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 300px)", gap: "1rem", justifyContent: "center" }}>
-                                {searchBuilds.map(build => <div key={build.id} onClick={() => {
-                                    if (!builds.find(x => x.build.id === build.id)) {
-                                        addBuild(build); setAddBuildOpen(false);
-                                    }
-                                }}>
-                                    <BuildEntry build={build} size={"S"} complete={false} clickable={false} />
-                                </div>
-                                )}
-                            </div>
-
-                            <div style={{ display: "flex", gap: "0.5rem", alignSelf: "end" }}>
-                                <button className="page-button" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>
-                                <button className="page-button" disabled={searchBuilds.length < 24} onClick={() => setPage(p => p + 1)}>Next</button>
-                            </div>
-                        </div>
+        <SelectBuildModal
+            isOpen={addBuildOpen}
+            onClose={() => setAddBuildOpen(false)}
+            onSelectBuild={build => {
+                if (!builds.find(x => x.build.id === build.id)) {
+                    addBuild(build); setAddBuildOpen(false);
                 }
-            </div>
-        </Modal>
+            }}
+        />
     </div>
 }
 
@@ -163,6 +98,7 @@ export default function CuratedListEditor({ mode, listId }) {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [shortDesc, setShortDesc] = useState('');
+    const [contributions, setContributions] = useState('closed');
     const [tags, setTags] = useState([]);
     const [builds, setBuilds] = useState([]);
     const [isPublished, setIsPublished] = useState(false);
@@ -178,12 +114,12 @@ export default function CuratedListEditor({ mode, listId }) {
     useEffect(() => {
         if (mode === "edit") {
             const handleList = list => {
-                console.log(list);
                 if (!list) router.back();
                 if (list.username || isLocalId(listId)) {
                     setTitle(list.title);
                     setBody(list.body);
                     setShortDesc(list.short_desc);
+                    setContributions(list.submission_mode);
                     setBuilds(list.items);
                     setTags(list.tags.map(t => tagToTagSelectorOption(t?.name ?? t)));
                     setIsPublished(list.is_published);
@@ -220,12 +156,16 @@ export default function CuratedListEditor({ mode, listId }) {
 
         setSaving(true);
         if (user) {
-            const trimmedBuilds = builds.map(({ build, note }) => ({ build_id: build.id, note: note }));
+            const trimmedBuilds = builds.map(({ build, note, submitted_by }) => {
+                const result = { build_id: build.id, note };
+                if (submitted_by) result.submitted_by = submitted_by;
+                return result;
+            });
             if (mode === "edit") {
-                const data = await updateCuratedList(listId, title, body, shortDesc, trimmedBuilds, tagsConverted, blockDiscovery, isPublished);
+                const data = await updateCuratedList(listId, title, body, shortDesc, trimmedBuilds, contributions, tagsConverted, blockDiscovery, isPublished);
                 router.push(`/curated-lists/${data}`);
             } else {
-                const data = await insertCuratedList(title, body, shortDesc, trimmedBuilds, tagsConverted, blockDiscovery, isPublished);
+                const data = await insertCuratedList(title, body, shortDesc, trimmedBuilds, contributions, tagsConverted, blockDiscovery, isPublished);
                 router.push(`/curated-lists/${data}`);
             }
         } else {
@@ -251,6 +191,9 @@ export default function CuratedListEditor({ mode, listId }) {
     return loading ? <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontSize: "1.5rem", fontWeight: "bold" }}>
         Loading...
     </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", containerType: "inline-size" }}>
+        <h2 style={{ fontSize: "1.2rem", margin: 0 }}>
+            {mode === "edit" ? "Editing" : "Creating"} Curated List
+        </h2>
         {!user ?
             <div style={{ color: "rgba(255, 99, 71, 0.85)" }}>When not logged in, curated lists are saved locally on this device. After logging in, you can sync them to your account. Curated lists that are not synced cannot be accessed while logged in.</div>
             : null
@@ -266,8 +209,22 @@ export default function CuratedListEditor({ mode, listId }) {
         <div className={{ maxWidth: "48rem", marginLeft: "auto", marginRight: "auto" }}>
             <MarkdownEditorWrapper value={body} onChange={setBody} placeholder={"Describe your curated list here..."} />
         </div>
+        {!isLocalId(listId) ? <>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <span style={{ fontSize: "1.2rem" }}>Contributions: </span>
+                <select value={contributions} onChange={e => setContributions(e.target.value)}>
+                    <option value={"closed"}>Closed</option>
+                    <option value={"open"}>Open</option>
+                </select>
+            </div>
+            <span style={{ fontSize: "1rem", color: "#aaa" }}>
+                Opening contributions allows other users to submit builds which you can then review to add to your curated list.
+            </span>
+        </> :
+            null
+        }
         <span style={{ fontSize: "1.2rem" }}>Builds</span>
-        <BuildList builds={builds} setBuilds={setBuilds} user={user} />
+        <BuildList builds={builds} setBuilds={setBuilds} />
         <span style={{ fontSize: "1.2rem" }}>Tags</span>
         <TagSelector selected={tags} onChange={setTags} creatable={true} />
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>

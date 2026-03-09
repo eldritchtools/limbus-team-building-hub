@@ -62,7 +62,7 @@ export default function BuildEntry({ build, size, complete = true, clickable = t
             </div>
             <div style={{ fontSize: "0.8rem", marginBottom: "0.2rem", color: "#ddd" }}>
                 {!isLocalId(build.id) ?
-                    <span>by <Username username={build.username} flair={build.user_flair} /> • </span> :
+                    <span>by <Username username={build.username} flair={build.user_flair} clickable={clickable} /> • </span> :
                     null
                 }<ReactTimeAgo date={build.published_at ?? build.created_at} locale="en-US" timeStyle="mini" />
             </div>

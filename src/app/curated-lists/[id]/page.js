@@ -19,11 +19,8 @@ import DropdownButton from "@/app/components/DropdownButton";
 import CommentSection from "@/app/components/commentSection";
 import LikeButton from "@/app/components/LikeButton";
 import SaveButton from "@/app/components/SaveButton";
-
-function isLocalId(id) {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return !uuidRegex.test(id);
-}
+import ContributeButton from "@/app/components/ContributeButton";
+import { isLocalId } from "@/app/utils";
 
 function BuildList({ builds, viewMode, isMobile }) {
     if (viewMode === "grid" || isMobile) {
@@ -32,6 +29,12 @@ function BuildList({ builds, viewMode, isMobile }) {
             {builds.map(build =>
                 <div key={build.build.id} style={{ display: "flex", flexDirection: "column", gap: "0", alignItems: "center", width: "100%" }}>
                     <BuildEntry build={build.build} size={"M"} />
+                    {build.submitted_by ?
+                        <div style={{ display: "flex" }}>
+                            Submitted by: <Username username={build.submitted_by_username} flair={build.submitted_by_flair} />
+                        </div> :
+                        null
+                    }
                     {build.note.length > 0 ?
                         <div style={{ alignSelf: "center", marginTop: isMobile ? "0.5rem" : "1rem" }}>
                             <MarkdownRenderer content={build.note} />
@@ -52,9 +55,16 @@ function BuildList({ builds, viewMode, isMobile }) {
                     <BuildEntry build={build.build} size={"M"} />
                     {build.note.length > 0 ?
                         <div style={{
+                            display: "flex", flexDirection: "column",
                             width: "100%", alignSelf: "start",
                             paddingTop: isMobile ? "0" : "1rem"
                         }}>
+                            {build.submitted_by ?
+                                <div style={{ display: "flex" }}>
+                                    Submitted by: <Username username={build.submitted_by_username} flair={build.submitted_by_flair} />
+                                </div> :
+                                null
+                            }
                             <MarkdownRenderer content={build.note} />
                         </div> :
                         null
@@ -205,6 +215,7 @@ export default function CuratedListPage({ params }) {
                                     <DeleteSolid text={"Delete"} />
                                 </button> : null
                         }
+                        {curatedList.submission_mode === "open" ? <ContributeButton listId={id} /> : null}
                     </div>
                     <div style={{ display: "flex", alignItems: "center" }}>
                         {

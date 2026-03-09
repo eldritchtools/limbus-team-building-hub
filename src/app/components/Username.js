@@ -1,10 +1,14 @@
 import "./Username.css";
 import NoPrefetchLink from "../NoPrefetchLink";
 
-export default function Username({username, flair, style={}}){
-    if (flair) 
-        return <span style={{whiteSpace: "wrap"}}>
-            <NoPrefetchLink href={`/profiles/${username}`} className="username" style={style}>{username}</NoPrefetchLink> <em style={{color: "#aaa"}}>({flair})</em>
+export default function Username({ username, flair, style = {}, clickable = true }) {
+    const component = clickable ?
+        <NoPrefetchLink href={`/profiles/${username}`} className="username" style={style}>{username}</NoPrefetchLink> :
+        <span className="username">{username}</span>
+
+    if (flair)
+        return <span style={{ whiteSpace: "wrap" }}>
+            {component} <em style={{ color: "#aaa" }}>({flair})</em>
         </span>
-    return <NoPrefetchLink href={`/profiles/${username}`} className="username" style={style}>{username}</NoPrefetchLink>
+    return component;
 }

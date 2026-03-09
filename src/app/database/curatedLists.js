@@ -15,14 +15,14 @@ async function searchCuratedLists(filters, isPublished = true, sortBy = "score",
     options.p_limit = pageSize;
     options.p_offset = start;
 
-    const { data, error } = await getSupabase().rpc('search_build_lists_v2', options);
+    const { data, error } = await getSupabase().rpc('search_build_lists_v3', options);
 
     if (error) throw (error);
     return data;
 }
 
 async function getCuratedList(id) {
-    const { data, error } = await getSupabase().rpc("get_build_list_v2", {
+    const { data, error } = await getSupabase().rpc("get_build_list_v3", {
         p_list_id: id,
     });
 
@@ -30,11 +30,12 @@ async function getCuratedList(id) {
     return data;
 }
 
-async function insertCuratedList(title, body, short_desc, items, tags, block_discovery, is_published) {
-    const { data, error } = await getSupabase().rpc('create_build_list', {
+async function insertCuratedList(title, body, short_desc, items, submission_mode, tags, block_discovery, is_published) {
+    const { data, error } = await getSupabase().rpc('create_build_list_v2', {
         p_title: title,
         p_body: body,
         p_short_desc: short_desc,
+        p_submission_mode: submission_mode,
         p_is_published: is_published,
         p_block_discovery: block_discovery,
         p_items: items,
@@ -45,12 +46,13 @@ async function insertCuratedList(title, body, short_desc, items, tags, block_dis
     return data;
 }
 
-async function updateCuratedList(list_id, title, body, short_desc, items, tags, block_discovery, is_published) {
-    const { error } = await getSupabase().rpc('update_build_list', {
+async function updateCuratedList(list_id, title, body, short_desc, items, submission_mode, tags, block_discovery, is_published) {
+    const { error } = await getSupabase().rpc('update_build_list_v2', {
         p_list_id: list_id,
         p_title: title,
         p_body: body,
         p_short_desc: short_desc,
+        p_submission_mode: submission_mode,
         p_is_published: is_published,
         p_block_discovery: block_discovery,
         p_items: items,
@@ -91,6 +93,30 @@ async function unpinCuratedListComment(listId) {
     return true;
 }
 
+async function submitBuildListContribution(user_id, list_id, build_id, note, submitter_note) {
+    try {
+        const { data, error } = await getSupabase()
+            .from("build_list_submissions")
+            .insert({
+                list_id: list_id,
+                build_id: build_id,
+                note: note,
+                submitter_note: submitter_note,
+                submitted_by: user_id
+            });
+
+        if (error) throw error;
+        return "Success";
+
+    } catch (err) {
+        if (err.code === "23505") {
+            return "You have a pending submission for this build on this curated list.";
+        } else {
+            return "Something went wrong while submitting.";
+        }
+    }
+}
+
 async function getCuratedListsForSitemap(page, count) {
     const offset = (page - 1) * count;
     const { data, error } = await getSupabase()
@@ -114,4 +140,9 @@ async function getCuratedListsCountForSitemap() {
     return count;
 }
 
-export { searchCuratedLists, getCuratedList, insertCuratedList, updateCuratedList, deleteCuratedList, pinCuratedListComment, unpinCuratedListComment, getCuratedListsForSitemap, getCuratedListsCountForSitemap };
+export {
+    searchCuratedLists, getCuratedList, insertCuratedList, updateCuratedList, deleteCuratedList,
+    pinCuratedListComment, unpinCuratedListComment,
+    submitBuildListContribution,
+    getCuratedListsForSitemap, getCuratedListsCountForSitemap
+};

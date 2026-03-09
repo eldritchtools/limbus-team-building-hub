@@ -58,6 +58,19 @@ input[type="checkbox"] {
   font-size: 1rem;
 }
 
+.toggle-button-disabled {
+  background-color: #1a1a1a;
+  color: #777;
+  border: 1px solid #555;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin: 2px;
+  transition: background-color 0.2s, border-color 0.2s;
+  cursor: "not-allowed";
+  font-size: 1rem;
+  opacity: 0.6;
+}
+
 .toggle-button:hover {
   background-color: #3a3a3a;
 }

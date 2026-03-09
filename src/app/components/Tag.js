@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import "./tag.css";
-import Link from "next/link";
+import NoPrefetchLink from "../NoPrefetchLink";
 
 export default function Tag({ tag, type }) {
     const path = useMemo(() => {
@@ -10,5 +10,5 @@ export default function Tag({ tag, type }) {
         return `/${type}/search?${search.toString()}`;
     }, [tag, type]);
 
-    return <Link className="tag" href={path} prefetch={false}>{tag}</Link>
+    return <NoPrefetchLink className="tag" href={path}>{tag}</NoPrefetchLink>
 }

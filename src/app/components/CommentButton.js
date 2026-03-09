@@ -1,4 +1,4 @@
-import Link from "next/link";
+import NoPrefetchLink from "../NoPrefetchLink";
 import { CommentSolid } from "./Symbols";
 
 const style = {
@@ -11,10 +11,16 @@ const style = {
     textDecoration: "none"
 };
 
-export default function CommentButton({ buildId, count, iconSize }) {
+export default function CommentButton({ targetPath, targetId, count, buildEntryVersion, iconSize }) {
     const text = count === 1 ? "1 Comment" : `${count} Comments`;
-    
-    return <Link href={`/builds/${buildId}#comments`} style={style} prefetch={false}>
-        <CommentSolid text={text} size={iconSize} />
-    </Link>
+
+    if (buildEntryVersion) {
+        return <NoPrefetchLink href={`/${targetPath}/${targetId}#comments`} style={style}>
+            <CommentSolid text={text} size={iconSize} />
+        </NoPrefetchLink>
+    } else {
+        return <NoPrefetchLink href={`/${targetPath}/${targetId}#comments`} className="toggle-button" style={{color: "#ddd", textDecoration: "none"}}>
+            <CommentSolid text={text} size={iconSize} />
+        </NoPrefetchLink>
+    }
 }

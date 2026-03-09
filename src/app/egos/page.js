@@ -5,13 +5,13 @@ import { Icon, EgoImg, RarityImg, SinnerIcon, Status, useData } from "@eldritcht
 import { capitalizeFirstLetter, ColorResist, getSeasonString, sinnerMapping } from "../utils";
 import { selectStyle } from "../styles";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import "./egos.css";
 import EgoComparisonAdvanced from "./EgoComparisonAdvanced";
 import DropdownButton from "../components/DropdownButton";
 import EgoComparisonBasic from "./EgoComparisonBasic";
 import { SelectorWithExclusion } from "../components/Selectors";
 import { generalTooltipProps } from "../components/GeneralTooltip";
+import NoPrefetchLink from "../NoPrefetchLink";
 const Select = dynamic(() => import("react-select"), { ssr: false });
 
 const mainFilters = {
@@ -43,9 +43,9 @@ function SkillTypeIcons({ skill }) {
 
 function EgoDetails({ id, ego }) {
     const wrapCell = contents => <td style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid", verticalAlign: "middle" }}>
-        <Link key={id} href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "128px" }} prefetch={false}>
+        <NoPrefetchLink key={id} href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "128px" }}>
             {contents}
-        </Link>
+        </NoPrefetchLink>
     </td>
 
     return <tr className="clickable-table-row">
@@ -239,11 +239,11 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
 
     if (displayType === "icon") {
         const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(128px, 1fr))", width: "100%", gap: "0.5rem" }}>
-            {list.map(([id, ego]) => <div key={id}><Link href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }} prefetch={false}>
+            {list.map(([id, ego]) => <div key={id}><NoPrefetchLink href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }}>
                 <div className="clickable-ego">
                     <EgoImg ego={ego} type={"awaken"} displayName={true} displayRarity={true} />
                 </div>
-            </Link></div>)}
+            </NoPrefetchLink></div>)}
         </div>
 
         if (separateSinners) {
@@ -263,7 +263,7 @@ function EgoList({ egos, searchString, selectedMainFilters, displayType, separat
         }
     } else if (displayType === "card") {
         const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, min(420px, 100%))", width: "100%", gap: "0.5rem", justifyContent: "center" }}>
-            {list.map(([id, ego]) => <div key={id}><Link href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }} prefetch={false}><EgoCard key={id} ego={ego} /></Link></div>)}
+            {list.map(([id, ego]) => <div key={id}><NoPrefetchLink href={`/egos/${id}`} style={{ color: "#ddd", textDecoration: "none" }}><EgoCard key={id} ego={ego} /></NoPrefetchLink></div>)}
         </div>
 
         if (separateSinners) {

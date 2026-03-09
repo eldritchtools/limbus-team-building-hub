@@ -3,7 +3,6 @@
 import { KeywordIcon } from "@eldritchtools/limbus-shared-library";
 import { keywordIdMapping } from "../keywordIds";
 import Tag from "./Tag";
-import Link from "next/link";
 import Username from "./Username";
 import IdentityImgSpread from "./IdentityImgSpread";
 import LikeButton from "./LikeButton";
@@ -13,6 +12,7 @@ import { decodeBuildExtraOpts } from "./BuildExtraOpts";
 import { useBreakpoint } from "@eldritchtools/shared-components";
 import "./BuildEntry.css";
 import CommentButton from "./CommentButton";
+import NoPrefetchLink from "../NoPrefetchLink";
 
 function getSizes(size, isMobile) {
     if (isMobile || size === "S") return { width: "300px", iconSize: 24, buttonIconSize: 16, scale: 0.175 };
@@ -39,7 +39,7 @@ export default function BuildEntry({ build, size, complete = true, clickable = t
     if (!sizes) return null;
 
     return <div className="build-entry" style={{ width: sizes.width }}>
-        {clickable ? <Link href={`/builds/${build.id}`} className="build-entry-link" prefetch={false} /> : null}
+        {clickable ? <NoPrefetchLink href={`/builds/${build.id}`} className="build-entry-link" /> : null}
 
         {build.keyword_ids.length > 0 ?
             <div className="build-icon-rails">
@@ -69,9 +69,9 @@ export default function BuildEntry({ build, size, complete = true, clickable = t
         </div>
         {complete ?
             <div className="build-buttons-container">
-                <LikeButton buildId={build.id} likeCount={build.like_count} buildEntryVersion={true} iconSize={sizes.buttonIconSize} />
-                <CommentButton buildId={build.id} count={build.comment_count} iconSize={sizes.buttonIconSize} />
-                <SaveButton buildId={build.id} buildEntryVersion={true} iconSize={sizes.buttonIconSize} />
+                <LikeButton targetType={"build"} targetId={build.id} likeCount={build.like_count} buildEntryVersion={true} iconSize={sizes.buttonIconSize} />
+                <CommentButton targetPath={"builds"} targetId={build.id} count={build.comment_count} buildEntryVersion={true} iconSize={sizes.buttonIconSize} />
+                <SaveButton targetType={"build"} targetId={build.id} buildEntryVersion={true} iconSize={sizes.buttonIconSize} />
             </div>
             : null}
     </div>

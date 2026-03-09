@@ -1,12 +1,27 @@
 CREATE OR REPLACE FUNCTION handle_comment_notifications()
 RETURNS TRIGGER AS $$
 DECLARE
-  build_owner UUID;
+  target_owner UUID;
   parent_owner UUID;
   existing_notif UUID;
+  tgt_type target_type_enum;
+  tgt_id UUID;
 BEGIN
-  SELECT user_id INTO build_owner FROM public.builds WHERE id = NEW.build_id;
+  tgt_type := NEW.target_type;
+  tgt_id   := NEW.target_id;
 
+  -- ========================
+  -- Get owner of target
+  -- ========================
+  IF tgt_type = 'build' THEN
+    SELECT user_id INTO target_owner FROM public.builds WHERE id = tgt_id;
+  ELSIF tgt_type = 'build_list' THEN
+    SELECT user_id INTO target_owner FROM public.build_lists WHERE id = tgt_id;
+  END IF;
+
+  -- ========================
+  -- Parent comment owner
+  -- ========================
   IF NEW.parent_id IS NOT NULL THEN
     SELECT user_id INTO parent_owner FROM public.comments WHERE id = NEW.parent_id;
   END IF;
@@ -14,11 +29,12 @@ BEGIN
   -- ========================
   -- 1. Notify build owner
   -- ========================
-  IF build_owner IS NOT NULL AND build_owner != NEW.user_id THEN
+  IF target_owner IS NOT NULL AND target_owner != NEW.user_id THEN
     SELECT id INTO existing_notif
     FROM public.notifications
-    WHERE user_id = build_owner
-      AND build_id = NEW.build_id
+    WHERE user_id = target_owner
+      AND target_type = tgt_type
+      AND target_id = tgt_id
       AND type = 'comment'
       AND is_read = FALSE
     LIMIT 1;
@@ -30,8 +46,8 @@ BEGIN
       WHERE id = existing_notif
         AND NOT (NEW.user_id = ANY(actor_ids));
     ELSE
-      INSERT INTO notifications (user_id, actor_ids, build_id, type)
-      VALUES (build_owner, ARRAY[NEW.user_id], NEW.build_id, 'comment');
+      INSERT INTO notifications (user_id, actor_ids, target_type, target_id, type)
+      VALUES (target_owner, ARRAY[NEW.user_id], tgt_type, tgt_id, 'comment');
     END IF;
   END IF;
 
@@ -41,12 +57,13 @@ BEGIN
   IF NEW.parent_id IS NOT NULL 
      AND parent_owner IS NOT NULL
      AND parent_owner != NEW.user_id
-     AND parent_owner != build_owner THEN
+     AND parent_owner != target_owner THEN
 
     SELECT id INTO existing_notif
     FROM notifications
     WHERE user_id = parent_owner
-      AND build_id = NEW.build_id
+      AND target_type = tgt_type
+      AND target_id = tgt_id
       AND parent_comment_id = NEW.parent_id
       AND type = 'reply'
       AND is_read = FALSE
@@ -59,8 +76,8 @@ BEGIN
       WHERE id = existing_notif
         AND NOT (NEW.user_id = ANY(actor_ids));
     ELSE
-      INSERT INTO notifications (user_id, actor_ids, build_id, parent_comment_id, type)
-      VALUES (parent_owner, ARRAY[NEW.user_id], NEW.build_id, NEW.parent_id, 'reply');
+      INSERT INTO notifications (user_id, actor_ids, target_type, target_id, parent_comment_id, type)
+      VALUES (parent_owner, ARRAY[NEW.user_id], tgt_type, tgt_id, NEW.parent_id, 'reply');
     END IF;
   END IF;
 
@@ -77,7 +94,7 @@ FOR EACH ROW
 EXECUTE FUNCTION handle_comment_notifications();
 
 
-CREATE OR REPLACE FUNCTION public.get_user_notifications(
+CREATE OR REPLACE FUNCTION public.get_user_notifications_v2(
   p_user_id UUID,
   p_limit INT DEFAULT 20,
   p_offset INT DEFAULT 0
@@ -86,8 +103,9 @@ RETURNS TABLE (
   id UUID,
   type TEXT,
   actors TEXT[],
-  build_id UUID,
-  build_title TEXT,
+  target_type target_type_enum,
+  target_id UUID,
+  title TEXT,
   is_read BOOLEAN,
   created_at TIMESTAMPTZ
 )
@@ -98,22 +116,34 @@ AS $$
     n.id,
     n.type,
     ARRAY_AGG(DISTINCT a.username ORDER BY a.username) AS actors,
-    n.build_id,
-    b.title AS build_title,
+    n.target_type,
+    n.target_id,
+    COALESCE(b.title, l.title) AS title,
     n.is_read,
     n.created_at
   FROM public.notifications AS n
-  JOIN public.builds AS b ON b.id = n.build_id
+
+  LEFT JOIN public.builds b
+    ON n.target_type = 'build'
+   AND b.id = n.target_id
+
+  LEFT JOIN public.build_lists l
+    ON n.target_type = 'build_list'
+   AND l.id = n.target_id
+   
   LEFT JOIN LATERAL (
     SELECT u.username
     FROM public.users AS u
     WHERE u.id = ANY(n.actor_ids)
   ) AS a ON TRUE
   WHERE n.user_id = p_user_id
-  GROUP BY n.id, n.type, n.build_id, b.title, n.is_read, n.created_at
+  GROUP BY n.id, n.type, n.target_type, n.target_id, b.title, l.title, n.is_read, n.created_at
   ORDER BY n.created_at DESC
   LIMIT p_limit OFFSET p_offset;
 $$;
+
+CREATE INDEX idx_notifications_user ON notifications (user_id, created_at DESC);
+CREATE INDEX idx_notifications_user_target_type ON notifications (user_id, target_type, created_at DESC);
 
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 

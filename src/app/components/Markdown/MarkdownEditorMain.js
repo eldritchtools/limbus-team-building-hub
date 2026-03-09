@@ -13,7 +13,7 @@ import {
 import { Transaction } from "@codemirror/state";
 import { markdownStyling } from './MarkdownEditorStyling';
 import "./MarkdownEditorMain.css"
-import { backspaceTriggersCompletion, tokenAutocomplete, useAutocompleteDataFacetExtension } from './MarkdownEditorAutocomplete';
+import { backspaceTriggersCompletion, tabAcceptsCompletion, tokenAutocomplete, useAutocompleteDataFacetExtension } from './MarkdownEditorAutocomplete';
 
 /* ---------- Helpers ---------- */
 
@@ -232,6 +232,7 @@ export default function MarkdownEditorMain({
                 EditorView.lineWrapping,
                 markdownStyling,
                 backspaceTriggersCompletion,
+                tabAcceptsCompletion,
                 dataFacetExtension,
                 tokenAutocomplete,
                 cmPlaceholder(placeholder),

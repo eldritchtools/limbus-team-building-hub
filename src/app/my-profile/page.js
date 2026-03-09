@@ -1,21 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { getFilteredBuilds } from "../database/builds";
 import { useAuth } from "../database/authProvider";
-import { getSaves } from "../database/saves";
+import { getSavedBuilds, getSavedCuratedLists } from "../database/saves";
 import { tabStyle } from "../styles";
 import BuildsGrid from "../components/BuildsGrid";
 import { useSearchParams } from "next/navigation";
 import { updateUser } from "../database/users";
 import MarkdownEditorWrapper from "../components/Markdown/MarkdownEditorWrapper";
-import { buildsStore, listsStore, savesStore } from "../database/localDB";
+import { buildsStore, listsStore, savedListsStore, savesStore } from "../database/localDB";
 import DropdownButton from "../components/DropdownButton";
 import { SocialIcon, socialsData } from "../lib/userSocials";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { searchCuratedLists } from "../database/curatedLists";
 import CuratedList from "../components/CuratedList";
+import NoPrefetchLink from "../NoPrefetchLink";
 
 function SocialsComponent({ socials, setSocials }) {
     const swapOrder = (i1, i2) => {
@@ -116,7 +116,7 @@ export default function ProfilePage() {
                 case "saved":
                     if (user) {
                         setBuildsLoading(true);
-                        getSaves(user.id, page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
+                        getSavedBuilds(user.id, page, 24).then(b => { setBuilds(b); setBuildsLoading(false); })
                     } else {
                         setBuildsLoading(true);
                         const fetchSaves = async () => {
@@ -135,27 +135,45 @@ export default function ProfilePage() {
                 case "published":
                     if (user) {
                         setListsLoading(true);
-                        searchCuratedLists({ "user_id": user.id, "ignore_block_discovery": true }, true, "new", page, 24)
-                            .then(b => { setLists(b); setListsLoading(false); })
+                        searchCuratedLists({ "user_id": user.id, "ignore_block_discovery": true }, true, "new", page, 10)
+                            .then(l => { setLists(l); setListsLoading(false); })
                     } else {
-                        setBuilds([]);
+                        setLists([]);
                     }
                     break;
                 case "drafts":
                     if (user) {
                         setListsLoading(true);
-                        searchCuratedLists({ "user_id": user.id, "ignore_block_discovery": true }, false, "new", page, 24)
-                            .then(b => { setLists(b); setListsLoading(false); })
+                        searchCuratedLists({ "user_id": user.id, "ignore_block_discovery": true }, false, "new", page, 10)
+                            .then(l => { setLists(l); setListsLoading(false); })
                     } else {
                         const fetchLists = async () => {
                             const lists = await listsStore.getAll();
-                            setLists(lists.map(x => ({...x, items: x.items.map(build => build.build)})));
+                            setLists(lists.map(x => ({ ...x, items: x.items.map(build => build.build) })));
                         }
                         fetchLists();
                     }
                     break;
                 case "saved":
-                    setLists([]);
+                    if (user) {
+                        setListsLoading(true);
+                        getSavedCuratedLists(user.id, page, 10).then(l => { setLists(l); setListsLoading(false); })
+                    } else {
+                        setListsLoading(true);
+                        const fetchSaves = async () => {
+                            const saves = await savedListsStore.getAll();
+                            if (saves.length === 0) {
+                                setLists([]);
+                                setListsLoading(false);
+                            }
+                            else {
+                                searchCuratedLists({ "list_ids": saves.map(x => x.id) }, true, "new", page, 10)
+                                    .then(l => { setLists(l); setListsLoading(false); })
+                            }
+                        }
+                        fetchSaves();
+                    }
+                    break;
                 default:
                     break;
             }
@@ -291,7 +309,7 @@ export default function ProfilePage() {
                 );
             }
             return components;
-        } else if(mainActiveTab === "lists") {
+        } else if (mainActiveTab === "lists") {
             if (listsLoading) return <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading...</p>;
             const components = [];
             if (!user) {
@@ -312,7 +330,7 @@ export default function ProfilePage() {
                             str = "No drafts yet";
                             break;
                         case "saved":
-                            str = "Saves are currently not supported for curated lists";
+                            str = "No saved curated lists yet";
                             break;
                         default:
                             break;
@@ -349,7 +367,7 @@ export default function ProfilePage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", maxWidth: "1600px" }}>
                     <h2 style={headerStyle}>Details</h2>
                     <div>
-                        View your profile <Link className="text-link" href={`profiles/${profile.username}`}>here</Link>.
+                        View your profile <NoPrefetchLink className="text-link" href={`profiles/${profile.username}`}>here</NoPrefetchLink>.
                     </div>
                     <h4 style={headerStyle}>Username</h4>
                     <span style={subHeaderStyle}>Name to display across the site. This must be updated separately from the rest of the profile.</span>
@@ -381,23 +399,23 @@ export default function ProfilePage() {
         <div style={{ border: "1px #777 solid" }} />
 
         <h2 style={{ display: "flex", marginBottom: "1rem", gap: "1rem" }}>
-            <div style={{ cursor: "pointer", color: mainActiveTab === "builds" ? "#ddd" : "#777" }} onClick={() => {setMainActiveTab("builds"); setPage(1);}}>Builds</div>
-            <div style={{ cursor: "pointer", color: mainActiveTab === "lists" ? "#ddd" : "#777" }} onClick={() => {setMainActiveTab("lists"); setPage(1);}}>Curated Lists</div>
+            <div style={{ cursor: "pointer", color: mainActiveTab === "builds" ? "#ddd" : "#777" }} onClick={() => { setMainActiveTab("builds"); setPage(1); }}>Builds</div>
+            <div style={{ cursor: "pointer", color: mainActiveTab === "lists" ? "#ddd" : "#777" }} onClick={() => { setMainActiveTab("lists"); setPage(1); }}>Curated Lists</div>
         </h2>
         <div style={{ display: "flex", marginBottom: "1rem", gap: "1rem" }}>
             {mainActiveTab === "builds" ?
-                <Link href="/builds/new" style={{ textDecoration: "none" }}>
+                <NoPrefetchLink href="/builds/new" style={{ textDecoration: "none" }}>
                     <div style={{ fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", color: "#777" }}>+New Build</div>
-                </Link> :
-                <Link href="/curated-lists/new" style={{ textDecoration: "none" }}>
+                </NoPrefetchLink> :
+                <NoPrefetchLink href="/curated-lists/new" style={{ textDecoration: "none" }}>
                     <div style={{ fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", color: "#777" }}>+New Curated List</div>
-                </Link>
+                </NoPrefetchLink>
             }
             {user ?
-                <div style={{ ...tabStyle, color: activeTab === "published" ? "#ddd" : "#777" }} onClick={() => {setActiveTab("published"); setPage(1);}}>Published</div> :
+                <div style={{ ...tabStyle, color: activeTab === "published" ? "#ddd" : "#777" }} onClick={() => { setActiveTab("published"); setPage(1); }}>Published</div> :
                 null}
-            <div style={{ ...tabStyle, color: activeTab === "drafts" ? "#ddd" : "#777" }} onClick={() => {setActiveTab("drafts"); setPage(1);}}>Drafts</div>
-            <div style={{ ...tabStyle, color: activeTab === "saved" ? "#ddd" : "#777" }} onClick={() => {setActiveTab("saved"); setPage(1);}}>Saved</div>
+            <div style={{ ...tabStyle, color: activeTab === "drafts" ? "#ddd" : "#777" }} onClick={() => { setActiveTab("drafts"); setPage(1); }}>Drafts</div>
+            <div style={{ ...tabStyle, color: activeTab === "saved" ? "#ddd" : "#777" }} onClick={() => { setActiveTab("saved"); setPage(1); }}>Saved</div>
         </div>
 
         {contentDisplay()}

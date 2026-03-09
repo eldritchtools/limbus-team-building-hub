@@ -3,9 +3,9 @@
 import { EgoImg, Icon, KeywordIcon, Status, useData } from "@eldritchtools/limbus-shared-library";
 import { Tooltip } from "react-tooltip";
 import { tooltipStyle } from "../styles";
-import Link from "next/link";
 import { isTouchDevice } from "@eldritchtools/shared-components";
 import { AtkWeight } from "./AtkWeight";
+import NoPrefetchLink from "../NoPrefetchLink";
 
 function compileSkillData(skill, uptie) {
     return skill.data.reduce((acc, dataTier) => dataTier.uptie <= uptie ? { ...acc, ...dataTier } : acc, {});
@@ -60,7 +60,7 @@ function EgoTooltipContent({ id, ego, uptie = 4 }) {
                 </div>
             </div>
         </div>
-        {isTouchDevice() ? <Link href={`/egos/${ego.id}`} style={{ alignSelf: "center", fontSize: "1.2rem" }} prefetch={false}>Go to page</Link> : null}
+        {isTouchDevice() ? <NoPrefetchLink href={`/egos/${ego.id}`} style={{ alignSelf: "center", fontSize: "1.2rem" }}>Go to page</NoPrefetchLink> : null}
     </div>
 }
 

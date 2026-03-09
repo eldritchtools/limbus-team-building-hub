@@ -5,9 +5,9 @@ import { useAuth } from "../database/authProvider";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { getNotifications, getUnreadNotificationsCount } from "../database/notifications";
-import Link from "next/link";
 import Notification from "./Notifications";
 import { getSupabase } from "../database/connection";
+import NoPrefetchLink from "../NoPrefetchLink";
 
 function UserStatus() {
     const { user, profile, logout } = useAuth();
@@ -81,7 +81,7 @@ function UserStatus() {
                                     }
                                 </div>
                                 <div style={{ borderTop: "1px solid #444", padding: "8px", textAlign: "center" }}>
-                                    <Link href="/notifications" style={{ color: "#4da3ff", textDecoration: "none", fontSize: "0.9rem" }}>View all notifications</Link>
+                                    <NoPrefetchLink href="/notifications" style={{ color: "#4da3ff", textDecoration: "none", fontSize: "0.9rem" }}>View all notifications</NoPrefetchLink>
                                 </div>
                             </div> : null}
                     </div>

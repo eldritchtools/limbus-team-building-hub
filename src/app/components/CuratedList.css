@@ -11,7 +11,7 @@
     border-radius: 1rem;
 }
 
-.curated-list:hover:not(:has(.build-entry:hover, .tag:hover, .username:hover)) {
+.curated-list:hover:not(:has(.build-entry:hover, .tag:hover, .username:hover, .toggle-button:hover, .toggle-button-active:hover)) {
     background: #3a3a3a;
 }
 
@@ -29,4 +29,6 @@
     padding: 1rem; 
     z-index: 2;
     pointer-events: none;
+    width: 100%;
+    box-sizing: border-box;
 }

@@ -1,9 +1,12 @@
-import Link from "next/link";
 import BuildEntry from "../components/BuildEntry";
 import Username from "./Username";
 import ReactTimeAgo from "react-time-ago";
 import Tag from "./Tag";
 import "./CuratedList.css";
+import NoPrefetchLink from "../NoPrefetchLink";
+import LikeButton from "./LikeButton";
+import CommentButton from "./CommentButton";
+import SaveButton from "./SaveButton";
 
 function isLocalId(id) {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -12,7 +15,7 @@ function isLocalId(id) {
 
 export default function CuratedList({ list }) {
     return <div className="curated-list">
-        <Link href={`/curated-lists/${list.id}`} className="curated-list-link" prefetch={false} />
+        <NoPrefetchLink href={`/curated-lists/${list.id}`} className="curated-list-link" />
 
         <div className="curated-list-contents">
             <h3 style={{ margin: 0 }}>{list.title}</h3>
@@ -26,7 +29,7 @@ export default function CuratedList({ list }) {
                 {list.short_desc}
             </div>
             {list.items.length > 0 ?
-                <div style={{ paddingLeft: "1rem", overflowX: "auto", scrollbarWidth: "thin" }}>
+                <div style={{ paddingLeft: "1rem", overflowX: "auto", scrollbarWidth: "thin", width: "100%" }}>
                     <div style={{ display: "flex", gap: "1rem" }}>
                         {list.items.map(build => <BuildEntry key={build.id} build={build} size={"S"} complete={false} />)}
                     </div>
@@ -41,6 +44,11 @@ export default function CuratedList({ list }) {
                 </div> :
                 null
             }
+            <div style={{display: "flex", gap: "0.5rem", pointerEvents: "all"}}>
+                <LikeButton targetType={"build_list"} targetId={list.id} likeCount={list.like_count} iconSize={20} />
+                <CommentButton targetPath={"curated-lists"} targetId={list.id} count={list.comment_count} iconSize={20} />
+                <SaveButton targetType={"build_list"} targetId={list.id} iconSize={20} />
+            </div>
         </div>
     </div>
 }

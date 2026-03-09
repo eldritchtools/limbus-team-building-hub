@@ -2,7 +2,6 @@
 
 import { DataProvider, getMeta, GiftTooltip, StatusTooltip } from "@eldritchtools/limbus-shared-library";
 import { Layout } from "@eldritchtools/shared-components";
-import Link from "next/link";
 import { IdentityTooltip } from "./components/IdentityTooltip";
 import { EgoTooltip } from "./components/EgoTooltip";
 import { GeneralTooltip } from "./components/GeneralTooltip";
@@ -14,6 +13,7 @@ import { RequestsCacheProvider } from "./database/RequestsCacheProvider";
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
 import { CalcTooltip } from "./components/CalcTooltip";
+import NoPrefetchLink from "./NoPrefetchLink";
 
 TimeAgo.addDefaultLocale(en);
 
@@ -55,7 +55,7 @@ export default function LayoutComponent({ children }) {
                 developerName={"Project Moon"}
                 githubLink={"https://github.com/eldritchtools/limbus-team-building-hub"}
                 paths={paths}
-                LinkComponent={Link}
+                LinkComponent={NoPrefetchLink}
                 topComponent={<UserStatus />}
             >
                 <DataProvider>

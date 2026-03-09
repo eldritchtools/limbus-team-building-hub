@@ -15,11 +15,11 @@ export default function CuratedListsPage() {
 
     useEffect(() => {
         const mode = searchParams.get('mode');
-        if (["recent", "random"].includes(mode)) {
+        if (["popular", "recent", "random"].includes(mode)) {
             setActiveTab(mode);
         } else {
             const saved = localStorage.getItem("listsActiveTab");
-            setActiveTab(saved ?? "recent");
+            setActiveTab(saved ?? "popular");
         }
     }, [searchParams]);
 
@@ -31,9 +31,11 @@ export default function CuratedListsPage() {
         const fetchLists = async () => {
             try {
                 setLoading(true);
-                const data = activeTab === "recent" ?
-                    await searchCuratedLists({}, true, "new", 1, 10) :
-                    await searchCuratedLists({}, true, "random", 1, 10)
+                const data = activeTab === "popular" ?
+                    await searchCuratedLists({}, true, "popular", 1, 10) :
+                    activeTab === "recent" ?
+                        await searchCuratedLists({}, true, "new", 1, 10) :
+                        await searchCuratedLists({}, true, "random", 1, 10)
                 if (!canceled) {
                     setLists(data || []);
                 }
@@ -60,7 +62,7 @@ export default function CuratedListsPage() {
         <ListsSearchComponent />
         <div style={{ border: "1px #777 solid" }} />
         <div style={{ display: "flex", flexDirection: "row", gap: "1rem", alignSelf: "center", marginTop: "0.5rem", marginBottom: "0.5rem" }}>
-            {/* <div style={{ ...tabStyle, color: activeTab === "popular" ? "#ddd" : "#777" }} onClick={() => handleTabClick("popular")}>Popular</div> */}
+            <div style={{ ...tabStyle, color: activeTab === "popular" ? "#ddd" : "#777" }} onClick={() => handleTabClick("popular")}>Popular</div>
             <div style={{ ...tabStyle, color: activeTab === "recent" ? "#ddd" : "#777" }} onClick={() => handleTabClick("recent")}>New</div>
             <div style={{ ...tabStyle, color: activeTab === "random" ? "#ddd" : "#777" }} onClick={() => handleTabClick("random")}>Random</div>
         </div>

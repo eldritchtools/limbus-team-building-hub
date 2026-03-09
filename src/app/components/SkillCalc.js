@@ -428,7 +428,7 @@ function IdentitySkillCalc({ identity, uptie = 4, level = LEVEL_CAP, opts }) {
             Loading...
         </div>;
 
-    const applyCrits = opts.crit === "all" || (opts.crit === "poise" && identity.skillKeywordList.includes("Poise"))
+    const applyCrits = opts.crit === "all" || (opts.crit === "poise" && identity.skillKeywordList?.includes("Poise"))
 
     const [atkskills] = identity.skillTypes.reduce(([skills, counts], skill) => {
         const tier = skillData.skills[skill.id].tier;

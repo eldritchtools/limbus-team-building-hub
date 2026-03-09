@@ -141,6 +141,7 @@ input[type="number"] {
   font-weight: bold;
   text-decoration: none;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .text-link:hover,

@@ -4,14 +4,14 @@ import { useAuth } from "../database/authProvider";
 import { LikeOutline, LikeSolid } from "./Symbols";
 
 
-export default function LikeButton({ buildId, likeCount, buildEntryVersion = false, iconSize }) {
+export default function LikeButton({ targetType, targetId, likeCount, buildEntryVersion = false, iconSize }) {
     const { user } = useAuth();
-    const { likedMap, toggleLike, fetchUserData } = useRequestsCache();
+    const { checkLiked, toggleLike, fetchUserData } = useRequestsCache();
     const [count, setCount] = useState(likeCount);
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => { if (user) fetchUserData([buildId]) }, [fetchUserData, buildId, user]);
-    const liked = useMemo(() => likedMap[buildId], [likedMap, buildId]);
+    useEffect(() => { if (user) fetchUserData(targetType, [targetId]) }, [fetchUserData, targetType, targetId, user]);
+    const liked = useMemo(() => checkLiked(targetType, targetId), [checkLiked, targetType, targetId]);
     const text = count === 1 ? "1 Like" : `${count} Likes`;
 
     if (!user)
@@ -32,7 +32,7 @@ export default function LikeButton({ buildId, likeCount, buildEntryVersion = fal
 
     const handleClick = async () => {
         setLoading(true);
-        await toggleLike(buildId);
+        await toggleLike(targetType, targetId);
         setLoading(false);
 
         if (liked) setCount(p => p - 1);

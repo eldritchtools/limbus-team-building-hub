@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import './LoginPage.css';
 import { getSupabase } from '../database/connection';
-import Link from 'next/link';
+import NoPrefetchLink from '../NoPrefetchLink';
 
 function AuthForm() {
     const router = useRouter();
@@ -97,9 +97,9 @@ function AuthForm() {
                 <input type="password" placeholder="Password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 {isLogin ? (
                     <div style={{ display: "flex", justifyContent: "end" }}>
-                        <Link className="text-link" href="/auth/forgot-password" style={{ textAlign: 'right', fontSize: "0.8rem" }}>
+                        <NoPrefetchLink className="text-link" href="/auth/forgot-password" style={{ textAlign: 'right', fontSize: "0.8rem" }}>
                             Forgot your password?
-                        </Link>
+                        </NoPrefetchLink>
                     </div>
                 ) : <input type="password" placeholder="Confirm password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />}
                 <div style={{ display: "flex", justifyContent: "center" }}>

@@ -100,7 +100,7 @@ async function deleteBuild(build_id) {
     return { deleted: true };
 }
 
-async function pinComment(buildId, commentId) {
+async function pinBuildComment(buildId, commentId) {
     const { error } = await getSupabase().from('builds').update({ pinned_comment_id: commentId }).eq('id', buildId);
 
     if (error) {
@@ -111,7 +111,7 @@ async function pinComment(buildId, commentId) {
     return true;
 }
 
-async function unpinComment(buildId) {
+async function unpinBuildComment(buildId) {
     const { error } = await getSupabase().from('builds').update({ pinned_comment_id: null }).eq('id', buildId)
 
     if (error) {
@@ -157,4 +157,4 @@ async function getHomepageBuilds() {
     return { popular: data.popular, newest: data.newest, showcase: data.showcase };
 }
 
-export { getPopularBuilds, getFilteredBuilds, getBuild, insertBuild, updateBuild, deleteBuild, pinComment, unpinComment, getBuildsForSitemap, getBuildsCountForSitemap, getHomepageBuilds };
+export { getPopularBuilds, getFilteredBuilds, getBuild, insertBuild, updateBuild, deleteBuild, pinBuildComment, unpinBuildComment, getBuildsForSitemap, getBuildsCountForSitemap, getHomepageBuilds };

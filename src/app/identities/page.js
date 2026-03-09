@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Icon, IdentityImg, RarityImg, SinnerIcon, Status, useData } from "@eldritchtools/limbus-shared-library";
 import { capitalizeFirstLetter, getSeasonString, sinnerMapping } from "../utils";
 import { selectStyle } from "../styles";
-import Link from "next/link";
 import "./identities.css";
 
 import IdentityComparisonAdvanced from "./IdentityComparisonAdvanced";
@@ -12,6 +11,7 @@ import DropdownButton from "../components/DropdownButton";
 import IdentityComparisonBasic from "./IdentityComparisonBasic";
 import { SelectorWithExclusion } from "../components/Selectors";
 import { generalTooltipProps } from "../components/GeneralTooltip";
+import NoPrefetchLink from "../NoPrefetchLink";
 
 const mainFilters = {
     "tier": ["0", "00", "000"],
@@ -58,9 +58,9 @@ function processTag(tag, removeStyles = false) {
 
 function IdentityDetails({ id, identity }) {
     const wrapCell = contents => <td style={{ borderTop: "1px #777 solid", borderBottom: "1px #777 solid", verticalAlign: "middle" }}>
-        <Link key={id} href={`/identities/${id}`} style={{ color: "#ddd", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "128px" }} prefetch={false}>
+        <NoPrefetchLink key={id} href={`/identities/${id}`} style={{ color: "#ddd", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "128px" }} >
             {contents}
-        </Link>
+        </NoPrefetchLink>
     </td>
 
     return <tr className="clickable-table-row">
@@ -255,11 +255,11 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
 
     if (displayType === "icon") {
         const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(128px, 1fr))", width: "100%", gap: "0.5rem" }}>
-            {list.map(([id, identity]) => <div key={id}><Link href={`/identities/${id}`} style={{ color: "#ddd", textDecoration: "none" }} prefetch={false}>
+            {list.map(([id, identity]) => <div key={id}><NoPrefetchLink href={`/identities/${id}`} style={{ color: "#ddd", textDecoration: "none" }} >
                 <div className="clickable-id">
                     <IdentityImg identity={identity} uptie={4} displayName={true} displayRarity={true} />
                 </div>
-            </Link></div>)}
+            </NoPrefetchLink></div>)}
         </div>
 
         if (separateSinners) {
@@ -279,7 +279,7 @@ function IdentityList({ identities, searchString, selectedMainFilters, displayTy
         }
     } else if (displayType === "card") {
         const listToComponents = list => <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, min(420px, 100%))", width: "100%", gap: "0.5rem", justifyContent: "center" }}>
-            {list.map(([id, identity]) => <div key={id}><Link href={`/identities/${id}`} style={{ color: "#ddd", textDecoration: "none" }} prefetch={false}><IdentityCard key={id} identity={identity} /></Link></div>)}
+            {list.map(([id, identity]) => <div key={id}><NoPrefetchLink href={`/identities/${id}`} style={{ color: "#ddd", textDecoration: "none" }} ><IdentityCard key={id} identity={identity} /></NoPrefetchLink></div>)}
         </div>
 
         if (separateSinners) {

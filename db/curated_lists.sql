@@ -7,6 +7,9 @@ create table public.build_lists (
 
   is_published BOOLEAN DEFAULT TRUE,
 
+  like_count INTEGER DEFAULT 0,
+  comment_count INTEGER DEFAULT 0,
+  score NUMERIC DEFAULT 0,
   search_vector tsvector,
   view_count INTEGER NOT NULL DEFAULT 0,
   block_discovery BOOLEAN NOT NULL DEFAULT FALSE,
@@ -99,8 +102,9 @@ with check (
   )
 );
 
-create or replace function public.search_build_lists(
+create or replace function public.search_build_lists_v2(
   p_query text default null,
+  list_id_filter UUID[] DEFAULT NULL,
   username_exact_filter TEXT DEFAULT NULL,
   user_id_filter UUID DEFAULT NULL,
   tag_filter TEXT[] DEFAULT NULL,
@@ -119,6 +123,8 @@ returns table (
   created_at timestamptz,
   published_at timestamptz,
   tags TEXT[],
+  like_count INT,
+  comment_count INT,
   items jsonb
 )
 language plpgsql
@@ -155,15 +161,18 @@ begin
       bl.created_at,
       bl.published_at,
       bl.search_vector,
+      bl.like_count,
+      bl.comment_count,
       CASE
         WHEN v_sort = 'search' AND v_tsquery IS NOT NULL THEN ts_rank(bl.search_vector, v_tsquery)
         WHEN v_sort = 'new' THEN EXTRACT(EPOCH FROM COALESCE(bl.published_at, bl.created_at))
-        WHEN v_sort = 'popular' THEN bl.view_count
+        WHEN v_sort = 'popular' THEN bl.score
         WHEN v_sort = 'random' THEN RANDOM()
       END AS sort_value 
     FROM public.build_lists bl
     JOIN public.users u ON bl.user_id = u.id
     WHERE bl.is_published = p_published
+      AND (list_id_filter IS NULL OR bl.id = ANY(list_id_filter))
       AND (username_exact_filter IS NULL OR u.username = username_exact_filter)
       AND (user_id_filter IS NULL OR bl.user_id = user_id_filter)
       AND (v_tsquery IS NULL OR bl.search_vector @@ v_tsquery)
@@ -223,6 +232,8 @@ begin
     l.created_at,
     l.published_at,
     COALESCE(lt.tags, ARRAY[]::TEXT[]) AS tags,
+    l.like_count,
+    l.comment_count,
     COALESCE(
       jsonb_agg(
         b ORDER BY array_position(lb.build_ids, b.id)
@@ -245,7 +256,9 @@ begin
     l.published_at,
     lt.tags,
     lb.build_ids,
-    l.sort_value
+    l.sort_value,
+    l.like_count,
+    l.comment_count
   ORDER BY l.sort_value DESC;
 end;
 $$;
@@ -432,7 +445,7 @@ begin
 end;
 $$;
 
-create or replace function public.get_build_list(
+create or replace function public.get_build_list_v2(
   p_list_id uuid
 )
 returns jsonb
@@ -463,9 +476,28 @@ begin
       bl.published_at,
       bl.updated_at,
       bl.view_count,
-      bl.block_discovery
+      bl.like_count,
+      bl.comment_count,
+      bl.block_discovery,
+
+      pc.id AS pinned_comment_id,
+      pc.user_id AS pinned_user_id,
+      pc.body AS pinned_body,
+      pc.created_at AS pinned_created_at,
+      pc.edited AS pinned_edited,
+      pu.username AS pinned_username,
+      pu.flair AS pinned_user_flair,
+      pp.body AS parent_body,
+      ppu.username AS parent_author,
+      ppu.flair AS parent_flair,
+      pp.deleted AS parent_deleted
+
     FROM public.build_lists bl
     JOIN public.users u ON bl.user_id = u.id
+    LEFT JOIN public.comments pc ON bl.pinned_comment_id = pc.id AND NOT pc.deleted
+    LEFT JOIN public.users pu ON pu.id = pc.user_id
+    LEFT JOIN public.comments pp ON pp.id = pc.parent_id
+    LEFT JOIN public.users ppu ON ppu.id = pp.user_id
     WHERE bl.id = p_list_id
   ),
 
@@ -537,15 +569,33 @@ begin
         WHEN l.user_id = v_user_id THEN l.view_count
         ELSE NULL
       END,
+    'like_count', l.like_count,
+    'comment_count', l.comment_count,
     'block_discovery', l.block_discovery,
     'tags', COALESCE(lt.tags, '[]'::jsonb),
-    'items', COALESCE(i.items, '[]'::jsonb)
+    'items', COALESCE(i.items, '[]'::jsonb),
+    'pinned_comment', CASE
+      WHEN l.pinned_comment_id IS NULL THEN NULL
+      ELSE jsonb_build_object(
+        'id', l.pinned_comment_id,
+        'user_id', l.pinned_user_id,
+        'username', l.pinned_username,
+        'user_flair', l.pinned_user_flair,
+        'body', l.pinned_body,
+        'created_at', l.pinned_created_at,
+        'edited', l.pinned_edited,
+        'parent_body', l.parent_body,
+        'parent_author', l.parent_author,
+        'parent_flair', l.parent_flair,
+        'parent_deleted', l.parent_deleted
+      )
+    END
   )
   INTO v_result
   FROM list_data l
   LEFT JOIN list_tags lt ON lt.list_id = l.id
   LEFT JOIN items i ON TRUE;
-
+  
   return v_result;
 
 end;

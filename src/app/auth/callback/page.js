@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/database/authProvider';
-import { buildsStore, listsStore, savesStore } from '@/app/database/localDB';
+import { buildsStore, listsStore, savedListsStore, savesStore } from '@/app/database/localDB';
 
 export default function AuthCallback() {
     const router = useRouter();
@@ -26,33 +26,13 @@ export default function AuthCallback() {
             return;
         }
 
-        const checkLocalBuilds = async () => {
+        const checkLocalData = async () => {
             const builds = await buildsStore.getAll();
-            if (builds.length !== 0) {
-                (async () => {
-                    router.replace('/login/setup');
-                })();
-                return;
-            }
-
-            checkLocalSaves();
-        }
-
-        const checkLocalSaves = async () => {
             const saves = await savesStore.getAll();
-            if (saves.length !== 0) {
-                (async () => {
-                    router.replace('/login/setup');
-                })();
-                return;
-            }
-
-            checkLocalLists();
-        }
-
-        const checkLocalLists = async () => {
             const lists = await listsStore.getAll();
-            if (lists.length !== 0) {
+            const savedLists = await savedListsStore.getAll();
+
+            if (builds.length !== 0 || saves.length !== 0 || lists.length !== 0 || savedLists.length !== 0) {
                 (async () => {
                     router.replace('/login/setup');
                 })();
@@ -69,7 +49,7 @@ export default function AuthCallback() {
             router.replace(state || '/');
         }
 
-        checkLocalBuilds();
+        checkLocalData();
     }, [loading, user, profile, router, refreshProfile]);
 
     return <p style={{ textAlign: 'center', marginTop: '2rem' }}>Authenticating...</p>;

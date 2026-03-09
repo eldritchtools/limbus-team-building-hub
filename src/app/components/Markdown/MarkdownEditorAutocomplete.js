@@ -1,4 +1,4 @@
-import { autocompletion, startCompletion } from "@codemirror/autocomplete";
+import { autocompletion, startCompletion, completionStatus, acceptCompletion } from "@codemirror/autocomplete";
 import { Facet } from "@codemirror/state";
 import { useData } from "@eldritchtools/limbus-shared-library";
 import { keywordToIdMapping } from "../../keywordIds";
@@ -254,5 +254,16 @@ const backspaceTriggersCompletion = keymap.of([
     }
 ]);
 
+const tabAcceptsCompletion = keymap.of([
+  {
+    key: "Tab",
+    run(view) {
+      if (completionStatus(view.state) === "active") {
+        return acceptCompletion(view);
+      }
+      return false;
+    }
+  }
+]);
 
-export { useAutocompleteDataFacetExtension, backspaceTriggersCompletion, tokenAutocomplete };
+export { useAutocompleteDataFacetExtension, backspaceTriggersCompletion, tokenAutocomplete, tabAcceptsCompletion };

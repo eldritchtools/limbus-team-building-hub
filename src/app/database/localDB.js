@@ -5,7 +5,8 @@ export const db = new Dexie("limbus-team-building-hub");
 db.version(1).stores({
     builds: "++id",
     lists: "++id",
-    saves: "id"
+    saves: "id",
+    savedLists: "id"
 });
 
 function makeStore(table) {
@@ -21,3 +22,4 @@ function makeStore(table) {
 export const buildsStore = makeStore(db.builds);
 export const savesStore = makeStore(db.saves);
 export const listsStore = makeStore(db.lists);
+export const savedListsStore = makeStore(db.savedLists);

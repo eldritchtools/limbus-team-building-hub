@@ -6,9 +6,9 @@ import TagSelector, { tagToTagSelectorOption } from "../components/TagSelector";
 import { useState } from "react";
 import { keywordIconConvert, keywordToIdMapping } from "../keywordIds";
 import { EgoSelector, IdentitySelector } from "../components/Selectors";
-import Link from "next/link";
 import "./BuildsSearchComponent.css";
 import { generalTooltipProps } from "../components/GeneralTooltip";
+import NoPrefetchLink from "../NoPrefetchLink";
 
 function KeywordSelector({ selectedKeywords, setSelectedKeywords }) {
     const handleToggle = (filter, selected, excluded) => {
@@ -133,7 +133,7 @@ export default function BuildsSearchComponent({ options = {}, inPage = false, se
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginTop: "0.2rem" }}>
             <button style={{ fontSize: "1.2rem", cursor: "pointer" }} onClick={applyFilters}>Search Builds</button>
             {!inPage ?
-                <span>or <Link className="text-link" href={"/builds/new"}>create a build</Link></span> :
+                <span>or <NoPrefetchLink className="text-link" href={"/builds/new"}>create a build</NoPrefetchLink></span> :
                 null
             }
         </div>

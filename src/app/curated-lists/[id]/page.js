@@ -3,7 +3,7 @@
 import Tag from "@/app/components/Tag";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/app/database/authProvider";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Modal } from "@/app/components/Modal";
 import Username from "@/app/components/Username";
 
@@ -16,6 +16,9 @@ import { DeleteSolid, EditSolid, ViewSolid } from "@/app/components/Symbols";
 import { deleteCuratedList, getCuratedList } from "@/app/database/curatedLists";
 import BuildEntry from "@/app/components/BuildEntry";
 import DropdownButton from "@/app/components/DropdownButton";
+import CommentSection from "@/app/components/commentSection";
+import LikeButton from "@/app/components/LikeButton";
+import SaveButton from "@/app/components/SaveButton";
 
 function isLocalId(id) {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -67,17 +70,38 @@ export default function CuratedListPage({ params }) {
     const { user } = useAuth();
     const [viewMode, setViewMode] = useState(null);
     const [curatedList, setCuratedList] = useState(null);
+    const [likeCount, setLikeCount] = useState(0);
+    const [commentCount, setCommentCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [deleting, setDeleting] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const router = useRouter();
     const { isMobile } = useBreakpoint();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    
+    useEffect(() => {
+        if (!loading && pathname && searchParams) {
+            const hash = window.location.hash?.substring(1);
+            if (!hash) return;
+
+            const el = document.getElementById(hash);
+            if (el) {
+                setTimeout(() => {
+                    const y = el.getBoundingClientRect().top + window.pageYOffset - 48;
+                    window.scrollTo({ top: y, behavior: 'smooth' })
+                }, 200);
+            }
+        }
+    }, [loading, pathname, searchParams]);
 
     useEffect(() => {
         if (loading) {
             const handleCuratedList = x => {
                 setCuratedList(x);
                 setLoading(false);
+                setLikeCount(x.like_count);
+                setCommentCount(x.comment_count);
                 document.title = `${x.title} | Limbus Company Team Building Hub`;
             }
 
@@ -167,6 +191,8 @@ export default function CuratedListPage({ params }) {
                         null
                     }
                     <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", flexWrap: "wrap" }}>
+                        <LikeButton targetType={"build_list"} targetId={id} likeCount={likeCount} />
+                        <SaveButton targetType={"build_list"} targetId={id} />
                         {
                             (user && user.id === curatedList.user_id) || isLocalId(id) ?
                                 <button onClick={editList}>
@@ -198,6 +224,15 @@ export default function CuratedListPage({ params }) {
                 } */}
                 </div>
             </div>
+
+            <div style={{ border: "1px #777 solid" }} />
+
+            {curatedList.is_published ?
+                <div id="comments" style={{ width: "clamp(300px, 100%, 1200px)", alignSelf: "center" }}>
+                    <CommentSection targetType={"build_list"} targetId={id} ownerId={curatedList.user_id} commentCount={commentCount} pinnedComment={curatedList.pinned_comment} />
+                </div> :
+                <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>No comments while the build is not published.</p>
+            }
 
             <Modal isOpen={deleteOpen} onClose={() => setDeleteOpen(false)}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem" }}>

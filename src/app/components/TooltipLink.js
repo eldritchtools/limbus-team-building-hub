@@ -1,5 +1,5 @@
 import { isTouchDevice } from "@eldritchtools/shared-components";
-import Link from "next/link";
+import NoPrefetchLink from "../NoPrefetchLink";
 
 export default function TooltipLink({ href, tooltipId, tooltipContent, className, style, children }) {
     const props = {};
@@ -7,13 +7,12 @@ export default function TooltipLink({ href, tooltipId, tooltipContent, className
     if (style) props.style = style;
     if (isTouchDevice()) props.onClick = e => e.preventDefault();
 
-    return <Link
+    return <NoPrefetchLink
         href={href}
         data-tooltip-id={tooltipId}
         data-tooltip-content={tooltipContent}
-        prefetch={false}
         {...props}
     >
         {children}
-    </Link>
+    </NoPrefetchLink>
 }

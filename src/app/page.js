@@ -1,11 +1,11 @@
 'use client';
 
 import { EgoImg, IdentityImg, useData } from "@eldritchtools/limbus-shared-library";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import BuildEntry from "./components/BuildEntry";
 import { getHomepageBuilds } from "./database/builds";
 import { useBreakpoint } from "@eldritchtools/shared-components";
+import NoPrefetchLink from "./NoPrefetchLink";
 
 export default function Home() {
     const [identities, identitiesLoading] = useData("identities");
@@ -51,11 +51,14 @@ export default function Home() {
                 <br /> <br />
                 Use the sidebar or click on the links below to get started.
             </p>
-            <div style={{ display: "flex", flexWrap: "wrap", border: "1px solid #aaa", borderRadius: "0.5rem", padding: "1rem", gap: "1rem" }}>
-                <Link className="text-link" href={"/builds"}>Explore Builds</Link>
-                <Link className="text-link" href={"/builds/new"}>Create a build</Link>
-                <Link className="text-link" href={"/identities"}>Identities</Link>
-                <Link className="text-link" href={"/egos"}>E.G.Os</Link>
+            <div style={{ border: "1px solid #aaa", borderRadius: "0.5rem", overflowX: "auto", maxWidth: "100%" }}>
+                <div style={{ display: "flex", flexWrap: "nowrap", width: "max-content", gap: "1rem", padding: "1rem", boxSizing: "border-box" }}>
+                    <NoPrefetchLink className="text-link" href={"/builds"}>Explore Builds</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/builds/new"}>Create a build</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/curated-lists"}>Explore Curated Lists</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/identities"}>Identities</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/egos"}>E.G.Os</NoPrefetchLink>
+                </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", width: "100%", border: "1px solid #aaa", borderRadius: "0.5rem", padding: "1rem", boxSizing: "border-box" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "start", gap: "0.5rem", width: "100%" }}>
@@ -68,16 +71,16 @@ export default function Home() {
                                         <div>{date}</div>
                                         <div style={{ display: "flex" }}>
                                             {list.map(obj => obj.id[0] === "1" ?
-                                                <Link key={obj.id} href={`/identities/${obj.id}`} prefetch={false}>
+                                                <NoPrefetchLink key={obj.id} href={`/identities/${obj.id}`}>
                                                     <div style={{ width: "128px", height: "128px" }}>
                                                         <IdentityImg identity={obj} uptie={4} displayName={true} displayRarity={true} />
                                                     </div>
-                                                </Link> :
-                                                <Link key={obj.id} href={`/egos/${obj.id}`} prefetch={false}>
+                                                </NoPrefetchLink> :
+                                                <NoPrefetchLink key={obj.id} href={`/egos/${obj.id}`}>
                                                     <div style={{ width: "128px", height: "128px" }}>
                                                         <EgoImg ego={obj} type={"awaken"} displayName={true} displayRarity={true} />
                                                     </div>
-                                                </Link>
+                                                </NoPrefetchLink>
                                             )}
                                         </div>
                                     </div>)}
@@ -88,7 +91,7 @@ export default function Home() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <h3 style={{ margin: 0 }}>Popular Builds</h3>
-                        <Link className="text-link" href={"/builds?mode=popular"}>view more popular builds ➔</Link>
+                        <NoPrefetchLink className="text-link" href={"/builds?mode=popular"}>view more popular builds ➔</NoPrefetchLink>
                     </div>
                     <div style={{ color: "#aaa", fontSize: "0.8rem", alignSelf: "start", textAlign: "start" }}>
                         The most popular builds. Updated once every four hours.
@@ -104,7 +107,7 @@ export default function Home() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <h3 style={{ margin: 0 }}>Newest Builds</h3>
-                        <Link className="text-link" href={"/builds?mode=recent"}>view more new builds ➔</Link>
+                        <NoPrefetchLink className="text-link" href={"/builds?mode=recent"}>view more new builds ➔</NoPrefetchLink>
                     </div>
                     <div style={{ color: "#aaa", fontSize: "0.8rem", alignSelf: "start", textAlign: "start" }}>
                         The newest builds submitted by managers.
@@ -120,7 +123,7 @@ export default function Home() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <h3 style={{ margin: 0 }}>Community Showcase</h3>
-                        <Link className="text-link" href={"/builds?mode=random"}>view random builds ➔</Link>
+                        <NoPrefetchLink className="text-link" href={"/builds?mode=random"}>view random builds ➔</NoPrefetchLink>
                     </div>
                     <div style={{ color: "#aaa", fontSize: "0.8rem", alignSelf: "start", textAlign: "start" }}>
                         A random build with at least 1 like is added to this list every hour and the oldest is rotated out.

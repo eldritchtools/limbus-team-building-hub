@@ -8,6 +8,8 @@ import LikeButton from "./LikeButton";
 import CommentButton from "./CommentButton";
 import SaveButton from "./SaveButton";
 import ContributeButton from "./ContributeButton";
+import { useAuth } from "../database/authProvider";
+import ReviewButton from "./ReviewButton";
 
 function isLocalId(id) {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -15,6 +17,8 @@ function isLocalId(id) {
 }
 
 export default function CuratedList({ list }) {
+    const { user } = useAuth();
+
     return <div className="curated-list">
         <NoPrefetchLink href={`/curated-lists/${list.id}`} className="curated-list-link" />
 
@@ -50,6 +54,7 @@ export default function CuratedList({ list }) {
                 <CommentButton targetPath={"curated-lists"} targetId={list.id} count={list.comment_count} iconSize={20} />
                 <SaveButton targetType={"build_list"} targetId={list.id} iconSize={20} />
                 {list.submission_mode === "open" ? <ContributeButton listId={list.id} iconSize={20} /> : null}
+                {user?.id === list.user_id ? <ReviewButton listId={list.id} iconSize={20} /> : null}
             </div>
         </div>
     </div>

@@ -101,7 +101,7 @@ CREATE OR REPLACE FUNCTION public.get_user_notifications_v2(
 )
 RETURNS TABLE (
   id UUID,
-  type TEXT,
+  type notification_type_enum,
   actors TEXT[],
   target_type target_type_enum,
   target_id UUID,
@@ -144,6 +144,7 @@ $$;
 
 CREATE INDEX idx_notifications_user ON notifications (user_id, created_at DESC);
 CREATE INDEX idx_notifications_user_target_type ON notifications (user_id, target_type, created_at DESC);
+CREATE INDEX idx_notifications_lookup ON notifications (user_id, target_type, target_id, type) WHERE is_read = FALSE;
 
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 

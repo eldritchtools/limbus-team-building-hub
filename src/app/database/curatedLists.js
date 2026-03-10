@@ -93,7 +93,7 @@ async function unpinCuratedListComment(listId) {
     return true;
 }
 
-async function submitBuildListContribution(user_id, list_id, build_id, note, submitter_note) {
+async function submitCuratedListContribution(user_id, list_id, build_id, note, submitter_note) {
     try {
         const { data, error } = await getSupabase()
             .from("build_list_submissions")
@@ -115,6 +115,44 @@ async function submitBuildListContribution(user_id, list_id, build_id, note, sub
             return "Something went wrong while submitting.";
         }
     }
+}
+
+async function getCuratedListSubmissions(id) {
+    const { data, error } = await getSupabase().rpc("get_build_list_submissions", {
+        p_list_id: id,
+    });
+
+    if (error) throw error;
+    return data;
+}
+
+async function approveCuratedListSubmission(id, note) {
+    const { data, error } = await getSupabase().rpc("approve_build_list_submission", {
+        p_submission_id: id,
+        p_note: note
+    });
+
+    if (error) throw error;
+    return data;
+}
+
+async function rejectCuratedListSubmission(id) {
+    const { data, error } = await getSupabase().rpc("reject_build_list_submission", {
+        p_submission_id: id
+    });
+
+    if (error) throw error;
+    return data;
+}
+
+async function rejectCuratedListSubmissionsForBuild(list_id, build_id) {
+    const { data, error } = await getSupabase().rpc("reject_build_list_submissions_for_build", {
+        p_list_id: list_id,
+        p_build_id: build_id
+    });
+
+    if (error) throw error;
+    return data;
 }
 
 async function getCuratedListsForSitemap(page, count) {
@@ -143,6 +181,6 @@ async function getCuratedListsCountForSitemap() {
 export {
     searchCuratedLists, getCuratedList, insertCuratedList, updateCuratedList, deleteCuratedList,
     pinCuratedListComment, unpinCuratedListComment,
-    submitBuildListContribution,
+    submitCuratedListContribution, getCuratedListSubmissions, approveCuratedListSubmission, rejectCuratedListSubmission, rejectCuratedListSubmissionsForBuild,
     getCuratedListsForSitemap, getCuratedListsCountForSitemap
 };

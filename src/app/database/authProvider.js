@@ -39,6 +39,7 @@ export function AuthProvider({ children }) {
         const init = async () => {
             const { data, error } = await getSupabase().auth.getSession();
             if (error) console.error(error);
+            setLoading(true);
             const session = data?.session;
             const currentUser = session?.user ?? null;
 

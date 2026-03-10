@@ -113,6 +113,14 @@ CREATE TABLE public.notifications (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TYPE notification_type_enum AS ENUM (
+  'comment',
+  'reply',
+  'build_list_submission',
+  'build_list_submission_approved',
+  'build_list_submission_rejected'
+);
+
 CREATE TYPE target_type_enum AS ENUM (
   'build',
   'build_list'

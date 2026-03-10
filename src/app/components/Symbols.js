@@ -11,7 +11,8 @@ import {
     PencilIcon as PencilIconSolid,
     TrashIcon as TrashIconSolid,
     EyeIcon as EyeIconSolid,
-    UserPlusIcon as UserPlusIconSolid
+    UserPlusIcon as UserPlusIconSolid,
+    ClipboardDocumentCheckIcon as ClipboardDocumentCheckIconSolid
 } from '@heroicons/react/24/solid'
 
 
@@ -66,4 +67,8 @@ export function ViewSolid({ size = 20, text }) {
 
 export function ContributeSolid({ size = 20, text }) {
     return constructSymbol(UserPlusIconSolid, size, text)
+}
+
+export function ReviewSolid({ size = 20, text }) {
+    return constructSymbol(ClipboardDocumentCheckIconSolid, size, text)
 }

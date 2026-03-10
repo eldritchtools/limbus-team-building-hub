@@ -12,7 +12,7 @@ import Username from "../components/Username";
 import SelectBuildModal from "../components/SelectBuildModal";
 import { isLocalId } from "../utils";
 
-function BuildItem({ build, note, index, isFirst, isLast, swapBuilds, removeBuild, setBuildNote }) {
+function BuildItem({ build, note, index, isFirst, isLast, swapBuilds, removeBuild, setBuildNote, username, flair }) {
     return <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center", width: "100%" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "2rem", paddingRight: "1rem" }}>
             <button onClick={() => swapBuilds(index - 1)} disabled={isFirst}>∧</button>
@@ -24,9 +24,9 @@ function BuildItem({ build, note, index, isFirst, isLast, swapBuilds, removeBuil
             <button onClick={() => swapBuilds(index + 1)} disabled={isLast}>∨</button>
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
-            {build.submitted_by ?
-                <div style={{ display: "flex" }}>
-                    Submitted by: <Username username={build.submitted_by_username} flair={build.submitted_by_flair} />
+            {username ?
+                <div style={{ display: "flex", gap: "0.2rem" }}>
+                    Submitted by: <Username username={username} flair={flair} />
                 </div> :
                 null
             }
@@ -79,6 +79,8 @@ function BuildList({ builds, setBuilds }) {
                 swapBuilds={x => swapBuilds(i, x)}
                 removeBuild={() => removeBuild(build.build.id)}
                 setBuildNote={v => setBuildNote(build.build.id, v)}
+                username={build.submitted_by_username}
+                flair={build.submitted_by_flair}
             />
         )}
 

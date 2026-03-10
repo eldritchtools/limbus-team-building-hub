@@ -9,7 +9,7 @@ import { isLocalId } from "@/app/utils";
 import MarkdownEditorWrapper from "@/app/components/Markdown/MarkdownEditorWrapper";
 import Username from "@/app/components/Username";
 import { useAuth } from "@/app/database/authProvider";
-import { getCuratedList, submitBuildListContribution } from "@/app/database/curatedLists";
+import { getCuratedList, submitCuratedListContribution } from "@/app/database/curatedLists";
 import { useBreakpoint } from "@eldritchtools/shared-components";
 import BuildEntry from "@/app/components/BuildEntry";
 
@@ -50,7 +50,7 @@ export default function ContributeCuratedListPage({ params }) {
         }
         setSubmitting(true);
 
-        const result = await submitBuildListContribution(user.id, id, build.id, note, submitterNote);
+        const result = await submitCuratedListContribution(user.id, id, build.id, note, submitterNote);
         if(result === "Success")
             router.push(`/curated-lists/${id}`);
         else {

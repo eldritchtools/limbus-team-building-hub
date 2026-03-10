@@ -17,13 +17,18 @@ const targetTypeMapping = {
     "build_list": "curated list"
 }
 
+const eventString = {
+    "comment": "commented on your",
+    "reply": "replied to your comment to the",
+    "build_list_submission": "made a submission to your",
+    "build_list_submission_approved": "approved your submission to the",
+    "build_list_submission_rejected": "rejected your submission to the",
+}
+
 function constructNotifMessage(notif) {
     const actorsStr = constructActorStr(notif.actors);
-    const type = targetTypeMapping[notif.target_type];
 
-    return notif.type === "comment" ?
-        `${actorsStr} commented on your ${type} ${notif.title}` :
-        `${actorsStr} replied to your comment to the ${type} ${notif.title}`;
+    return `${actorsStr} ${eventString[notif.type]} ${targetTypeMapping[notif.target_type]} ${notif.title}`
 }
 
 export default function Notification({ notif, updateNotif }) {

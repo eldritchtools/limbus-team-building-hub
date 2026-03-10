@@ -118,6 +118,7 @@ create or replace function public.search_build_lists_v3(
 )
 returns table (
   id uuid,
+  user_id uuid,
   username TEXT,
   user_flair TEXT,
   title text,
@@ -229,6 +230,7 @@ begin
 
   SELECT
     l.id,
+    l.user_id,
     l.username,
     l.flair AS user_flair,
     l.title,
@@ -253,6 +255,7 @@ begin
 
   GROUP BY
     l.id,
+    l.user_id,
     l.username,
     l.flair,
     l.title,
@@ -747,3 +750,326 @@ USING (
       AND bl.user_id = auth.uid()
   )
 );
+
+CREATE OR REPLACE FUNCTION public.get_build_list_submissions(
+  p_list_id uuid
+)
+RETURNS TABLE (
+  submission_id uuid,
+  list_id uuid,
+  build_id uuid,
+  note text,
+  submitter_note text,
+  submitted_at timestamptz,
+  submitter jsonb,
+  build jsonb
+)
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  SELECT
+    s.id AS submission_id,
+    s.list_id,
+    s.build_id,
+    s.note,
+    s.submitter_note,
+    s.submitted_at,
+
+    jsonb_build_object(
+      'user_id', s.submitted_by,
+      'username', su.username,
+      'flair', su.flair
+    ),
+
+    jsonb_build_object(
+      'id', b.id,
+      'username', bu.username,
+      'user_flair', bu.flair,
+      'title', b.title,
+      'deployment_order', b.deployment_order,
+      'active_sinners', b.active_sinners,
+      'identity_ids', b.identity_ids,
+      'ego_ids', b.ego_ids,
+      'keyword_ids', b.keyword_ids,
+      'created_at', b.created_at,
+      'published_at', b.published_at,
+      'updated_at', b.updated_at,
+      'tags',
+        COALESCE(
+          jsonb_agg(DISTINCT t.name) FILTER (WHERE t.id IS NOT NULL),
+          '[]'::jsonb
+        )
+    ) AS build
+
+  FROM public.build_list_submissions s
+
+  JOIN public.builds b
+    ON b.id = s.build_id
+
+  LEFT JOIN public.users bu
+    ON bu.id = b.user_id
+
+  LEFT JOIN public.users su
+    ON su.id = s.submitted_by
+
+  LEFT JOIN public.build_tags bt
+    ON bt.build_id = b.id
+
+  LEFT JOIN public.tags t
+    ON t.id = bt.tag_id
+
+  WHERE s.list_id = p_list_id
+    AND s.status = 'pending'
+
+  GROUP BY
+    s.id,
+    s.list_id,
+    s.build_id,
+    s.note,
+    s.submitter_note,
+    s.submitted_at,
+    s.submitted_by,
+    su.username,
+    su.flair,
+    b.id,
+    bu.username,
+    bu.flair
+
+  ORDER BY s.submitted_at;
+$$;
+
+CREATE INDEX idx_submissions_list_status ON build_list_submissions(list_id, status, submitted_at);
+
+CREATE OR REPLACE FUNCTION public.approve_build_list_submission(
+  p_submission_id uuid,
+  p_note text
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_list_id uuid;
+  v_build_id uuid;
+  v_submitted_by uuid;
+  v_position int;
+BEGIN
+
+  -- lock the submission row
+  SELECT
+    list_id,
+    build_id,
+    submitted_by
+  INTO
+    v_list_id,
+    v_build_id,
+    v_submitted_by
+  FROM public.build_list_submissions
+  WHERE id = p_submission_id
+    AND status = 'pending'
+  FOR UPDATE;
+
+  IF v_list_id IS NULL THEN
+    RAISE EXCEPTION 'Submission not found or already reviewed';
+  END IF;
+
+  -- determine next position
+  SELECT COALESCE(MAX(position) + 1, 1)
+  INTO v_position
+  FROM public.build_list_items
+  WHERE list_id = v_list_id;
+
+  -- insert into list
+  INSERT INTO public.build_list_items (
+    list_id,
+    build_id,
+    note,
+    submitted_by,
+    position
+  )
+  VALUES (
+    v_list_id,
+    v_build_id,
+    p_note,
+    v_submitted_by,
+    v_position
+  );
+
+  -- mark submission as approved
+  UPDATE public.build_list_submissions
+  SET
+    status = 'approved',
+    reviewed_by = auth.uid(),
+    reviewed_at = now()
+  WHERE id = p_submission_id;
+
+  -- reject all other submissions of the same build
+  UPDATE public.build_list_submissions
+  SET
+    status = 'rejected',
+    reviewed_by = auth.uid(),
+    reviewed_at = now()
+  WHERE list_id = v_list_id
+    AND build_id = v_build_id
+    AND status = 'pending';
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.reject_build_list_submission(
+  p_submission_id uuid
+)
+RETURNS void
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  UPDATE public.build_list_submissions
+  SET
+    status = 'rejected',
+    reviewed_by = auth.uid(),
+    reviewed_at = now()
+  WHERE id = p_submission_id
+    AND status = 'pending'
+$$;
+
+CREATE OR REPLACE FUNCTION public.reject_build_list_submissions_for_build(
+  p_list_id uuid,
+  p_build_id uuid
+)
+RETURNS void
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  UPDATE public.build_list_submissions
+  SET
+    status = 'rejected',
+    reviewed_by = auth.uid(),
+    reviewed_at = now()
+  WHERE list_id = p_list_id
+    AND build_id = p_build_id
+    AND status = 'pending';
+$$;
+
+CREATE OR REPLACE FUNCTION handle_build_list_submission_notifications()
+RETURNS TRIGGER AS $$
+DECLARE
+  list_owner UUID;
+  existing_notif UUID;
+BEGIN
+
+  -- Get list owner
+  SELECT user_id INTO list_owner
+  FROM public.build_lists
+  WHERE id = NEW.list_id;
+
+  -- Don't notify yourself
+  IF list_owner IS NULL OR list_owner = NEW.submitted_by THEN
+    RETURN NEW;
+  END IF;
+
+  -- Check existing unread notification
+  SELECT id INTO existing_notif
+  FROM public.notifications
+  WHERE user_id = list_owner
+    AND target_type = 'build_list'
+    AND target_id = NEW.list_id
+    AND type = 'build_list_submission'
+    AND is_read = FALSE
+  LIMIT 1;
+
+  IF existing_notif IS NOT NULL THEN
+    UPDATE public.notifications
+    SET actor_ids = array_append(actor_ids, NEW.submitted_by),
+        created_at = NOW()
+    WHERE id = existing_notif
+      AND NOT (NEW.submitted_by = ANY(actor_ids));
+  ELSE
+    INSERT INTO public.notifications (
+      user_id,
+      actor_ids,
+      target_type,
+      target_id,
+      type
+    )
+    VALUES (
+      list_owner,
+      ARRAY[NEW.submitted_by],
+      'build_list',
+      NEW.list_id,
+      'build_list_submission'
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER trg_build_list_submission_notifications
+AFTER INSERT ON public.build_list_submissions
+FOR EACH ROW
+EXECUTE FUNCTION handle_build_list_submission_notifications();
+
+CREATE OR REPLACE FUNCTION handle_build_list_submission_review_notifications()
+RETURNS TRIGGER AS $$
+DECLARE
+  existing_notif UUID;
+  notif_type notification_type_enum;
+BEGIN
+
+  IF NEW.status = OLD.status THEN
+    RETURN NEW;
+  END IF;
+
+  IF NEW.status = 'approved' THEN
+    notif_type := 'build_list_submission_approved';
+  ELSIF NEW.status = 'rejected' THEN
+    notif_type := 'build_list_submission_rejected';
+  ELSE
+    RETURN NEW;
+  END IF;
+
+  -- Don't notify yourself
+  IF NEW.submitted_by IS NULL OR NEW.submitted_by = NEW.reviewed_by THEN
+    RETURN NEW;
+  END IF;
+
+  -- Find existing notification
+  SELECT id INTO existing_notif
+  FROM public.notifications
+  WHERE user_id = NEW.submitted_by
+    AND target_type = 'build_list'
+    AND target_id = NEW.list_id
+    AND type = notif_type
+    AND is_read = FALSE
+  LIMIT 1;
+
+  IF existing_notif IS NOT NULL THEN
+    UPDATE public.notifications
+    SET actor_ids = array_append(actor_ids, NEW.reviewed_by),
+        created_at = NOW()
+    WHERE id = existing_notif
+      AND NOT (NEW.reviewed_by = ANY(actor_ids));
+  ELSE
+    INSERT INTO public.notifications (
+      user_id,
+      actor_ids,
+      target_type,
+      target_id,
+      type
+    )
+    VALUES (
+      NEW.submitted_by,
+      ARRAY[NEW.reviewed_by],
+      'build_list',
+      NEW.list_id,
+      notif_type
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER trg_build_list_submission_review_notifications
+AFTER UPDATE OF status ON public.build_list_submissions
+FOR EACH ROW
+EXECUTE FUNCTION handle_build_list_submission_review_notifications();

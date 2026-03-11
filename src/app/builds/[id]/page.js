@@ -28,11 +28,7 @@ import { DeleteSolid, EditSolid, ShareSolid, ViewSolid } from "@/app/components/
 import SinDistribution from "@/app/components/SinDistribution";
 import SocialsDisplay from "@/app/components/SocialsDisplay";
 import { constructTeamCode } from "@/app/components/TeamCodeEncoding";
-
-function isLocalId(id) {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return !uuidRegex.test(id);
-}
+import { isLocalId } from "@/app/utils";
 
 export default function BuildPage({ params }) {
     const { id } = React.use(params);
@@ -152,7 +148,7 @@ export default function BuildPage({ params }) {
         Loading...
     </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", containerType: "inline-size" }}>
         <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-            <h2 style={{ display: "flex", fontSize: "1.2rem", fontWeight: "bold", alignItems: "center" }}>
+            <h2 style={{ display: "flex", fontSize: "1.2rem", fontWeight: "bold", alignItems: "center", flexWrap: "wrap" }}>
                 <div style={{ display: "flex", gap: "0.2rem" }}>
                     {build.keyword_ids.map(id => <KeywordIcon key={id} id={keywordIdMapping[id]} />)}
                 </div>

@@ -1,16 +1,18 @@
 import {
-  HandThumbUpIcon,
-  BookmarkIcon,
+    HandThumbUpIcon,
+    BookmarkIcon,
 } from '@heroicons/react/24/outline'
 
 import {
-  HandThumbUpIcon as HandThumbUpIconSolid,
-  ChatBubbleLeftIcon as ChatBubbleLeftIconSolid,
-  BookmarkIcon as BookmarkIconSolid,
-  ShareIcon as ShareIconSolid,
-  PencilIcon as PencilIconSolid,
-  TrashIcon as TrashIconSolid,
-  EyeIcon as EyeIconSolid
+    HandThumbUpIcon as HandThumbUpIconSolid,
+    ChatBubbleLeftIcon as ChatBubbleLeftIconSolid,
+    BookmarkIcon as BookmarkIconSolid,
+    ShareIcon as ShareIconSolid,
+    PencilIcon as PencilIconSolid,
+    TrashIcon as TrashIconSolid,
+    EyeIcon as EyeIconSolid,
+    UserPlusIcon as UserPlusIconSolid,
+    ClipboardDocumentCheckIcon as ClipboardDocumentCheckIconSolid
 } from '@heroicons/react/24/solid'
 
 
@@ -61,4 +63,12 @@ export function DeleteSolid({ size = 20, text }) {
 
 export function ViewSolid({ size = 20, text }) {
     return constructSymbol(EyeIconSolid, size, text);
+}
+
+export function ContributeSolid({ size = 20, text }) {
+    return constructSymbol(UserPlusIconSolid, size, text)
+}
+
+export function ReviewSolid({ size = 20, text }) {
+    return constructSymbol(ClipboardDocumentCheckIconSolid, size, text)
 }

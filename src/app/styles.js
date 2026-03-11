@@ -15,7 +15,7 @@ const selectStyle = {
         backgroundColor: "#2a2a2a",
         border: "1px solid #555",
         maxWidth: "40rem",
-        zIndex: 3
+        zIndex: 6
     }),
     option: (provided, state) => ({
         ...provided,
@@ -74,7 +74,7 @@ const selectStyleWide = {
         border: "1px solid #555",
         minHeight: "28px",
         width: "55rem",
-        zIndex: 3
+        zIndex: 6
     }),
 };
 
@@ -96,7 +96,7 @@ const selectStyleVariable = {
         border: "1px solid #555",
         minHeight: "28px",
         width: "100%",
-        zIndex: 3
+        zIndex: 6
     }),
 };
 

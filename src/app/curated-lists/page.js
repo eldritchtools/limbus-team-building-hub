@@ -59,6 +59,9 @@ export default function CuratedListsPage() {
     }
 
     return <div style={{ display: "flex", flexDirection: "column", textAlign: "center", gap: "0.5rem" }}>
+        <div>
+            Curated lists are lists of builds managed by users. Some lists may be open to contributions from other users.
+        </div>
         <ListsSearchComponent />
         <div style={{ border: "1px #777 solid" }} />
         <div style={{ display: "flex", flexDirection: "row", gap: "1rem", alignSelf: "center", marginTop: "0.5rem", marginBottom: "0.5rem" }}>

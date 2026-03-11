@@ -84,7 +84,7 @@ function Comment({ comment, targetType, targetId, buildOwnerId, pinned, onPost, 
 
     return (
         <div style={{ border: "1px #777 solid", borderRadius: "1rem", padding: "0.8rem 1rem 0.2rem 1rem" }}>
-            {comment.parent_author && (
+            {comment.parent_body && (
                 <div style={{ paddingBottom: "0.25rem" }}>
                     {comment.parent_deleted ?
                         <div style={{ display: "flex", flexDirection: "column", textAlign: "start", gap: "0.25rem" }}>

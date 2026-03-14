@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_filtered_builds_v7(
+CREATE OR REPLACE FUNCTION public.get_filtered_builds_v8(
   title_filter TEXT DEFAULT NULL,
   username_filter TEXT DEFAULT NULL,
   username_exact_filter TEXT DEFAULT NULL,
@@ -16,12 +16,14 @@ CREATE OR REPLACE FUNCTION public.get_filtered_builds_v7(
   limit_count INTEGER DEFAULT 20,
   offset_count INTEGER DEFAULT 0,
   strict_filter BOOLEAN DEFAULT FALSE,
-  ignore_block_discovery BOOLEAN DEFAULT FALSE
+  ignore_block_discovery BOOLEAN DEFAULT FALSE,
+  include_egos BOOLEAN DEFAULT FALSE
 )
 RETURNS TABLE (
   id UUID,
   title TEXT,
   created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ,
   published_at TIMESTAMPTZ,
   like_count INTEGER,
   comment_count INTEGER,
@@ -34,7 +36,8 @@ RETURNS TABLE (
   tags TEXT[],
   extra_opts TEXT,
   identity_ids INT[],
-  keyword_ids INT[]
+  keyword_ids INT[],
+  ego_ids INT[]
 ) AS $$
 BEGIN
   RETURN QUERY
@@ -43,6 +46,7 @@ BEGIN
     b.title,
     b.created_at,
     b.published_at,
+    b.updated_at,
     b.like_count,
     b.comment_count,
     b.deployment_order,
@@ -54,7 +58,8 @@ BEGIN
     ARRAY_AGG(DISTINCT t.name) AS tags,
     b.extra_opts,
     b.identity_ids,
-    b.keyword_ids
+    b.keyword_ids,
+    CASE WHEN include_egos THEN b.ego_ids ELSE NULL END
   FROM public.builds AS b
   JOIN public.users AS u ON b.user_id = u.id
   LEFT JOIN public.build_tags AS bt ON b.id = bt.build_id

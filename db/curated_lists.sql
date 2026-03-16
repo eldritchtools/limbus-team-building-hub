@@ -14,6 +14,7 @@ create table public.build_lists (
   view_count INTEGER NOT NULL DEFAULT 0,
   block_discovery BOOLEAN NOT NULL DEFAULT FALSE,
   submission_mode build_list_submission_mode DEFAULT 'closed',
+  pinned_comment_id UUID REFERENCES public.comments(id) ON DELETE SET NULL,
 
   created_at TIMESTAMPTZ DEFAULT NOW(),
   published_at TIMESTAMPTZ DEFAULT NULL,

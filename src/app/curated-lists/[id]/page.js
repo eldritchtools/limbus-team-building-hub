@@ -244,7 +244,7 @@ export default function CuratedListPage({ params }) {
                 <div id="comments" style={{ width: "clamp(300px, 100%, 1200px)", alignSelf: "center" }}>
                     <CommentSection targetType={"build_list"} targetId={id} ownerId={curatedList.user_id} commentCount={commentCount} pinnedComment={curatedList.pinned_comment} />
                 </div> :
-                <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>No comments while the build is not published.</p>
+                <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>No comments while the curated list is not published.</p>
             }
 
             <Modal isOpen={deleteOpen} onClose={() => setDeleteOpen(false)}>

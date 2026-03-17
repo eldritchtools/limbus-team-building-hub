@@ -415,11 +415,13 @@ export default function ProfilePage() {
             if (!user) {
                 if (activeTab === "drafts") {
                     components.push(<div key={"draft-warn"} style={{ color: "rgba(255, 99, 71, 0.85)", paddingBottom: "0.5rem" }}>
-                        When not logged in, md plans are saved locally on this device. After logging in, you can sync them to your account. Md plans that are not synced cannot be accessed while logged in.
+                        {/* When not logged in, md plans are saved locally on this device. After logging in, you can sync them to your account. Md plans that are not synced cannot be accessed while logged in. */}
+                        When not logged in, md plans are saved locally on this device. MD plans are currently not syncable on login.
                     </div>)
                 } else if (activeTab === "saved") {
                     components.push(<div key={"save-warn"} style={{ color: "rgba(255, 99, 71, 0.85)", paddingBottom: "0.5rem" }}>
-                        When not logged in, saved md plans are stored locally on this device. After logging in, you can sync them to your account. Saved md plans that are not synced cannot be accessed while logged in. Local drafts cannot be saved.
+                        {/* When not logged in, saved md plans are stored locally on this device. After logging in, you can sync them to your account. Saved md plans that are not synced cannot be accessed while logged in. Local drafts cannot be saved. */}
+                        When not logged in, saved md plans are stored locally on this device. Saved md plans are currently not syncable on login.
                     </div>)
                 }
             }

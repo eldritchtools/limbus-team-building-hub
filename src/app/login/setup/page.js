@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/database/authProvider';
-import { buildsStore, listsStore, savedListsStore, savesStore } from '@/app/database/localDB';
+import { buildsStore, listsStore, mdPlansStore, savedListsStore, savedMdPlansStore, savesStore } from '@/app/database/localDB';
 import { useRequestsCache } from '@/app/database/RequestsCacheProvider';
 import { insertBuild } from '@/app/database/builds';
 // import { insertCuratedList } from '@/app/database/collections';
@@ -20,10 +20,14 @@ export default function UsernameSetup() {
     const [localSaves, setLocalSaves] = useState([]);
     const [localLists, setLocalLists] = useState([]);
     const [localSavedLists, setLocalSavedLists] = useState([]);
+    const [localMdPlans, setLocalMdPlans] = useState([]);
+    const [localSavedMdPlans, setLocalSavedMdPlans] = useState([]);
     const [buildSyncCancelled, setBuildSyncCancelled] = useState(false);
     const [saveSyncCancelled, setSaveSyncCancelled] = useState(false);
     const [listSyncCancelled, setListSyncCancelled] = useState(false);
     const [savedListSyncCancelled, setSavedListSyncCancelled] = useState(false);
+    const [planSyncCancelled, setPlanSyncCancelled] = useState(false);
+    const [savedPlanSyncCancelled, setSavedPlanSyncCancelled] = useState(false);
     const [localLoading, setLocalLoading] = useState(true);
     const [syncing, setSyncing] = useState(false);
 
@@ -32,6 +36,8 @@ export default function UsernameSetup() {
         setLocalSaves(await savesStore.getAll());
         setLocalLists(await listsStore.getAll());
         setLocalSavedLists(await savedListsStore.getAll());
+        setLocalMdPlans(await mdPlansStore.getAll());
+        setLocalSavedMdPlans(await savedMdPlansStore.getAll());
         setLocalLoading(false);
     }
 
@@ -243,6 +249,7 @@ export default function UsernameSetup() {
     //         {error && <p style={{ color: 'red' }}>{error}</p>}
     //     </main>;
     // }
+    
 
     router.replace("/");
     return null;

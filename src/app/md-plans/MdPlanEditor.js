@@ -507,7 +507,8 @@ export default function MdPlanEditor({ mode, mdPlanId }) {
             {mode === "edit" ? "Editing" : "Creating"} Run Plan
         </h2>
         {!user ?
-            <div style={{ color: "rgba(255, 99, 71, 0.85)" }}>When not logged in, run plans are saved locally on this device. After logging in, you can sync them to your account. Run plans that are not synced cannot be accessed while logged in.</div>
+            // <div style={{ color: "rgba(255, 99, 71, 0.85)" }}>When not logged in, md plans are saved locally on this device. After logging in, you can sync them to your account. Run plans that are not synced cannot be accessed while logged in.</div>
+            <div style={{ color: "rgba(255, 99, 71, 0.85)" }}>When not logged in, md plans are saved locally on this device. MD plans are currently not syncable on login.</div>
             : null
         }
         <span style={{ fontSize: "1.2rem" }}>Title</span>

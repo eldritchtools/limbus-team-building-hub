@@ -19,9 +19,9 @@ TimeAgo.addDefaultLocale(en);
 
 const paths = [
     { path: "/", title: "Home" },
-    { path: "/builds", title: "Explore Team Builds" },
-    { path: "/curated-lists", title: "Explore Curated Lists" },
+    { path: "/builds", title: "Team Builds" },
     { path: "/md-plans", title: "MD Plans" },
+    { path: "/curated-lists", title: "Curated Lists" },
     {
         path: "/my-profile", title: "My Profile", subpaths: [
             { path: "/builds/new", title: "New Build" },

@@ -9,7 +9,7 @@ import { isLocalId } from "@/app/utils";
 import MarkdownEditorWrapper from "@/app/components/Markdown/MarkdownEditorWrapper";
 import Username from "@/app/components/Username";
 import { useAuth } from "@/app/database/authProvider";
-import { getCuratedList, submitCuratedListContribution } from "@/app/database/curatedLists";
+import { getCuratedList, submitCuratedListContribution } from "@/app/database/collections";
 import { useBreakpoint } from "@eldritchtools/shared-components";
 import BuildEntry from "@/app/components/BuildEntry";
 

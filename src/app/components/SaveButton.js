@@ -4,12 +4,13 @@ import { useAuth } from "../database/authProvider";
 import { savedListsStore, savesStore } from "../database/localDB";
 import { SaveOutline, SaveSolid } from "./Symbols";
 
-function NormalSaveButton({ targetType, targetId, user, buildEntryVersion, iconSize }) {
+function NormalSaveButton({ targetType, targetId, user, buildEntryVersion, iconSize, shortText=false }) {
     const { checkSaved, toggleSave, fetchUserData } = useRequestsCache();
     const [loading, setLoading] = useState(false);
 
     useEffect(() => { if (user) fetchUserData(targetType, [targetId]) }, [fetchUserData, targetType, targetId, user]);
     const saved = useMemo(() => checkSaved(targetType, targetId), [checkSaved, targetType, targetId]);
+    const text = shortText ? "" : (saved ? "Saved" : "Save");
 
     if (saved === undefined || saved === null) return null;
 
@@ -24,11 +25,11 @@ function NormalSaveButton({ targetType, targetId, user, buildEntryVersion, iconS
             style={{ display: "flex", alignItems: "center", justifyContent: "center", color: loading ? "#aaa" : "#ddd", borderBottomRightRadius: "12px" }}
             onClick={loading ? null : handleClick}
         >
-            {saved ? <SaveSolid text={"Saved"} size={iconSize} /> : <SaveOutline text={"Save"} size={iconSize} />}
+            {saved ? <SaveSolid text={text} size={iconSize} /> : <SaveOutline text={text} size={iconSize} />}
         </div>
     } else {
         return <button onClick={handleClick} className={saved ? "toggle-button-active" : "toggle-button"} disabled={loading}>
-            {saved ? <SaveSolid text={"Saved"} size={iconSize} /> : <SaveOutline text={"Save"} size={iconSize} />}
+            {saved ? <SaveSolid text={text} size={iconSize} /> : <SaveOutline text={text} size={iconSize} />}
         </button>
     }
 }
@@ -38,9 +39,10 @@ function isLocalId(id) {
     return !uuidRegex.test(id);
 }
 
-function LocalSaveButton({ targetType, targetId, buildEntryVersion, iconSize }) {
+function LocalSaveButton({ targetType, targetId, buildEntryVersion, iconSize, shortText=false }) {
     const [saved, setSaved] = useState(false);
     const [loading, setLoading] = useState(false);
+    const text = shortText ? "" : (saved ? "Saved" : "Save");
 
     const store = useMemo(() => {
         switch(targetType) {
@@ -76,18 +78,18 @@ function LocalSaveButton({ targetType, targetId, buildEntryVersion, iconSize }) 
             style={{ display: "flex", alignItems: "center", justifyContent: "center", color: loading ? "#aaa" : "#ddd", borderBottomRightRadius: "12px" }}
             onClick={loading ? null : handleClick}
         >
-            {saved ? <SaveSolid text={"Saved"} size={iconSize} /> : <SaveOutline text={"Save"} size={iconSize} />}
+            {saved ? <SaveSolid text={text} size={iconSize} /> : <SaveOutline text={text} size={iconSize} />}
         </div>
     } else {
         return <button onClick={handleClick} className={saved ? "toggle-button-active" : "toggle-button"} disabled={loading}>
-            {saved ? <SaveSolid text={"Saved"} size={iconSize} /> : <SaveOutline text={"Save"} size={iconSize} />}
+            {saved ? <SaveSolid text={text} size={iconSize} /> : <SaveOutline text={text} size={iconSize} />}
         </button>
     }
 }
 
-export default function SaveButton({ targetType, targetId, buildEntryVersion=false, iconSize }) {
+export default function SaveButton({ targetType, targetId, buildEntryVersion=false, iconSize, shortText=false }) {
     const { user } = useAuth();
-    if (!user) return <LocalSaveButton targetType={targetType} targetId={targetId} buildEntryVersion={buildEntryVersion} iconSize={iconSize} />;
-    else return <NormalSaveButton targetType={targetType} targetId={targetId} user={user} buildEntryVersion={buildEntryVersion} iconSize={iconSize} />
+    if (!user) return <LocalSaveButton targetType={targetType} targetId={targetId} buildEntryVersion={buildEntryVersion} iconSize={iconSize} shortText={shortText} />;
+    else return <NormalSaveButton targetType={targetType} targetId={targetId} user={user} buildEntryVersion={buildEntryVersion} iconSize={iconSize} shortText={shortText} />
 
 }

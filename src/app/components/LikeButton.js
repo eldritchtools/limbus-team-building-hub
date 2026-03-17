@@ -4,7 +4,7 @@ import { useAuth } from "../database/authProvider";
 import { LikeOutline, LikeSolid } from "./Symbols";
 
 
-export default function LikeButton({ targetType, targetId, likeCount, buildEntryVersion = false, iconSize }) {
+export default function LikeButton({ targetType, targetId, likeCount, buildEntryVersion = false, iconSize, shortText=false }) {
     const { user } = useAuth();
     const { checkLiked, toggleLike, fetchUserData } = useRequestsCache();
     const [count, setCount] = useState(likeCount);
@@ -12,7 +12,7 @@ export default function LikeButton({ targetType, targetId, likeCount, buildEntry
 
     useEffect(() => { if (user) fetchUserData(targetType, [targetId]) }, [fetchUserData, targetType, targetId, user]);
     const liked = useMemo(() => checkLiked(targetType, targetId), [checkLiked, targetType, targetId]);
-    const text = count === 1 ? "1 Like" : `${count} Likes`;
+    const text = shortText ? `${count}` : count === 1 ? "1 Like" : `${count} Likes`;
 
     if (!user)
         if (buildEntryVersion) {

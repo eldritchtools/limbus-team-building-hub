@@ -6,7 +6,7 @@ import { useAuth } from "../database/authProvider";
 import { useRouter } from "next/navigation";
 import MarkdownEditorWrapper from "../components/Markdown/MarkdownEditorWrapper";
 import { listsStore } from "../database/localDB";
-import { getCuratedList, insertCuratedList, updateCuratedList } from "../database/curatedLists";
+import { getCuratedList, insertCuratedList, updateCuratedList } from "../database/collections";
 import BuildEntry from "../components/BuildEntry";
 import Username from "../components/Username";
 import SelectBuildModal from "../components/SelectBuildModal";

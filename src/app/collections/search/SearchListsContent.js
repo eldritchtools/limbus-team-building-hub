@@ -1,8 +1,8 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import ListsSearchComponent from "../ListsSearchComponent";
-import { searchCuratedLists } from "@/app/database/curatedLists";
+import ListsSearchComponent from "../CollectionsSearchComponent";
+import { searchCuratedLists } from "@/app/database/collections";
 import CuratedList from "@/app/components/CuratedList";
 
 export default function SearchListsContent() {

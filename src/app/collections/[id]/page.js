@@ -13,7 +13,7 @@ import { useBreakpoint } from "@eldritchtools/shared-components";
 import { listsStore } from "@/app/database/localDB";
 import { DeleteSolid, EditSolid, ViewSolid } from "@/app/components/Symbols";
 // import SocialsDisplay from "@/app/components/SocialsDisplay";
-import { deleteCuratedList, getCuratedList } from "@/app/database/curatedLists";
+import { deleteCuratedList, getCuratedList } from "@/app/database/collections";
 import BuildEntry from "@/app/components/BuildEntry";
 import DropdownButton from "@/app/components/DropdownButton";
 import CommentSection from "@/app/components/commentSection";

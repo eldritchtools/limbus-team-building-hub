@@ -21,6 +21,7 @@ const paths = [
     { path: "/", title: "Home" },
     { path: "/builds", title: "Explore Team Builds" },
     { path: "/curated-lists", title: "Explore Curated Lists" },
+    { path: "/md-plans", title: "MD Plans" },
     {
         path: "/my-profile", title: "My Profile", subpaths: [
             { path: "/builds/new", title: "New Build" },

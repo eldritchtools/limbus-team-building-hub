@@ -6,7 +6,7 @@ export default function ReviewButton({ listId, iconSize }) {
     const { user } = useAuth();
 
     if (user) {
-        return <NoPrefetchLink href={`/curated-lists/${listId}/review`} className="toggle-button" style={{ color: "#ddd", textDecoration: "none" }}>
+        return <NoPrefetchLink href={`/collections/${listId}/review`} className="toggle-button" style={{ color: "#ddd", textDecoration: "none" }}>
             <ReviewSolid text={"Review Submissions"} size={iconSize} />
         </NoPrefetchLink>
     } else {

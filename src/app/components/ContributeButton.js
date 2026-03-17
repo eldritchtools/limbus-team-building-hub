@@ -2,11 +2,11 @@ import { useAuth } from "../database/authProvider";
 import NoPrefetchLink from "../NoPrefetchLink";
 import { ContributeSolid } from "./Symbols";
 
-export default function ContributeButton({ listId, iconSize }) {
+export default function ContributeButton({ collectionId, iconSize }) {
     const { user } = useAuth();
     
     if (user) {
-        return <NoPrefetchLink href={`/curated-lists/${listId}/contribute`} className="toggle-button" style={{ color: "#ddd", textDecoration: "none" }}>
+        return <NoPrefetchLink href={`/collections/${collectionId}/contribute`} className="toggle-button" style={{ color: "#ddd", textDecoration: "none" }}>
             <ContributeSolid text={"Contribute"} size={iconSize} />
         </NoPrefetchLink>
     } else {

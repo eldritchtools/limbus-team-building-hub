@@ -210,27 +210,54 @@ BEGIN
                     / POWER((EXTRACT(EPOCH FROM (NOW() - COALESCE(published_at, created_at))) / 86400) + 2, 1.05)
         WHERE id = tgt_id;
 
-    -- Handle build lists
-    ELSIF tgt_type = 'build_list' THEN
+    -- Handle collections
+    ELSIF tgt_type = 'collection' THEN
         IF TG_TABLE_NAME = 'likes' THEN
             SELECT COUNT(*) INTO new_like_count
             FROM public.likes
-            WHERE target_type = 'build_list' AND target_id = tgt_id;
+            WHERE target_type = 'collection' AND target_id = tgt_id;
 
             SELECT comment_count INTO new_comment_count
-            FROM public.build_lists
+            FROM public.collections
             WHERE id = tgt_id;
         ELSIF TG_TABLE_NAME = 'comments' THEN
             SELECT COUNT(*) INTO new_comment_count
             FROM public.comments
-            WHERE target_type = 'build_list' AND target_id = tgt_id AND NOT deleted;
+            WHERE target_type = 'collection' AND target_id = tgt_id AND NOT deleted;
 
             SELECT like_count INTO new_like_count
-            FROM public.build_lists
+            FROM public.collections
             WHERE id = tgt_id;
         END IF;
 
-        UPDATE public.build_lists
+        UPDATE public.collections
+        SET
+            like_count = new_like_count,
+            comment_count = new_comment_count,
+            score = (new_like_count * 2 + new_comment_count)
+                    / POWER((EXTRACT(EPOCH FROM (NOW() - COALESCE(published_at, created_at))) / 86400) + 2, 1.05)
+        WHERE id = tgt_id;
+
+    ELSIF tgt_type = 'md_plan' THEN
+        IF TG_TABLE_NAME = 'likes' THEN
+            SELECT COUNT(*) INTO new_like_count
+            FROM public.likes
+            WHERE target_type = 'md_plan' AND target_id = tgt_id;
+
+            SELECT comment_count INTO new_comment_count
+            FROM public.md_plans
+            WHERE id = tgt_id;
+        ELSIF TG_TABLE_NAME = 'comments' THEN
+            SELECT COUNT(*) INTO new_comment_count
+            FROM public.comments
+            WHERE target_type = 'md_plan' AND target_id = tgt_id AND NOT deleted;
+
+            SELECT like_count INTO new_like_count
+            FROM public.md_plans
+            WHERE id = tgt_id;
+        END IF;
+
+        UPDATE public.md_plans
         SET
             like_count = new_like_count,
             comment_count = new_comment_count,

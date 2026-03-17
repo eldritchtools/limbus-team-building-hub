@@ -5,7 +5,7 @@ import { useAuth } from '@/app/database/authProvider';
 import { buildsStore, listsStore, savedListsStore, savesStore } from '@/app/database/localDB';
 import { useRequestsCache } from '@/app/database/RequestsCacheProvider';
 import { insertBuild } from '@/app/database/builds';
-import { insertCuratedList } from '@/app/database/curatedLists';
+import { insertCuratedList } from '@/app/database/collections';
 
 export default function UsernameSetup() {
     const router = useRouter();

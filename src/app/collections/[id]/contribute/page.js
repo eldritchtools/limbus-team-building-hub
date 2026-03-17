@@ -9,11 +9,11 @@ import { isLocalId } from "@/app/utils";
 import MarkdownEditorWrapper from "@/app/components/Markdown/MarkdownEditorWrapper";
 import Username from "@/app/components/Username";
 import { useAuth } from "@/app/database/authProvider";
-import { getCuratedList, submitCuratedListContribution } from "@/app/database/collections";
+import { getCollection, submitCollectionContribution } from "@/app/database/collections";
 import { useBreakpoint } from "@eldritchtools/shared-components";
 import BuildEntry from "@/app/components/BuildEntry";
 
-export default function ContributeCuratedListPage({ params }) {
+export default function ContributeCollectionPage({ params }) {
     const { id } = React.use(params);
     const [curatedList, setCuratedList] = useState(null);
     const [build, setBuild] = useState(null);
@@ -38,7 +38,7 @@ export default function ContributeCuratedListPage({ params }) {
             }
         }
 
-        getCuratedList(id).then(handleList).catch(_err => {
+        getCollection(id).then(handleList).catch(_err => {
             router.push(`/curated-lists/${listId}`);
         });
     }, [id, router, user]);
@@ -50,7 +50,7 @@ export default function ContributeCuratedListPage({ params }) {
         }
         setSubmitting(true);
 
-        const result = await submitCuratedListContribution(user.id, id, build.id, note, submitterNote);
+        const result = await submitCollectionContribution(user.id, id, build.id, note, submitterNote);
         if(result === "Success")
             router.push(`/curated-lists/${id}`);
         else {

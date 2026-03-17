@@ -6,7 +6,7 @@ import { useAuth } from "../database/authProvider";
 import { useRouter } from "next/navigation";
 import MarkdownEditorWrapper from "../components/Markdown/MarkdownEditorWrapper";
 import { listsStore } from "../database/localDB";
-import { getCuratedList, insertCuratedList, updateCuratedList } from "../database/collections";
+import { getCollection, insertCollection, updateCollection } from "../database/collections";
 import BuildEntry from "../components/BuildEntry";
 import Username from "../components/Username";
 import SelectBuildModal from "../components/SelectBuildModal";
@@ -133,12 +133,12 @@ export default function CuratedListEditor({ mode, listId }) {
             }
 
             if (user)
-                getCuratedList(listId).then(handleList).catch(_err => {
-                    router.push(`/curated-lists/${listId}`);
+                getCollection(listId).then(handleList).catch(_err => {
+                    router.push(`/collections/${listId}`);
                 });
             else
                 listsStore.get(Number(listId)).then(handleList).catch(_err => {
-                    router.push(`/curated-lists/${listId}`);
+                    router.push(`/collections/${listId}`);
                 });
         }
     }, [mode, listId, router, user]);
@@ -164,10 +164,10 @@ export default function CuratedListEditor({ mode, listId }) {
                 return result;
             });
             if (mode === "edit") {
-                const data = await updateCuratedList(listId, title, body, shortDesc, trimmedBuilds, contributions, tagsConverted, blockDiscovery, isPublished);
+                const data = await updateCollection(listId, title, body, shortDesc, trimmedBuilds, contributions, tagsConverted, blockDiscovery, isPublished);
                 router.push(`/curated-lists/${data}`);
             } else {
-                const data = await insertCuratedList(title, body, shortDesc, trimmedBuilds, contributions, tagsConverted, blockDiscovery, isPublished);
+                const data = await insertCollection(title, body, shortDesc, trimmedBuilds, contributions, tagsConverted, blockDiscovery, isPublished);
                 router.push(`/curated-lists/${data}`);
             }
         } else {

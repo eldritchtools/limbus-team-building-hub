@@ -146,7 +146,7 @@ async function rejectCollectionSubmission(id) {
     return data;
 }
 
-async function rejectCollectionSubmissionsForBuild(collection_id, build_id) {
+async function rejectCollectionSubmissionsForTarget(collection_id, build_id) {
     const { data, error } = await getSupabase().rpc("reject_collection_submissions_for_target", {
         p_collection_id: collection_id,
         p_build_id: build_id
@@ -182,6 +182,6 @@ async function getCollectionsCountForSitemap() {
 export {
     searchCollections, getCollection, insertCollection, updateCollection, deleteCollection,
     pinCollectionComment, unpinCollectionComment,
-    submitCollectionContribution, getCollectionSubmissions, approveCollectionSubmission, rejectCollectionSubmission, rejectCollectionSubmissionsForBuild,
+    submitCollectionContribution, getCollectionSubmissions, approveCollectionSubmission, rejectCollectionSubmission, rejectCollectionSubmissionsForTarget,
     getCollectionsForSitemap, getCollectionsCountForSitemap
 };

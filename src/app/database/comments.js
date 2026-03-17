@@ -30,7 +30,7 @@ async function updateComment(type, id, body) {
         .from("comments")
         .update({ body })
         .eq("target_type", type)
-        .eq("target_id", id)
+        .eq("id", id)
 
     if (error) throw error;
     return data;
@@ -41,7 +41,7 @@ async function deleteComment(type, id) {
         .from("comments")
         .update({ body: "", deleted: true })
         .eq("target_type", type)
-        .eq("target_id", id);
+        .eq("id", id);
 
     if (error) throw error;
 }

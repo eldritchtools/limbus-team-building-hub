@@ -55,7 +55,7 @@ function Comment({ comment, targetType, targetId, buildOwnerId, pinned, onPost, 
 
     async function handleDelete() {
         setDeleteLoading(true);
-        await deleteComment(comment.id);
+        await deleteComment(targetType, comment.id);
         onDelete(comment.id);
         if (pinned) onPin(null);
         setDeleteLoading(false);

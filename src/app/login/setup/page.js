@@ -2,10 +2,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/database/authProvider';
-import { buildsStore, listsStore, savedListsStore, savesStore } from '@/app/database/localDB';
+import { buildsStore, listsStore, mdPlansStore, savedListsStore, savedMdPlansStore, savesStore } from '@/app/database/localDB';
 import { useRequestsCache } from '@/app/database/RequestsCacheProvider';
 import { insertBuild } from '@/app/database/builds';
-import { insertCuratedList } from '@/app/database/curatedLists';
+// import { insertCuratedList } from '@/app/database/collections';
 
 export default function UsernameSetup() {
     const router = useRouter();
@@ -20,10 +20,14 @@ export default function UsernameSetup() {
     const [localSaves, setLocalSaves] = useState([]);
     const [localLists, setLocalLists] = useState([]);
     const [localSavedLists, setLocalSavedLists] = useState([]);
+    const [localMdPlans, setLocalMdPlans] = useState([]);
+    const [localSavedMdPlans, setLocalSavedMdPlans] = useState([]);
     const [buildSyncCancelled, setBuildSyncCancelled] = useState(false);
     const [saveSyncCancelled, setSaveSyncCancelled] = useState(false);
     const [listSyncCancelled, setListSyncCancelled] = useState(false);
     const [savedListSyncCancelled, setSavedListSyncCancelled] = useState(false);
+    const [planSyncCancelled, setPlanSyncCancelled] = useState(false);
+    const [savedPlanSyncCancelled, setSavedPlanSyncCancelled] = useState(false);
     const [localLoading, setLocalLoading] = useState(true);
     const [syncing, setSyncing] = useState(false);
 
@@ -32,6 +36,8 @@ export default function UsernameSetup() {
         setLocalSaves(await savesStore.getAll());
         setLocalLists(await listsStore.getAll());
         setLocalSavedLists(await savedListsStore.getAll());
+        setLocalMdPlans(await mdPlansStore.getAll());
+        setLocalSavedMdPlans(await savedMdPlansStore.getAll());
         setLocalLoading(false);
     }
 
@@ -169,80 +175,81 @@ export default function UsernameSetup() {
         </main>;
     }
 
-    if (localLists.length !== 0 && !listSyncCancelled) {
-        const handleSyncLists = async () => {
-            setSyncing(true);
-            setError("");
-            for (const list of localLists) {
-                const { id, title, body, short_desc, items, tags, block_discovery } = list;
-                try {
-                    const trimmedBuilds = items.map(({ build, note }) => ({ build_id: build.id, note: note }));
-                    const data = await insertCuratedList(title, body, short_desc, trimmedBuilds, tags, block_discovery, false);
-                    if (data) await listsStore.remove(id);
-                } catch (err) {
-                    setError("Failed to sync a curated list, try again or cancel syncing.");
-                    setSyncing(false);
-                    break;
-                }
-            }
-            setSyncing(false);
-            await fetchLocal();
-        }
+    // if (localLists.length !== 0 && !listSyncCancelled) {
+    //     const handleSyncLists = async () => {
+    //         setSyncing(true);
+    //         setError("");
+    //         for (const list of localLists) {
+    //             const { id, title, body, short_desc, items, tags, block_discovery } = list;
+    //             try {
+    //                 const trimmedBuilds = items.map(({ build, note }) => ({ build_id: build.id, note: note }));
+    //                 const data = await insertCuratedList(title, body, short_desc, trimmedBuilds, tags, block_discovery, false);
+    //                 if (data) await listsStore.remove(id);
+    //             } catch (err) {
+    //                 setError("Failed to sync a curated list, try again or cancel syncing.");
+    //                 setSyncing(false);
+    //                 break;
+    //             }
+    //         }
+    //         setSyncing(false);
+    //         await fetchLocal();
+    //     }
 
-        return <main style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", textAlign: 'center', marginTop: '3rem' }}>
-            <span style={{ fontSize: "1.2rem" }}>
-                Some local curated lists were found on your device. Would you like to sync them to your account?
-                <br />
-                Local curated lists that are not synced cannot be accessed while logged in.
-            </span>
-            <div style={{ display: "flex", gap: "2rem" }}>
-                <button onClick={handleSyncLists} disabled={syncing}>
-                    Sync Curated Lists
-                </button>
-                <button onClick={() => setListSyncCancelled(true)} disabled={syncing}>
-                    Don&apos;t Sync
-                </button>
-            </div>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-        </main>;
-    }
+    //     return <main style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", textAlign: 'center', marginTop: '3rem' }}>
+    //         <span style={{ fontSize: "1.2rem" }}>
+    //             Some local curated lists were found on your device. Would you like to sync them to your account?
+    //             <br />
+    //             Local curated lists that are not synced cannot be accessed while logged in.
+    //         </span>
+    //         <div style={{ display: "flex", gap: "2rem" }}>
+    //             <button onClick={handleSyncLists} disabled={syncing}>
+    //                 Sync Curated Lists
+    //             </button>
+    //             <button onClick={() => setListSyncCancelled(true)} disabled={syncing}>
+    //                 Don&apos;t Sync
+    //             </button>
+    //         </div>
+    //         {error && <p style={{ color: 'red' }}>{error}</p>}
+    //     </main>;
+    // }
 
-    if (localSavedLists.length !== 0 && !savedListSyncCancelled) {
-        const handleSyncSaves = async () => {
-            setSyncing(true);
-            setError("");
-            for (const save of localSavedLists) {
-                const { id } = save;
-                try {
-                    await toggleSave("build_list", id)
-                    await savedListsStore.remove(id);
-                } catch (err) {
-                    setError("Failed to sync a saved list, try again or cancel syncing.");
-                    setSyncing(false);
-                    break;
-                }
-            }
-            setSyncing(false);
-            await fetchLocal();
-        }
+    // if (localSavedLists.length !== 0 && !savedListSyncCancelled) {
+    //     const handleSyncSaves = async () => {
+    //         setSyncing(true);
+    //         setError("");
+    //         for (const save of localSavedLists) {
+    //             const { id } = save;
+    //             try {
+    //                 await toggleSave("build_list", id)
+    //                 await savedListsStore.remove(id);
+    //             } catch (err) {
+    //                 setError("Failed to sync a saved list, try again or cancel syncing.");
+    //                 setSyncing(false);
+    //                 break;
+    //             }
+    //         }
+    //         setSyncing(false);
+    //         await fetchLocal();
+    //     }
 
-        return <main style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", textAlign: 'center', marginTop: '3rem' }}>
-            <span style={{ fontSize: "1.2rem" }}>
-                Some local saved curated lists were found on your device. Would you like to sync them to your account?
-                <br />
-                Local saved curated lists that are not synced cannot be accessed while logged in.
-            </span>
-            <div style={{ display: "flex", gap: "2rem" }}>
-                <button onClick={handleSyncSaves} disabled={syncing}>
-                    Sync Saved Curated Lists
-                </button>
-                <button onClick={() => setSavedListSyncCancelled(true)} disabled={syncing}>
-                    Don&apos;t Sync
-                </button>
-            </div>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-        </main>;
-    }
+    //     return <main style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", textAlign: 'center', marginTop: '3rem' }}>
+    //         <span style={{ fontSize: "1.2rem" }}>
+    //             Some local saved curated lists were found on your device. Would you like to sync them to your account?
+    //             <br />
+    //             Local saved curated lists that are not synced cannot be accessed while logged in.
+    //         </span>
+    //         <div style={{ display: "flex", gap: "2rem" }}>
+    //             <button onClick={handleSyncSaves} disabled={syncing}>
+    //                 Sync Saved Curated Lists
+    //             </button>
+    //             <button onClick={() => setSavedListSyncCancelled(true)} disabled={syncing}>
+    //                 Don&apos;t Sync
+    //             </button>
+    //         </div>
+    //         {error && <p style={{ color: 'red' }}>{error}</p>}
+    //     </main>;
+    // }
+    
 
     router.replace("/");
     return null;

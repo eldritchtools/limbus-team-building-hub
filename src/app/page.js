@@ -53,9 +53,10 @@ export default function Home() {
             </p>
             <div style={{ border: "1px solid #aaa", borderRadius: "0.5rem", overflowX: "auto", maxWidth: "100%" }}>
                 <div style={{ display: "flex", flexWrap: "nowrap", width: "max-content", gap: "1rem", padding: "1rem", boxSizing: "border-box" }}>
-                    <NoPrefetchLink className="text-link" href={"/builds"}>Explore Builds</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/builds"}>Team Builds</NoPrefetchLink>
                     <NoPrefetchLink className="text-link" href={"/builds/new"}>Create a build</NoPrefetchLink>
-                    <NoPrefetchLink className="text-link" href={"/curated-lists"}>Explore Curated Lists</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/md-plans"}>MD Plans</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/curated-lists"}>Curated Lists</NoPrefetchLink>
                     <NoPrefetchLink className="text-link" href={"/identities"}>Identities</NoPrefetchLink>
                     <NoPrefetchLink className="text-link" href={"/egos"}>E.G.Os</NoPrefetchLink>
                 </div>

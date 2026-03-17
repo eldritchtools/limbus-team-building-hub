@@ -13,7 +13,7 @@ import { useBreakpoint } from "@eldritchtools/shared-components";
 import { listsStore } from "@/app/database/localDB";
 import { DeleteSolid, EditSolid, ViewSolid } from "@/app/components/Symbols";
 // import SocialsDisplay from "@/app/components/SocialsDisplay";
-import { deleteCuratedList, getCuratedList } from "@/app/database/curatedLists";
+import { deleteCollection, getCollection } from "@/app/database/collections";
 import BuildEntry from "@/app/components/BuildEntry";
 import DropdownButton from "@/app/components/DropdownButton";
 import CommentSection from "@/app/components/commentSection";
@@ -119,7 +119,7 @@ export default function CuratedListPage({ params }) {
             if (isLocalId(id)) {
                 listsStore.get(Number(id)).then(handleCuratedList);
             } else {
-                getCuratedList(id).then(handleCuratedList);
+                getCollection(id).then(handleCuratedList);
             }
         }
     }, [id, loading]);
@@ -140,7 +140,7 @@ export default function CuratedListPage({ params }) {
 
     const handleDeleteList = async () => {
         setDeleting(true);
-        const data = await deleteCuratedList(id);
+        const data = await deleteCollection(id);
         if (data && data.deleted) {
             router.push(`/curated-lists`);
         }

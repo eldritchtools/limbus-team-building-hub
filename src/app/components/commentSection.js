@@ -13,7 +13,8 @@ import MarkdownRenderer from "@/app/components/Markdown/MarkdownRenderer";
 import Username from "@/app/components/Username";
 import ReactTimeAgo from "react-time-ago";
 import { pinBuildComment, unpinBuildComment } from "@/app/database/builds";
-import { pinCuratedListComment, unpinCuratedListComment } from "../database/curatedLists";
+import { pinCollectionComment, unpinCollectionComment } from "../database/collections";
+import { pinMdPlanComment, unpinMdPlanComment } from "../database/mdPlans";
 
 function CommentInput({ targetType, targetId, parentId = null, editId = null, initialValue = "", onEdit, onPost, onCancel }) {
     const [body, setBody] = useState(initialValue);
@@ -66,8 +67,10 @@ function Comment({ comment, targetType, targetId, buildOwnerId, pinned, onPost, 
         setPinLoading(true);
         if (targetType === "build") {
             if (await (pinBuildComment(targetId, comment.id))) onPin(comment);
-        } else if (targetType === "build_list") {
-            if (await (pinCuratedListComment(targetId, comment.id))) onPin(comment);
+        } else if (targetType === "collection") {
+            if (await (pinCollectionComment(targetId, comment.id))) onPin(comment);
+        } else if (targetType === "md_plan") {
+            if (await (pinMdPlanComment(targetId, comment.id))) onPin(comment);
         }
         setPinLoading(false);
     }
@@ -76,8 +79,10 @@ function Comment({ comment, targetType, targetId, buildOwnerId, pinned, onPost, 
         setPinLoading(true);
         if (targetType === "build") {
             if (await (unpinBuildComment(targetId))) onPin(null);
-        } else if (targetType === "build_list") {
-            if (await (unpinCuratedListComment(targetId))) onPin(null);
+        } else if (targetType === "collection") {
+            if (await (unpinCollectionComment(targetId))) onPin(null);
+        } else if (targetType === "md_plan") {
+            if (await (unpinMdPlanComment(targetId))) onPin(null);
         }
         setPinLoading(false);
     }

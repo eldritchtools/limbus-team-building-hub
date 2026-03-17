@@ -11,8 +11,8 @@ const style = {
     textDecoration: "none"
 };
 
-export default function CommentButton({ targetPath, targetId, count, buildEntryVersion, iconSize }) {
-    const text = count === 1 ? "1 Comment" : `${count} Comments`;
+export default function CommentButton({ targetPath, targetId, count, buildEntryVersion, iconSize, shortText=false }) {
+    const text = shortText ? `${count}` : count === 1 ? "1 Comment" : `${count} Comments`;
 
     if (buildEntryVersion) {
         return <NoPrefetchLink href={`/${targetPath}/${targetId}#comments`} style={style}>

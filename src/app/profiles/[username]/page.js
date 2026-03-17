@@ -8,9 +8,11 @@ import BuildsGrid from "@/app/components/BuildsGrid";
 import MarkdownRenderer from "@/app/components/Markdown/MarkdownRenderer";
 import { useBreakpoint } from "@eldritchtools/shared-components";
 import SocialsDisplay from "@/app/components/SocialsDisplay";
-import CuratedList from "@/app/components/CuratedList";
 import { tabStyle } from "@/app/styles";
-import { searchCuratedLists } from "@/app/database/curatedLists";
+import { searchCollections } from "@/app/database/collections";
+import { searchMdPlans } from "@/app/database/mdPlans";
+import Collection from "@/app/components/Collection";
+import MdPlan from "@/app/components/MdPlan";
 
 export default function ProfilePage({ params }) {
     const { username } = React.use(params);
@@ -20,8 +22,10 @@ export default function ProfilePage({ params }) {
 
     const [builds, setBuilds] = useState([]);
     const [buildsLoading, setBuildsLoading] = useState(false);
-    const [lists, setLists] = useState([]);
-    const [listsLoading, setListsLoading] = useState(false);
+    const [collections, setCollections] = useState([]);
+    const [collectionsLoading, setCollectionsLoading] = useState(false);
+    const [mdPlans, setMdPlans] = useState([]);
+    const [mdPlansLoading, setMdPlansLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [flair, setFlair] = useState("");
     const [description, setDescription] = useState("");
@@ -49,10 +53,14 @@ export default function ProfilePage({ params }) {
             setBuildsLoading(true);
             getFilteredBuilds({ "username_exact": parsedUsername, "ignore_block_discovery": true }, true, "recency", false, page, 24)
                 .then(b => { setBuilds(b); setBuildsLoading(false); })
-        } else if (viewMode === "lists") {
-            setListsLoading(true);
-            searchCuratedLists({ "username_exact": parsedUsername, "ignore_block_discovery": true }, true, "new", page, 10)
-                .then(l => { setLists(l); setListsLoading(false); })
+        } else if (viewMode === "collections") {
+            setCollectionsLoading(true);
+            searchCollections({ "username_exact": parsedUsername, "ignore_block_discovery": true }, true, "new", page, 10)
+                .then(c => { setCollections(l); setCollectionsLoading(false); })
+        } else if (viewMode === "md_plans") {
+            setMdPlansLoading(true);
+            searchMdPlans({ "username_exact": parsedUsername, ignoreBlockDiscovery: true, sortBy: "new", published: true, limit: 20, offset: (page - 1) * 20 })
+                .then(p => { setMdPlans(p); setMdPlansLoading(false); })
         }
     }, [parsedUsername, page, viewMode]);
 
@@ -85,19 +93,35 @@ export default function ProfilePage({ params }) {
                     </div>
                 </div>;
             }
-        } else if (viewMode === "lists") {
-            if (listsLoading) return <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading...</p>;
-            if (lists.length === 0) {
+        } else if (viewMode === "collections") {
+            if (collectionsLoading) return <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading...</p>;
+            if (collections.length === 0) {
                 return <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>
-                    {page === 1 ? "No published curated lists yet." : "No more curated lists."}
+                    {page === 1 ? "No published collections yet." : "No more collections."}
                 </p>;
             } else {
                 return <div key={"content"} style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    {lists.map(list => <CuratedList key={list.id} list={list} />)}
+                    {collections.map(collection => <Collection key={list.id} collection={collection} />)}
 
                     <div style={{ display: "flex", gap: "0.5rem", alignSelf: "end" }}>
                         <button className="page-button" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>
-                        <button className="page-button" disabled={lists.length < 10} onClick={() => setPage(p => p + 1)}>Next</button>
+                        <button className="page-button" disabled={collections.length < 10} onClick={() => setPage(p => p + 1)}>Next</button>
+                    </div>
+                </div>;
+            }
+        } else if (viewMode === "md_plans") {
+            if (mdPlansLoading) return <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading...</p>;
+            if (mdPlans.length === 0) {
+                return <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>
+                    {page === 1 ? "No published md plans yet." : "No more md plans."}
+                </p>;
+            } else {
+                return <div key={"content"} style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    {mdPlans.map(plan => <MdPlan key={plan.id} plan={plan} />)}
+
+                    <div style={{ display: "flex", gap: "0.5rem", alignSelf: "end" }}>
+                        <button className="page-button" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>
+                        <button className="page-button" disabled={mdPlans.length < 10} onClick={() => setPage(p => p + 1)}>Next</button>
                     </div>
                 </div>;
             }
@@ -116,7 +140,8 @@ export default function ProfilePage({ params }) {
 
         <div style={{ display: "flex", marginTop: "0.5rem", marginBottom: "1rem", gap: "1rem", justifyContent: "center" }}>
             <div style={{ ...tabStyle, color: viewMode === "builds" ? "#ddd" : "#777" }} onClick={() => { setViewMode("builds"); setPage(1); }}>Builds</div>
-            <div style={{ ...tabStyle, color: viewMode === "lists" ? "#ddd" : "#777" }} onClick={() => { setViewMode("lists"); setPage(1); }}>Curated Lists</div>
+            {/* <div style={{ ...tabStyle, color: viewMode === "lists" ? "#ddd" : "#777" }} onClick={() => { setViewMode("collections"); setPage(1); }}>Collections</div> */}
+            <div style={{ ...tabStyle, color: viewMode === "md_plans" ? "#ddd" : "#777" }} onClick={() => { setViewMode("md_plans"); setPage(1); }}>MD Plans</div>
         </div>
 
         {contentDisplay()}

@@ -26,13 +26,14 @@ async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", 
     if ("keywords" in filters) options["keyword_filter"] = filters["keywords"];
     if ("keywords_exclude" in filters) options["keyword_exclude"] = filters["keywords_exclude"];
     if ("ignore_block_discovery" in filters) options["ignore_block_discovery"] = filters["ignore_block_discovery"];
+    if ("include_egos" in filters) options["include_egos"] = filters["include_egos"];
     options.p_published = isPublished;
     options.sort_by = sortBy;
     options.strict_filter = strictFiltering;
     options.limit_count = pageSize;
     options.offset_count = start;
 
-    const { data, error } = await getSupabase().rpc('get_filtered_builds_v7', options);
+    const { data, error } = await getSupabase().rpc('get_filtered_builds_v8', options);
 
     if (error) throw (error);
     return data;

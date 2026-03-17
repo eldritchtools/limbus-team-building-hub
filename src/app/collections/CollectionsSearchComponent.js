@@ -3,10 +3,10 @@
 import { selectStyleVariable } from "../styles";
 import TagSelector, { tagToTagSelectorOption } from "../components/TagSelector";
 import { useState } from "react";
-import "./ListsSearchComponent.css";
+import "./CollectionsSearchComponent.css";
 import NoPrefetchLink from "../NoPrefetchLink";
 
-export default function ListsSearchComponent({ options = {} }) {
+export default function CollectionsSearchComponent({ options = {} }) {
     const [searchString, setSearchString] = useState(options.search || "");
     const [tags, setTags] = useState((options.tags || []).map(t => tagToTagSelectorOption(t)));
 

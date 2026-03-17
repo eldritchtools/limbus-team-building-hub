@@ -8,7 +8,7 @@ import { isLocalId } from "@/app/utils";
 import MarkdownEditorWrapper from "@/app/components/Markdown/MarkdownEditorWrapper";
 import Username from "@/app/components/Username";
 import { useAuth } from "@/app/database/authProvider";
-import { approveCuratedListSubmission, getCuratedList, getCuratedListSubmissions, rejectCuratedListSubmission, rejectCuratedListSubmissionsForBuild } from "@/app/database/curatedLists";
+import { approveCollectionSubmission, getCollection, getCollectionSubmissions, rejectCollectionSubmission, rejectCollectionSubmissionsForTarget } from "@/app/database/collections";
 import { useBreakpoint } from "@eldritchtools/shared-components";
 import BuildEntry from "@/app/components/BuildEntry";
 import "./Submission.css";
@@ -125,7 +125,7 @@ export default function ReviewCuratedListPage({ params }) {
             }
         }
 
-        getCuratedList(id).then(handleList).catch(_err => {
+        getCollection(id).then(handleList).catch(_err => {
             router.push(`/curated-lists/${listId}`);
         });
 
@@ -134,14 +134,14 @@ export default function ReviewCuratedListPage({ params }) {
             setSubmissionsLoading(false);
         }
 
-        getCuratedListSubmissions(id).then(handleSubmissions).catch(_err => {
+        getCollectionSubmissions(id).then(handleSubmissions).catch(_err => {
             router.push(`/curated-lists/${listId}`);
         });
     }, [id, router, user]);
 
     const handleApprove = async (submissionId, note, submissionIds) => {
         setSubmitting(true);
-        await approveCuratedListSubmission(submissionId, note);
+        await approveCollectionSubmission(submissionId, note);
         setApproved(p => new Set([...p, submissionId]));
         setRejected(p => new Set([...p, ...submissionIds.filter(x => x !== submissionId)]));
         setSubmitting(false);
@@ -149,14 +149,14 @@ export default function ReviewCuratedListPage({ params }) {
 
     const handleReject = async (submissionId) => {
         setSubmitting(true);
-        await rejectCuratedListSubmission(submissionId);
+        await rejectCollectionSubmission(submissionId);
         setRejected(p => new Set([...p, submissionId]));
         setSubmitting(false);
     }
 
     const handleRejectAll = async (buildId, submissionIds) => {
         setSubmitting(true);
-        await rejectCuratedListSubmissionsForBuild(id, buildId);
+        await rejectCollectionSubmissionsForTarget(id, buildId);
         setRejected(p => new Set([...p, ...submissionIds]));
         setSubmitting(false);
     }

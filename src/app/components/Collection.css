@@ -1,4 +1,4 @@
-.curated-list {
+.collection {
     position: relative;
     box-sizing: border-box;
     display: flex;
@@ -11,17 +11,17 @@
     border-radius: 1rem;
 }
 
-.curated-list:hover:not(:has(.build-entry:hover, .tag:hover, .username:hover, .toggle-button:hover, .toggle-button-active:hover)) {
+.collection:hover:not(:has(.build-entry:hover, .tag:hover, .username:hover, .toggle-button:hover, .toggle-button-active:hover)) {
     background: #3a3a3a;
 }
 
-.curated-list-link {
+.collection-link {
     position: absolute;
     inset: 0;
     z-index: 1;
 }
 
-.curated-list-contents {
+.collection-contents {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

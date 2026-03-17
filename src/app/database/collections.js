@@ -1,11 +1,11 @@
 import { getSupabase } from "./connection";
 
-async function searchCuratedLists(filters, isPublished = true, sortBy = "score", page = 1, pageSize = 10) {
+async function searchCollections(filters, isPublished = true, sortBy = "score", page = 1, pageSize = 10) {
     const start = (page - 1) * pageSize;
 
     const options = {};
     if ("query" in filters) options["p_query"] = filters["query"];
-    if ("list_ids" in filters) options["list_id_filter"] = filters["list_id"];
+    if ("collection_ids" in filters) options["collection_id_filter"] = filters["collection_id"];
     if ("user_id" in filters) options["user_id_filter"] = filters["user_id"];
     if ("username_exact" in filters) options["username_exact_filter"] = filters["username_exact"];
     if ("tags" in filters) options["tag_filter"] = filters["tags"];
@@ -15,14 +15,14 @@ async function searchCuratedLists(filters, isPublished = true, sortBy = "score",
     options.p_limit = pageSize;
     options.p_offset = start;
 
-    const { data, error } = await getSupabase().rpc('search_build_lists_v3', options);
+    const { data, error } = await getSupabase().rpc('search_collections_v1', options);
 
     if (error) throw (error);
     return data;
 }
 
-async function getCuratedList(id) {
-    const { data, error } = await getSupabase().rpc("get_build_list_v3", {
+async function getCollection(id) {
+    const { data, error } = await getSupabase().rpc("get_collection_v1", {
         p_list_id: id,
     });
 
@@ -30,8 +30,8 @@ async function getCuratedList(id) {
     return data;
 }
 
-async function insertCuratedList(title, body, short_desc, items, submission_mode, tags, block_discovery, is_published) {
-    const { data, error } = await getSupabase().rpc('create_build_list_v2', {
+async function insertCollection(title, body, short_desc, items, submission_mode, tags, block_discovery, is_published) {
+    const { data, error } = await getSupabase().rpc('create_collection_v1', {
         p_title: title,
         p_body: body,
         p_short_desc: short_desc,
@@ -46,9 +46,9 @@ async function insertCuratedList(title, body, short_desc, items, submission_mode
     return data;
 }
 
-async function updateCuratedList(list_id, title, body, short_desc, items, submission_mode, tags, block_discovery, is_published) {
-    const { error } = await getSupabase().rpc('update_build_list_v2', {
-        p_list_id: list_id,
+async function updateCollection(collection_id, title, body, short_desc, items, submission_mode, tags, block_discovery, is_published) {
+    const { error } = await getSupabase().rpc('update_collection_v1', {
+        p_collection_id: collection_id,
         p_title: title,
         p_body: body,
         p_short_desc: short_desc,
@@ -60,19 +60,19 @@ async function updateCuratedList(list_id, title, body, short_desc, items, submis
     });
 
     if (error) throw (error);
-    return list_id;
+    return collection_id;
 }
 
-async function deleteCuratedList(list_id) {
-    const { error } = await getSupabase().from("build_lists").delete().eq("id", list_id);
+async function deleteCollection(collection_id) {
+    const { error } = await getSupabase().from("collections").delete().eq("id", collection_id);
 
     if (error) throw error;
     return { deleted: true };
 }
 
 
-async function pinCuratedListComment(listId, commentId) {
-    const { error } = await getSupabase().from('build_lists').update({ pinned_comment_id: commentId }).eq('id', listId);
+async function pinCollectionComment(collectionId, commentId) {
+    const { error } = await getSupabase().from('collections').update({ pinned_comment_id: commentId }).eq('id', collectionId);
 
     if (error) {
         console.error('Error pinning comment:', error);
@@ -82,8 +82,8 @@ async function pinCuratedListComment(listId, commentId) {
     return true;
 }
 
-async function unpinCuratedListComment(listId) {
-    const { error } = await getSupabase().from('build_lists').update({ pinned_comment_id: null }).eq('id', listId)
+async function unpinCollectionComment(collectionId) {
+    const { error } = await getSupabase().from('collections').update({ pinned_comment_id: null }).eq('id', collectionId)
 
     if (error) {
         console.error('Error unpinning comment:', error);
@@ -93,13 +93,14 @@ async function unpinCuratedListComment(listId) {
     return true;
 }
 
-async function submitCuratedListContribution(user_id, list_id, build_id, note, submitter_note) {
+async function submitCollectionContribution(user_id, collection_id, target_type, target_id, note, submitter_note) {
     try {
         const { data, error } = await getSupabase()
-            .from("build_list_submissions")
+            .from("collection_submissions")
             .insert({
-                list_id: list_id,
-                build_id: build_id,
+                collection_id: collection_id,
+                target_type: target_type,
+                target_id: target_id,
                 note: note,
                 submitter_note: submitter_note,
                 submitted_by: user_id
@@ -110,24 +111,24 @@ async function submitCuratedListContribution(user_id, list_id, build_id, note, s
 
     } catch (err) {
         if (err.code === "23505") {
-            return "You have a pending submission for this build on this curated list.";
+            return "You have a pending submission for this item on this collection.";
         } else {
             return "Something went wrong while submitting.";
         }
     }
 }
 
-async function getCuratedListSubmissions(id) {
-    const { data, error } = await getSupabase().rpc("get_build_list_submissions", {
-        p_list_id: id,
+async function getCollectionSubmissions(id) {
+    const { data, error } = await getSupabase().rpc("get_collection_submissions", {
+        p_collection_id: id,
     });
 
     if (error) throw error;
     return data;
 }
 
-async function approveCuratedListSubmission(id, note) {
-    const { data, error } = await getSupabase().rpc("approve_build_list_submission", {
+async function approveCollectionSubmission(id, note) {
+    const { data, error } = await getSupabase().rpc("approve_collection_submission", {
         p_submission_id: id,
         p_note: note
     });
@@ -136,8 +137,8 @@ async function approveCuratedListSubmission(id, note) {
     return data;
 }
 
-async function rejectCuratedListSubmission(id) {
-    const { data, error } = await getSupabase().rpc("reject_build_list_submission", {
+async function rejectCollectionSubmission(id) {
+    const { data, error } = await getSupabase().rpc("reject_collection_submission", {
         p_submission_id: id
     });
 
@@ -145,9 +146,9 @@ async function rejectCuratedListSubmission(id) {
     return data;
 }
 
-async function rejectCuratedListSubmissionsForBuild(list_id, build_id) {
-    const { data, error } = await getSupabase().rpc("reject_build_list_submissions_for_build", {
-        p_list_id: list_id,
+async function rejectCollectionSubmissionsForTarget(collection_id, build_id) {
+    const { data, error } = await getSupabase().rpc("reject_collection_submissions_for_target", {
+        p_collection_id: collection_id,
         p_build_id: build_id
     });
 
@@ -155,10 +156,10 @@ async function rejectCuratedListSubmissionsForBuild(list_id, build_id) {
     return data;
 }
 
-async function getCuratedListsForSitemap(page, count) {
+async function getCollectionsForSitemap(page, count) {
     const offset = (page - 1) * count;
     const { data, error } = await getSupabase()
-        .from('build_lists')
+        .from('collections')
         .select('id, created_at, updated_at')
         .eq('is_published', true)
         .order('created_at', { ascending: true })
@@ -168,9 +169,9 @@ async function getCuratedListsForSitemap(page, count) {
     return data;
 }
 
-async function getCuratedListsCountForSitemap() {
+async function getCollectionsCountForSitemap() {
     const { count, error } = await getSupabase()
-        .from('build_lists')
+        .from('collections')
         .select('*', { count: 'exact', head: true })
         .eq('is_published', true);
 
@@ -179,8 +180,8 @@ async function getCuratedListsCountForSitemap() {
 }
 
 export {
-    searchCuratedLists, getCuratedList, insertCuratedList, updateCuratedList, deleteCuratedList,
-    pinCuratedListComment, unpinCuratedListComment,
-    submitCuratedListContribution, getCuratedListSubmissions, approveCuratedListSubmission, rejectCuratedListSubmission, rejectCuratedListSubmissionsForBuild,
-    getCuratedListsForSitemap, getCuratedListsCountForSitemap
+    searchCollections, getCollection, insertCollection, updateCollection, deleteCollection,
+    pinCollectionComment, unpinCollectionComment,
+    submitCollectionContribution, getCollectionSubmissions, approveCollectionSubmission, rejectCollectionSubmission, rejectCollectionSubmissionsForTarget,
+    getCollectionsForSitemap, getCollectionsCountForSitemap
 };

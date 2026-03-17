@@ -36,6 +36,8 @@ function encodeBuildExtraOpts(identityUpties, identityLevels, egoThreadspins) {
 }
 
 function decodeBuildExtraOpts(string, parts=null) {
+    if(string.length === 0) return {};
+    
     const decodePart = (part, size) => {
         return part.split(",").reduce((acc, val) => {
             const [i, n] = val.split("=");

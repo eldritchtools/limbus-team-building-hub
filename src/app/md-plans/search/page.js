@@ -1,10 +1,10 @@
 import { Suspense } from "react";
-import SearchListsContent from "./SearchListsContent";
+import SearchMdPlansContent from "./SearchMdPlansContent";
 
-export default function SearchListsPage() {
+export default function SearchMdPlansPage() {
     return <div style={{ display: "flex", flexDirection: "column", textAlign: "center", gap: "1rem" }}>
         <Suspense fallback={<div>Loading...</div>}>
-            <SearchListsContent />
+            <SearchMdPlansContent />
         </Suspense>
     </div>
 }

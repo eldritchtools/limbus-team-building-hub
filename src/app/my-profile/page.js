@@ -3,19 +3,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { getFilteredBuilds } from "../database/builds";
 import { useAuth } from "../database/authProvider";
-import { getSavedBuilds, getSavedCuratedLists } from "../database/saves";
+import { getSavedBuilds, getSavedCuratedLists, getSavedMdPlans } from "../database/saves";
 import { tabStyle } from "../styles";
 import BuildsGrid from "../components/BuildsGrid";
 import { useSearchParams } from "next/navigation";
 import { updateUser } from "../database/users";
 import MarkdownEditorWrapper from "../components/Markdown/MarkdownEditorWrapper";
-import { buildsStore, listsStore, savedListsStore, savesStore } from "../database/localDB";
+import { buildsStore, listsStore, mdPlansStore, savedListsStore, savedMdPlansStore, savesStore } from "../database/localDB";
 import DropdownButton from "../components/DropdownButton";
 import { SocialIcon, socialsData } from "../lib/userSocials";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
-import { searchCuratedLists } from "../database/curatedLists";
-import CuratedList from "../components/CuratedList";
+import { searchCollections } from "../database/collections";
 import NoPrefetchLink from "../NoPrefetchLink";
+import { searchMdPlans } from "../database/mdPlans";
+import MdPlan from "../components/MdPlan";
+import { useBreakpoint } from "@eldritchtools/shared-components";
+import Collection from "../components/Collection";
 
 function SocialsComponent({ socials, setSocials }) {
     const swapOrder = (i1, i2) => {
@@ -59,8 +62,10 @@ export default function ProfilePage() {
     const [usernameError, setUsernameError] = useState(null);
     const [builds, setBuilds] = useState([]);
     const [buildsLoading, setBuildsLoading] = useState(false);
-    const [lists, setLists] = useState([]);
-    const [listsLoading, setListsLoading] = useState(false);
+    const [collections, setCollections] = useState([]);
+    const [collectionsLoading, setCollectionsLoading] = useState(false);
+    const [plans, setPlans] = useState([]);
+    const [plansLoading, setPlansLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [flair, setFlair] = useState("");
     const [socials, setSocials] = useState([]);
@@ -69,6 +74,7 @@ export default function ProfilePage() {
     const [profileError, setProfileError] = useState(null);
     const [updating, setUpdating] = useState(false);
     const searchParams = useSearchParams();
+    const { isMobile } = useBreakpoint();
 
     useEffect(() => {
         if (profile) {
@@ -130,46 +136,87 @@ export default function ProfilePage() {
                 default:
                     break;
             }
-        } else if (mainActiveTab === "lists") {
+        } else if (mainActiveTab === "collections") {
             switch (activeTab) {
                 case "published":
                     if (user) {
-                        setListsLoading(true);
-                        searchCuratedLists({ "user_id": user.id, "ignore_block_discovery": true }, true, "new", page, 10)
-                            .then(l => { setLists(l); setListsLoading(false); })
+                        setCollectionsLoading(true);
+                        searchCollections({ "user_id": user.id, "ignore_block_discovery": true }, true, "new", page, 10)
+                            .then(c => { setCollections(c); setCollectionsLoading(false); })
                     } else {
-                        setLists([]);
+                        setCollections([]);
                     }
                     break;
                 case "drafts":
                     if (user) {
-                        setListsLoading(true);
-                        searchCuratedLists({ "user_id": user.id, "ignore_block_discovery": true }, false, "new", page, 10)
-                            .then(l => { setLists(l); setListsLoading(false); })
+                        setCollectionsLoading(true);
+                        searchCollections({ "user_id": user.id, "ignore_block_discovery": true }, false, "new", page, 10)
+                            .then(c => { setCollections(c); setCollectionsLoading(false); })
                     } else {
-                        const fetchLists = async () => {
-                            const lists = await listsStore.getAll();
-                            setLists(lists.map(x => ({ ...x, items: x.items.map(build => build.build) })));
+                        const fetchCollections = async () => {
+                            const collections = await listsStore.getAll();
+                            setCollections(collections.map(x => ({ ...x, items: x.items.map(build => build.build) })));
                         }
-                        fetchLists();
+                        fetchCollections();
                     }
                     break;
                 case "saved":
                     if (user) {
-                        setListsLoading(true);
-                        getSavedCuratedLists(user.id, page, 10).then(l => { setLists(l); setListsLoading(false); })
+                        setCollectionsLoading(true);
+                        getSavedCuratedLists(user.id, page, 10).then(c => { setCollections(c); setCollectionsLoading(false); })
                     } else {
-                        setListsLoading(true);
+                        setCollectionsLoading(true);
                         const fetchSaves = async () => {
                             const saves = await savedListsStore.getAll();
                             if (saves.length === 0) {
-                                setLists([]);
-                                setListsLoading(false);
+                                setCollections([]);
+                                setCollectionsLoading(false);
                             }
                             else {
-                                searchCuratedLists({ "list_ids": saves.map(x => x.id) }, true, "new", page, 10)
-                                    .then(l => { setLists(l); setListsLoading(false); })
+                                searchCollections({ "collection_ids": saves.map(x => x.id) }, true, "new", page, 10)
+                                    .then(c => { setCollections(c); setCollectionsLoading(false); })
                             }
+                        }
+                        fetchSaves();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        } else if (mainActiveTab === "md_plans") {
+            switch (activeTab) {
+                case "published":
+                    if (user) {
+                        setPlansLoading(true);
+                        searchMdPlans({ userId: user.id, ignoreBlockDiscovery: true, sortBy: "new", published: true, limit: 20, offset: (page - 1) * 20 })
+                            .then(p => { setPlans(p); setPlansLoading(false); })
+                    } else {
+                        setPlans([]);
+                    }
+                    break;
+                case "drafts":
+                    if (user) {
+                        setPlansLoading(true);
+                        searchMdPlans({ userId: user.id, ignoreBlockDiscovery: true, sortBy: "new", published: false, limit: 20, offset: (page - 1) * 20 })
+                            .then(p => { setPlans(p); setPlansLoading(false); })
+                    } else {
+                        const fetchPlans = async () => {
+                            const plans = await mdPlansStore.getAll();
+                            setPlans(plans);
+                        }
+                        fetchPlans();
+                    }
+                    break;
+                case "saved":
+                    if (user) {
+                        setPlansLoading(true);
+                        getSavedMdPlans(user.id, page, 24).then(p => { setPlans(p); setPlansLoading(false); })
+                    } else {
+                        setPlansLoading(true);
+                        const fetchSaves = async () => {
+                            const saves = await savedMdPlansStore.getAll();
+                            searchMdPlans({ "md_plan_ids": saves.map(x => x.id) }, true, "recency", false, page, 24)
+                                .then(b => { setBuilds(b); setPlansLoading(false); })
                         }
                         fetchSaves();
                     }
@@ -265,7 +312,7 @@ export default function ProfilePage() {
                         When not logged in, builds are saved locally on this device. After logging in, you can sync them to your account. Builds that are not synced cannot be accessed while logged in.
                     </div>)
                 } else if (activeTab === "saved") {
-                    components.push(<div key={"draft-warn"} style={{ color: "rgba(255, 99, 71, 0.85)", paddingBottom: "0.5rem" }}>
+                    components.push(<div key={"save-warn"} style={{ color: "rgba(255, 99, 71, 0.85)", paddingBottom: "0.5rem" }}>
                         When not logged in, saved builds are stored locally on this device. After logging in, you can sync them to your account. Saved builds that are not synced cannot be accessed while logged in. Local drafts cannot be saved.
                     </div>)
                 }
@@ -309,50 +356,111 @@ export default function ProfilePage() {
                 );
             }
             return components;
-        } else if (mainActiveTab === "lists") {
-            if (listsLoading) return <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading...</p>;
+        } else if (mainActiveTab === "collections") {
+            if (collectionsLoading) return <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading...</p>;
             const components = [];
             if (!user) {
                 if (activeTab === "drafts") {
                     components.push(<div key={"draft-warn"} style={{ color: "rgba(255, 99, 71, 0.85)", paddingBottom: "0.5rem" }}>
-                        When not logged in, curated lists are saved locally on this device. After logging in, you can sync them to your account. Curated lists that are not synced cannot be accessed while logged in.
+                        When not logged in, collections are saved locally on this device. After logging in, you can sync them to your account. Collections that are not synced cannot be accessed while logged in.
+                    </div>)
+                } else if (activeTab === "saved") {
+                    components.push(<div key={"save-warn"} style={{ color: "rgba(255, 99, 71, 0.85)", paddingBottom: "0.5rem" }}>
+                        When not logged in, saved collections are stored locally on this device. After logging in, you can sync them to your account. Saved collections that are not synced cannot be accessed while logged in. Local drafts cannot be saved.
                     </div>)
                 }
             }
-            if (lists.length === 0) {
+            if (collections.length === 0) {
                 if (page === 1) {
                     let str;
                     switch (activeTab) {
                         case "published":
-                            str = user ? "No published curated lists yet" : "";
+                            str = user ? "No published collections yet" : "";
                             break;
                         case "drafts":
                             str = "No drafts yet";
                             break;
                         case "saved":
-                            str = "No saved curated lists yet";
+                            str = "No saved collections yet";
                             break;
                         default:
                             break;
                     }
                     if (str) {
-                        components.push(<p key={"no-lists"} style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>
+                        components.push(<p key={"no-collections"} style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>
                             {str}
                         </p>)
                     }
                 } else {
-                    components.push(<p key={"no-lists"} style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>
-                        No more builds.
+                    components.push(<p key={"no-collections"} style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>
+                        No more collections.
                     </p>)
                 }
             } else {
                 components.push(
                     <div key={"content"} style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                        {lists.map(list => <CuratedList key={list.id} list={list} />)}
+                        {collections.map(collection => <Collection key={collection.id} collection={collection} />)}
 
                         <div style={{ display: "flex", gap: "0.5rem", alignSelf: "end" }}>
                             <button className="page-button" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>
-                            <button className="page-button" disabled={builds.length < 24} onClick={() => setPage(p => p + 1)}>Next</button>
+                            <button className="page-button" disabled={collections.length < 10} onClick={() => setPage(p => p + 1)}>Next</button>
+                        </div>
+                    </div>
+                );
+            }
+            return components;
+        } else if (mainActiveTab === "md_plans") {
+            if (plansLoading) return <p style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>Loading...</p>;
+            const components = [];
+            if (!user) {
+                if (activeTab === "drafts") {
+                    components.push(<div key={"draft-warn"} style={{ color: "rgba(255, 99, 71, 0.85)", paddingBottom: "0.5rem" }}>
+                        {/* When not logged in, md plans are saved locally on this device. After logging in, you can sync them to your account. Md plans that are not synced cannot be accessed while logged in. */}
+                        When not logged in, md plans are saved locally on this device. MD plans are currently not syncable on login.
+                    </div>)
+                } else if (activeTab === "saved") {
+                    components.push(<div key={"save-warn"} style={{ color: "rgba(255, 99, 71, 0.85)", paddingBottom: "0.5rem" }}>
+                        {/* When not logged in, saved md plans are stored locally on this device. After logging in, you can sync them to your account. Saved md plans that are not synced cannot be accessed while logged in. Local drafts cannot be saved. */}
+                        When not logged in, saved md plans are stored locally on this device. Saved md plans are currently not syncable on login.
+                    </div>)
+                }
+            }
+            if (plans.length === 0) {
+                if (page === 1) {
+                    let str;
+                    switch (activeTab) {
+                        case "published":
+                            str = user ? "No published md plans yet" : "";
+                            break;
+                        case "drafts":
+                            str = "No drafts yet";
+                            break;
+                        case "saved":
+                            str = "No saved md plans yet";
+                            break;
+                        default:
+                            break;
+                    }
+                    if (str) {
+                        components.push(<p key={"no-plans"} style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>
+                            {str}
+                        </p>)
+                    }
+                } else {
+                    components.push(<p key={"no-plans"} style={{ color: "#aaa", fontweight: "bold", textAlign: "center" }}>
+                        No more md plans.
+                    </p>)
+                }
+            } else {
+                components.push(
+                    <div key={"content"} style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fill, ${isMobile ? 175 : 250}px)`, gap: isMobile ? "0.2rem" : "0.5rem", justifyContent: "center" }}>
+                            {plans.map(plan => <MdPlan key={plan.id} plan={plan} />)}
+                        </div>
+
+                        <div style={{ display: "flex", gap: "0.5rem", alignSelf: "end" }}>
+                            <button className="page-button" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>
+                            <button className="page-button" disabled={plans.length < 20} onClick={() => setPage(p => p + 1)}>Next</button>
                         </div>
                     </div>
                 );
@@ -400,16 +508,21 @@ export default function ProfilePage() {
 
         <h2 style={{ display: "flex", marginBottom: "1rem", gap: "1rem" }}>
             <div style={{ cursor: "pointer", color: mainActiveTab === "builds" ? "#ddd" : "#777" }} onClick={() => { setMainActiveTab("builds"); setPage(1); }}>Builds</div>
-            <div style={{ cursor: "pointer", color: mainActiveTab === "lists" ? "#ddd" : "#777" }} onClick={() => { setMainActiveTab("lists"); setPage(1); }}>Curated Lists</div>
+            {/* <div style={{ cursor: "pointer", color: mainActiveTab === "lists" ? "#ddd" : "#777" }} onClick={() => { setMainActiveTab("collections"); setPage(1); }}>Collections</div> */}
+            <div style={{ cursor: "pointer", color: mainActiveTab === "md_plans" ? "#ddd" : "#777" }} onClick={() => { setMainActiveTab("md_plans"); setPage(1); }}>MD Plans</div>
         </h2>
         <div style={{ display: "flex", marginBottom: "1rem", gap: "1rem" }}>
             {mainActiveTab === "builds" ?
                 <NoPrefetchLink href="/builds/new" style={{ textDecoration: "none" }}>
                     <div style={{ fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", color: "#777" }}>+New Build</div>
                 </NoPrefetchLink> :
-                <NoPrefetchLink href="/curated-lists/new" style={{ textDecoration: "none" }}>
-                    <div style={{ fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", color: "#777" }}>+New Curated List</div>
-                </NoPrefetchLink>
+                mainActiveTab === "lists" ?
+                    <NoPrefetchLink href="/collections/new" style={{ textDecoration: "none" }}>
+                        <div style={{ fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", color: "#777" }}>+New Collection</div>
+                    </NoPrefetchLink> :
+                    <NoPrefetchLink href="/md-plans/new" style={{ textDecoration: "none" }}>
+                        <div style={{ fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", color: "#777" }}>+New MD Plans</div>
+                    </NoPrefetchLink>
             }
             {user ?
                 <div style={{ ...tabStyle, color: activeTab === "published" ? "#ddd" : "#777" }} onClick={() => { setActiveTab("published"); setPage(1); }}>Published</div> :

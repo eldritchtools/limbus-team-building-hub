@@ -135,9 +135,14 @@ export default function BuildPage({ params }) {
 
     const handleDeleteBuild = async () => {
         setDeleting(true);
-        const data = await deleteBuild(id);
-        if (data && data.deleted) {
-            router.push(`/builds`);
+        if(isLocalId(id)) {
+            await buildsStore.remove(Number(id));
+            router.push(`/my-profile`);
+        } else {
+            const data = await deleteBuild(id);
+            if (data && data.deleted) {
+                router.push(`/builds`);
+            }
         }
         setDeleting(false);
     }
@@ -242,7 +247,7 @@ export default function BuildPage({ params }) {
                             </button> : null
                     }
                     {
-                        user && user.id === build.user_id ?
+                        (user && user.id === build.user_id) || isLocalId(id) ?
                             <button onClick={() => setDeleteOpen(true)}>
                                 <DeleteSolid text={"Delete"} />
                             </button> : null

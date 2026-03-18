@@ -11,17 +11,19 @@ import BuildEntry from "../components/BuildEntry";
 import Username from "../components/Username";
 import SelectBuildModal from "../components/SelectBuildModal";
 import { isLocalId } from "../utils";
+import MdPlan from "../components/MdPlan";
+import SelectMdPlanModal from "../components/SelectMdPlanModal";
 
-function BuildItem({ build, note, index, isFirst, isLast, swapBuilds, removeBuild, setBuildNote, username, flair }) {
+function Item({ type, data, note, index, isFirst, isLast, swapItems, removeItem, setItemNote, username, flair }) {
     return <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center", width: "100%" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "2rem", paddingRight: "1rem" }}>
-            <button onClick={() => swapBuilds(index - 1)} disabled={isFirst}>∧</button>
-            <button onClick={() => removeBuild()}>
+            <button onClick={() => swapItems(index - 1)} disabled={isFirst}>∧</button>
+            <button onClick={() => removeItem()}>
                 <div style={{ color: "#ff4848", fontWeight: "bold" }}>
                     ✕
                 </div>
             </button>
-            <button onClick={() => swapBuilds(index + 1)} disabled={isLast}>∨</button>
+            <button onClick={() => swapItems(index + 1)} disabled={isLast}>∨</button>
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
             {username ?
@@ -30,79 +32,99 @@ function BuildItem({ build, note, index, isFirst, isLast, swapBuilds, removeBuil
                 </div> :
                 null
             }
-            <BuildEntry build={build} size={"M"} complete={false} clickable={false} />
+            {
+                type === "build" ?
+                    <BuildEntry build={data} size={"M"} complete={false} clickable={false} /> :
+                    type === "md_plan" ?
+                        <MdPlan plan={data} complete={false} clickable={false} /> :
+                        null
+            }
         </div>
-        <div style={{ minWidth: "min(100ch, 90vw)", flex: 1, marginLeft: "auto", marginRight: "auto" }}>
-            <MarkdownEditorWrapper value={note} onChange={setBuildNote} placeholder={"Add any notes for this build here..."} />
+        <div style={{ minWidth: "min(80ch, 90vw)" }}>
+            <MarkdownEditorWrapper value={note} onChange={setItemNote} placeholder={"Add any notes for this item here..."} />
         </div>
     </div>
 }
 
-function BuildList({ builds, setBuilds }) {
-    const [addBuildOpen, setAddBuildOpen] = useState(false);
+function ItemList({ items, setItems }) {
+    const [addItemOpen, setAddItemOpen] = useState(false);
+    const [addType, setAddType] = useState(null);
 
-    const swapBuilds = (a, b) => {
-        setBuilds(p => {
+    const swapItems = (a, b) => {
+        setItems(p => {
             const res = [...p];
             [res[a], res[b]] = [res[b], res[a]];
             return res;
         });
     };
-    // p.map((x, i) => i === a ? p[b] : (i === b ? p[a] : x)))
 
-    const addBuild = (build) => {
-        setBuilds(p => [...p, { build: build, note: "" }])
+    const addItem = (type, item) => {
+        setItems(p => [...p, { type: type, data: item, note: "" }])
     };
 
-    const removeBuild = (id) => {
-        setBuilds(p => p.filter(x => x.build.id !== id))
+    const removeItem = (id) => {
+        setItems(p => p.filter(x => x.data.id !== id))
     };
 
-    const setBuildNote = (id, v) => {
-        setBuilds(p => p.map(x => x.build.id === id ? { ...x, note: v } : x))
+    const setItemNote = (id, v) => {
+        setItems(p => p.map(x => x.data.id === id ? { ...x, note: v } : x))
     }
 
     return <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <div>
-            <button onClick={() => { setAddBuildOpen(true); }}>
+        <div style={{ display: "flex" }}>
+            <button onClick={() => { setAddItemOpen(true); setAddType("build"); }}>
                 Add Build
             </button>
+            <button onClick={() => { setAddItemOpen(true); setAddType("plan"); }}>
+                Add MD Plan
+            </button>
         </div>
-        {builds.map((build, i) =>
-            <BuildItem
-                key={build.build.id}
-                build={build.build}
-                note={build.note}
+        {items.map((item, i) =>
+            <Item
+                key={item.data.id}
+                type={item.type}
+                data={item.data}
+                note={item.note}
                 index={i}
                 isFirst={i === 0}
-                isLast={i === builds.length - 1}
-                swapBuilds={x => swapBuilds(i, x)}
-                removeBuild={() => removeBuild(build.build.id)}
-                setBuildNote={v => setBuildNote(build.build.id, v)}
-                username={build.submitted_by_username}
-                flair={build.submitted_by_flair}
+                isLast={i === items.length - 1}
+                swapItems={x => swapItems(i, x)}
+                removeItem={() => removeItem(item.data.id)}
+                setItemNote={v => setItemNote(item.data.id, v)}
+                username={item.submitted_by_username}
+                flair={item.submitted_by_flair}
             />
         )}
 
         <SelectBuildModal
-            isOpen={addBuildOpen}
-            onClose={() => setAddBuildOpen(false)}
+            isOpen={addItemOpen && addType === "build"}
+            onClose={() => setAddItemOpen(false)}
             onSelectBuild={build => {
-                if (!builds.find(x => x.build.id === build.id)) {
-                    addBuild(build); setAddBuildOpen(false);
+                if (!items.find(x => x.data.id === build.id)) {
+                    addItem("build", build); setAddItemOpen(false);
+                }
+            }}
+        />
+
+        <SelectMdPlanModal
+            isOpen={addItemOpen && addType === "plan"}
+            onClose={() => setAddItemOpen(false)}
+            onSelectMdPlan={plan => {
+                if (!items.find(x => x.data.id === plan.id)) {
+                    addItem("md_plan", plan); setAddItemOpen(false);
                 }
             }}
         />
     </div>
 }
 
-export default function CuratedListEditor({ mode, listId }) {
+export default function CollectionEditor({ mode, collectionId }) {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [shortDesc, setShortDesc] = useState('');
     const [contributions, setContributions] = useState('closed');
     const [tags, setTags] = useState([]);
-    const [builds, setBuilds] = useState([]);
+    const [items, setItems] = useState([]);
     const [isPublished, setIsPublished] = useState(false);
     const [otherSettings, setOtherSettings] = useState(false);
     const [blockDiscovery, setBlockDiscovery] = useState(false);
@@ -115,33 +137,33 @@ export default function CuratedListEditor({ mode, listId }) {
 
     useEffect(() => {
         if (mode === "edit") {
-            const handleList = list => {
-                if (!list) router.back();
-                if (list.username || isLocalId(listId)) {
-                    setTitle(list.title);
-                    setBody(list.body);
-                    setShortDesc(list.short_desc);
-                    setContributions(list.submission_mode);
-                    setBuilds(list.items);
-                    setTags(list.tags.map(t => tagToTagSelectorOption(t?.name ?? t)));
-                    setIsPublished(list.is_published);
-                    setBlockDiscovery(list.block_discovery ?? false);
+            const handleCollection = collection => {
+                if (!collection) router.back();
+                if (collection.username || isLocalId(collectionId)) {
+                    setTitle(collection.title);
+                    setBody(collection.body);
+                    setShortDesc(collection.short_desc);
+                    setContributions(collection.submission_mode);
+                    setItems(collection.items.filter(x => x.data));
+                    setTags(collection.tags.map(t => tagToTagSelectorOption(t?.name ?? t)));
+                    setIsPublished(collection.is_published);
+                    setBlockDiscovery(collection.block_discovery ?? false);
                     setLoading(false);
 
-                    if (list.created_at) setCreatedAt(list.created_at);
+                    if (collection.created_at) setCreatedAt(collection.created_at);
                 }
             }
 
             if (user)
-                getCollection(listId).then(handleList).catch(_err => {
-                    router.push(`/collections/${listId}`);
+                getCollection(collectionId).then(handleCollection).catch(_err => {
+                    router.push(`/collections/${collectionId}`);
                 });
             else
-                listsStore.get(Number(listId)).then(handleList).catch(_err => {
-                    router.push(`/collections/${listId}`);
+                listsStore.get(Number(collectionId)).then(handleCollection).catch(_err => {
+                    router.push(`/collections/${collectionId}`);
                 });
         }
-    }, [mode, listId, router, user]);
+    }, [mode, collectionId, router, user]);
 
     const handleSave = async (isPublished) => {
         if (title === "") {
@@ -158,35 +180,37 @@ export default function CuratedListEditor({ mode, listId }) {
 
         setSaving(true);
         if (user) {
-            const trimmedBuilds = builds.map(({ build, note, submitted_by }) => {
-                const result = { build_id: build.id, note };
+            const trimmedItems = items.map(({ type, data, note, submitted_by }) => {
+                const result = { target_type: type, target_id: data.id, note };
                 if (submitted_by) result.submitted_by = submitted_by;
                 return result;
             });
             if (mode === "edit") {
-                const data = await updateCollection(listId, title, body, shortDesc, trimmedBuilds, contributions, tagsConverted, blockDiscovery, isPublished);
-                router.push(`/curated-lists/${data}`);
+                const data = await updateCollection(collectionId, title, body, shortDesc, trimmedItems, contributions, tagsConverted, blockDiscovery, isPublished);
+                router.push(`/collections/${data}`);
             } else {
-                const data = await insertCollection(title, body, shortDesc, trimmedBuilds, contributions, tagsConverted, blockDiscovery, isPublished);
-                router.push(`/curated-lists/${data}`);
+                const data = await insertCollection(title, body, shortDesc, trimmedItems, contributions, tagsConverted, blockDiscovery, isPublished);
+                router.push(`/collections/${data}`);
             }
         } else {
-            const listData = {
+            const collectionData = {
                 title: title,
                 body: body,
                 short_desc: shortDesc,
-                items: builds,
+                items: items,
                 tags: tagsConverted,
                 block_discovery: blockDiscovery,
+                like_count: 0,
+                comment_count: 0,
                 is_published: false,
                 created_at: createdAt ?? Date.now(),
                 updated_at: Date.now()
             }
 
-            if (mode === "edit") listData.id = Number(listId);
+            if (mode === "edit") collectionData.id = Number(collectionId);
 
-            const data = await listsStore.save(listData)
-            router.push(`/curated-lists/${data}`);
+            const data = await listsStore.save(collectionData)
+            router.push(`/collections/${data}`);
         }
     }
 
@@ -194,10 +218,10 @@ export default function CuratedListEditor({ mode, listId }) {
         Loading...
     </div> : <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", containerType: "inline-size" }}>
         <h2 style={{ fontSize: "1.2rem", margin: 0 }}>
-            {mode === "edit" ? "Editing" : "Creating"} Curated List
+            {mode === "edit" ? "Editing" : "Creating"} Collection
         </h2>
         {!user ?
-            <div style={{ color: "rgba(255, 99, 71, 0.85)" }}>When not logged in, curated lists are saved locally on this device. After logging in, you can sync them to your account. Curated lists that are not synced cannot be accessed while logged in.</div>
+            <div style={{ color: "rgba(255, 99, 71, 0.85)" }}>When not logged in, collections are saved locally on this device. After logging in, you can sync them to your account. Collections that are not synced cannot be accessed while logged in.</div>
             : null
         }
         <span style={{ fontSize: "1.2rem" }}>Title</span>
@@ -211,7 +235,7 @@ export default function CuratedListEditor({ mode, listId }) {
         <div className={{ maxWidth: "48rem", marginLeft: "auto", marginRight: "auto" }}>
             <MarkdownEditorWrapper value={body} onChange={setBody} placeholder={"Describe your curated list here..."} />
         </div>
-        {!isLocalId(listId) ? <>
+        {!isLocalId(collectionId) ? <>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <span style={{ fontSize: "1.2rem" }}>Contributions: </span>
                 <select value={contributions} onChange={e => setContributions(e.target.value)}>
@@ -220,13 +244,13 @@ export default function CuratedListEditor({ mode, listId }) {
                 </select>
             </div>
             <span style={{ fontSize: "1rem", color: "#aaa" }}>
-                Opening contributions allows other users to submit builds which you can then review to add to your curated list.
+                Opening contributions allows other users to submit items which you can then review to add to your collection.
             </span>
         </> :
             null
         }
-        <span style={{ fontSize: "1.2rem" }}>Builds</span>
-        <BuildList builds={builds} setBuilds={setBuilds} />
+        <span style={{ fontSize: "1.2rem" }}>Items</span>
+        <ItemList items={items} setItems={setItems} />
         <span style={{ fontSize: "1.2rem" }}>Tags</span>
         <TagSelector selected={tags} onChange={setTags} creatable={true} />
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>

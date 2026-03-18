@@ -6,6 +6,8 @@ export async function GET() {
     const urls = [
         { loc: `${SITE_URL}/`, lastmod: today },
         { loc: `${SITE_URL}/builds`, lastmod: today },
+        { loc: `${SITE_URL}/md-plans`, lastmod: today },
+        { loc: `${SITE_URL}/collections`, lastmod: today },
         { loc: `${SITE_URL}/identities`, lastmod: today },
         { loc: `${SITE_URL}/egos`, lastmod: today },
     ];

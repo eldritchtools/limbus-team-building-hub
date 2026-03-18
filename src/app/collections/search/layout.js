@@ -1,8 +1,8 @@
 export const metadata = {
-    title: "Curated Lists | Limbus Company Team Building Hub",
-    description: "Browse lists of builds curated by users"
+    title: "Collections | Limbus Company Team Building Hub",
+    description: "Browse collections of content managed by users"
 };
 
-export default function SearchListsLayout({ children }) {
+export default function SearchCollectionsLayout({ children }) {
   return <>{children}</>;
 }

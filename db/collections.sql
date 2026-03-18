@@ -260,16 +260,18 @@ begin
   builds AS (
     SELECT *
     FROM public.get_filtered_builds_v8(
-      build_id_filter := ARRAY(SELECT id FROM all_build_ids),
-      limit_count := 1000
+      build_id_filter := ARRAY(SELECT abi.id FROM all_build_ids abi),
+      limit_count := 1000,
+      ignore_block_discovery := true
     )
   ),
 
   md_plans AS (
     SELECT *
     FROM public.search_md_plans_v1(
-      plan_id_filter := ARRAY(SELECT id FROM all_md_plan_ids),
-      p_limit := 1000
+      plan_id_filter := ARRAY(SELECT ami.id FROM all_md_plan_ids ami),
+      p_limit := 1000,
+      p_ignore_block_discovery := true
     )
   ),
 
@@ -347,7 +349,8 @@ begin
     ct.tags,
     c.sort_value,
     c.like_count,
-    c.comment_count
+    c.comment_count,
+    i.items
   ORDER BY c.sort_value DESC;
 end;
 $$;
@@ -631,18 +634,20 @@ begin
   builds AS (
     SELECT *
     FROM public.get_filtered_builds_v8(
-      build_id_filter := ARRAY(SELECT id FROM all_build_ids),
+      build_id_filter := ARRAY(SELECT abi.id FROM all_build_ids abi),
       p_published := true,
-      limit_count := 1000
+      limit_count := 1000,
+      ignore_block_discovery := true
     )
   ),
 
   md_plans AS (
     SELECT *
     FROM public.search_md_plans_v1(
-      plan_id_filter := ARRAY(SELECT id FROM all_md_plan_ids),
+      plan_id_filter := ARRAY(SELECT ami.id FROM all_md_plan_ids ami),
       p_published := true,
-      p_limit := 1000
+      p_limit := 1000,
+      p_ignore_block_discovery := true
     )
   ),
 
@@ -886,18 +891,20 @@ all_md_plan_ids AS (
 builds AS (
   SELECT *
   FROM public.get_filtered_builds_v8(
-    build_id_filter := ARRAY(SELECT id FROM all_build_ids),
+    build_id_filter := ARRAY(SELECT abi.id FROM all_build_ids abi),
     p_published := TRUE,
-    limit_count := 1000
+    limit_count := 1000,
+    ignore_block_discovery := TRUE
   )
 ),
 
 md_plans AS (
   SELECT *
   FROM public.search_md_plans_v1(
-    plan_id_filter := ARRAY(SELECT id FROM all_md_plan_ids),
+    plan_id_filter := ARRAY(SELECT ami.id FROM all_md_plan_ids ami),
     p_published := TRUE,
-    p_limit := 1000
+    p_limit := 1000,
+    p_ignore_block_discovery := TRUE
   )
 ),
 
@@ -932,10 +939,7 @@ SELECT
     'flair', su.flair
   ) AS submitter,
 
-  jsonb_build_object(
-    'type', s.target_type,
-    'data', ac.data
-  ) AS data
+  ac.data
 
 FROM submissions s
 
@@ -1201,10 +1205,12 @@ CREATE OR REPLACE FUNCTION public.get_saved_collections(
 )
 RETURNS TABLE (
   id uuid,
+  user_id uuid,
   username TEXT,
   user_flair TEXT,
   title text,
   short_desc text,
+  submission_mode collection_submission_mode,
   created_at timestamptz,
   published_at timestamptz,
   tags TEXT[],
@@ -1221,8 +1227,8 @@ BEGIN
   -- get all saved collection IDs for the user
   SELECT COALESCE(ARRAY_AGG(target_id), ARRAY[]::UUID[])
   INTO saved_ids
-  FROM public.saves
-  WHERE user_id = p_user_id
+  FROM public.saves s
+  WHERE s.user_id = p_user_id
     AND target_type = 'collection';
 
   IF saved_ids = '{}' THEN
@@ -1246,76 +1252,6 @@ BEGIN
     );
 END;
 $$;
-
-INSERT INTO public.collections (
-  id,
-  user_id,
-  title,
-  body,
-  short_desc,
-  submission_mode,
-  is_published,
-  block_discovery,
-  created_at,
-  updated_at,
-  published_at,
-  view_count,
-  like_count,
-  comment_count,
-  search_vector,
-  pinned_comment_id,
-  score
-)
-SELECT
-  bl.id,
-  bl.user_id,
-  bl.title,
-  bl.body,
-  bl.short_desc,
-  bl.submission_mode::text::collection_submission_mode,
-  bl.is_published,
-  bl.block_discovery,
-  bl.created_at,
-  bl.updated_at,
-  bl.published_at,
-  bl.view_count,
-  bl.like_count,
-  bl.comment_count,
-  bl.search_vector,
-  bl.pinned_comment_id,
-  bl.score
-FROM public.build_lists bl;
-
-INSERT INTO public.collection_tags (
-  collection_id,
-  tag_id
-)
-SELECT
-  blt.list_id,
-  blt.tag_id
-FROM public.build_list_tags blt;
-
-INSERT INTO public.collection_items (
-  collection_id,
-  target_type,
-  target_id,
-  note,
-  position,
-  submitted_by
-)
-SELECT
-  bli.list_id,
-  'build'::target_type_enum,
-  bli.build_id,
-  bli.note,
-  bli.position,
-  bli.submitted_by
-FROM public.build_list_items bli;
-
-UPDATE public.likes
-SET target_type = 'collection'
-WHERE target_type = 'build_list';
-
 
 CREATE OR REPLACE FUNCTION public.update_target_stats()
 RETURNS TRIGGER

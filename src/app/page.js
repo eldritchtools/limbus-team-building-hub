@@ -56,7 +56,7 @@ export default function Home() {
                     <NoPrefetchLink className="text-link" href={"/builds"}>Team Builds</NoPrefetchLink>
                     <NoPrefetchLink className="text-link" href={"/builds/new"}>Create a build</NoPrefetchLink>
                     <NoPrefetchLink className="text-link" href={"/md-plans"}>MD Plans</NoPrefetchLink>
-                    <NoPrefetchLink className="text-link" href={"/curated-lists"}>Curated Lists</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/collections"}>Collections</NoPrefetchLink>
                     <NoPrefetchLink className="text-link" href={"/identities"}>Identities</NoPrefetchLink>
                     <NoPrefetchLink className="text-link" href={"/egos"}>E.G.Os</NoPrefetchLink>
                 </div>

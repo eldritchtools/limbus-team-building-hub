@@ -1,8 +1,8 @@
 export const metadata = {
-    title: "Review Curated List Submissions | Limbus Company Team Building Hub",
-    description: "Review curated list submissions"
+    title: "Review Collection Submissions | Limbus Company Team Building Hub",
+    description: "Review collection submissions"
 };
 
-export default function ReviewCuratedListLayout({ children }) {
+export default function ReviewCollectionLayout({ children }) {
   return children;
 }

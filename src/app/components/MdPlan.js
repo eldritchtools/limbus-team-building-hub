@@ -25,7 +25,7 @@ export default function MdPlan({ plan, complete = true, clickable = true }) {
     const width = isMobile ? "175px" : "250px";
 
     return <div className="md-plan" style={{ width: width }}>
-        <NoPrefetchLink href={`/md-plans/${plan.id}`} className="md-plan-link" />
+        {clickable ? <NoPrefetchLink href={`/md-plans/${plan.id}`} className="md-plan-link" /> : null}
 
         <div className="md-plan-contents" style={{ width: width }}>
             <div style={{ display: "flex", height: "2.4rem", alignItems: "center", marginBottom: "0.2rem" }}>

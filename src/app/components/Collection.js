@@ -10,6 +10,7 @@ import SaveButton from "./SaveButton";
 import ContributeButton from "./ContributeButton";
 import { useAuth } from "../database/authProvider";
 import ReviewButton from "./ReviewButton";
+import MdPlan from "./MdPlan";
 
 function isLocalId(id) {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -36,7 +37,13 @@ export default function Collection({ collection }) {
             {collection.items.length > 0 ?
                 <div style={{ paddingLeft: "1rem", overflowX: "auto", scrollbarWidth: "thin", width: "100%" }}>
                     <div style={{ display: "flex", gap: "1rem" }}>
-                        {collection.items.map(build => <BuildEntry key={build.id} build={build} size={"S"} complete={false} />)}
+                        {collection.items.map(item =>
+                            item.type === "build" ?
+                                <BuildEntry key={item.data.id} build={item.data} size={"S"} complete={false} /> :
+                                item.type === "md_plan" ?
+                                    <MdPlan key={item.data.id} plan={item.data} complete={false} /> :
+                                    null
+                        )}
                     </div>
                 </div> :
                 <div style={{ textAlign: "center" }}>

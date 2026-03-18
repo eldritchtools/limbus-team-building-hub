@@ -1,8 +1,8 @@
 export const metadata = {
-    title: "Edit Curated List | Limbus Company Team Building Hub",
-    description: "Edit a curated list"
+    title: "Edit Collection | Limbus Company Team Building Hub",
+    description: "Edit a collection"
 };
 
-export default function EditCuratedListLayout({ children }) {
+export default function EditCollectionLayout({ children }) {
   return children;
 }

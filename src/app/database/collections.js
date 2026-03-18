@@ -23,7 +23,7 @@ async function searchCollections(filters, isPublished = true, sortBy = "score", 
 
 async function getCollection(id) {
     const { data, error } = await getSupabase().rpc("get_collection_v1", {
-        p_list_id: id,
+        p_collection_id: id,
     });
 
     if (error) throw error;
@@ -146,10 +146,11 @@ async function rejectCollectionSubmission(id) {
     return data;
 }
 
-async function rejectCollectionSubmissionsForTarget(collection_id, build_id) {
+async function rejectCollectionSubmissionsForTarget(collection_id, target_type, target_id) {
     const { data, error } = await getSupabase().rpc("reject_collection_submissions_for_target", {
         p_collection_id: collection_id,
-        p_build_id: build_id
+        p_target_type: target_type,
+        p_target_id: target_id
     });
 
     if (error) throw error;

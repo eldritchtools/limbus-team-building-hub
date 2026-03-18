@@ -16,7 +16,7 @@ export default function CollectionsSearchComponent({ options = {} }) {
         if (tags.length > 0) searchFilters.tags = tags.map(t => t.value);
 
         const params = new URLSearchParams(searchFilters);
-        window.location.href = `/curated-lists/search?${params.toString()}`;
+        window.location.href = `/collections/search?${params.toString()}`;
     };
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
@@ -27,8 +27,8 @@ export default function CollectionsSearchComponent({ options = {} }) {
             <TagSelector selected={tags} onChange={setTags} creatable={false} styles={selectStyleVariable} />
         </div>
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginTop: "0.2rem" }}>
-            <button style={{ fontSize: "1.2rem", cursor: "pointer" }} onClick={applyFilters}>Search Curated Lists</button>
-            or <NoPrefetchLink className="text-link" href={"/curated-lists/new"}>create a curated list</NoPrefetchLink>
+            <button style={{ fontSize: "1.2rem", cursor: "pointer" }} onClick={applyFilters}>Search Collections</button>
+            or <NoPrefetchLink className="text-link" href={"/collections/new"}>create a collection</NoPrefetchLink>
         </div>
     </div>
 }

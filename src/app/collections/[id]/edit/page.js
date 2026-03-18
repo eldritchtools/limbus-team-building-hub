@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import CuratedListEditor from "../../CollectionEditor";
+import CollectionEditor from "../../CollectionEditor";
 
-export default function EditCuratedListPage({params}) {
+export default function EditCollectionPage({params}) {
     const { id } = React.use(params);
-    return <CuratedListEditor mode="edit" listId={id} />;
+    return <CollectionEditor mode="edit" collectionId={id} />;
 }

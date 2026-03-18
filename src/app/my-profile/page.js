@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getFilteredBuilds } from "../database/builds";
 import { useAuth } from "../database/authProvider";
-import { getSavedBuilds, getSavedCuratedLists, getSavedMdPlans } from "../database/saves";
+import { getSavedBuilds, getSavedCollections, getSavedMdPlans } from "../database/saves";
 import { tabStyle } from "../styles";
 import BuildsGrid from "../components/BuildsGrid";
 import { useSearchParams } from "next/navigation";
@@ -163,7 +163,7 @@ export default function ProfilePage() {
                 case "saved":
                     if (user) {
                         setCollectionsLoading(true);
-                        getSavedCuratedLists(user.id, page, 10).then(c => { setCollections(c); setCollectionsLoading(false); })
+                        getSavedCollections(user.id, page, 10).then(c => { setCollections(c); setCollectionsLoading(false); })
                     } else {
                         setCollectionsLoading(true);
                         const fetchSaves = async () => {
@@ -415,13 +415,11 @@ export default function ProfilePage() {
             if (!user) {
                 if (activeTab === "drafts") {
                     components.push(<div key={"draft-warn"} style={{ color: "rgba(255, 99, 71, 0.85)", paddingBottom: "0.5rem" }}>
-                        {/* When not logged in, md plans are saved locally on this device. After logging in, you can sync them to your account. Md plans that are not synced cannot be accessed while logged in. */}
-                        When not logged in, md plans are saved locally on this device. MD plans are currently not syncable on login.
+                        When not logged in, md plans are saved locally on this device. After logging in, you can sync them to your account. Md plans that are not synced cannot be accessed while logged in.
                     </div>)
                 } else if (activeTab === "saved") {
                     components.push(<div key={"save-warn"} style={{ color: "rgba(255, 99, 71, 0.85)", paddingBottom: "0.5rem" }}>
-                        {/* When not logged in, saved md plans are stored locally on this device. After logging in, you can sync them to your account. Saved md plans that are not synced cannot be accessed while logged in. Local drafts cannot be saved. */}
-                        When not logged in, saved md plans are stored locally on this device. Saved md plans are currently not syncable on login.
+                        When not logged in, saved md plans are stored locally on this device. After logging in, you can sync them to your account. Saved md plans that are not synced cannot be accessed while logged in. Local drafts cannot be saved.
                     </div>)
                 }
             }
@@ -508,7 +506,7 @@ export default function ProfilePage() {
 
         <h2 style={{ display: "flex", marginBottom: "1rem", gap: "1rem" }}>
             <div style={{ cursor: "pointer", color: mainActiveTab === "builds" ? "#ddd" : "#777" }} onClick={() => { setMainActiveTab("builds"); setPage(1); }}>Builds</div>
-            {/* <div style={{ cursor: "pointer", color: mainActiveTab === "lists" ? "#ddd" : "#777" }} onClick={() => { setMainActiveTab("collections"); setPage(1); }}>Collections</div> */}
+            <div style={{ cursor: "pointer", color: mainActiveTab === "collections" ? "#ddd" : "#777" }} onClick={() => { setMainActiveTab("collections"); setPage(1); }}>Collections</div>
             <div style={{ cursor: "pointer", color: mainActiveTab === "md_plans" ? "#ddd" : "#777" }} onClick={() => { setMainActiveTab("md_plans"); setPage(1); }}>MD Plans</div>
         </h2>
         <div style={{ display: "flex", marginBottom: "1rem", gap: "1rem" }}>
@@ -516,7 +514,7 @@ export default function ProfilePage() {
                 <NoPrefetchLink href="/builds/new" style={{ textDecoration: "none" }}>
                     <div style={{ fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", color: "#777" }}>+New Build</div>
                 </NoPrefetchLink> :
-                mainActiveTab === "lists" ?
+                mainActiveTab === "collections" ?
                     <NoPrefetchLink href="/collections/new" style={{ textDecoration: "none" }}>
                         <div style={{ fontSize: "1.2rem", fontWeight: "bold", cursor: "pointer", color: "#777" }}>+New Collection</div>
                     </NoPrefetchLink> :

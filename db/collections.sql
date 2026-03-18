@@ -260,16 +260,18 @@ begin
   builds AS (
     SELECT *
     FROM public.get_filtered_builds_v8(
-      build_id_filter := ARRAY(SELECT id FROM all_build_ids),
-      limit_count := 1000
+      build_id_filter := ARRAY(SELECT abi.id FROM all_build_ids abi),
+      limit_count := 1000,
+      ignore_block_discovery := true
     )
   ),
 
   md_plans AS (
     SELECT *
     FROM public.search_md_plans_v1(
-      plan_id_filter := ARRAY(SELECT id FROM all_md_plan_ids),
-      p_limit := 1000
+      plan_id_filter := ARRAY(SELECT ami.id FROM all_md_plan_ids ami),
+      p_limit := 1000,
+      p_ignore_block_discovery := true
     )
   ),
 
@@ -347,7 +349,8 @@ begin
     ct.tags,
     c.sort_value,
     c.like_count,
-    c.comment_count
+    c.comment_count,
+    i.items
   ORDER BY c.sort_value DESC;
 end;
 $$;
@@ -631,18 +634,20 @@ begin
   builds AS (
     SELECT *
     FROM public.get_filtered_builds_v8(
-      build_id_filter := ARRAY(SELECT id FROM all_build_ids),
+      build_id_filter := ARRAY(SELECT abi.id FROM all_build_ids abi),
       p_published := true,
-      limit_count := 1000
+      limit_count := 1000,
+      ignore_block_discovery := true
     )
   ),
 
   md_plans AS (
     SELECT *
     FROM public.search_md_plans_v1(
-      plan_id_filter := ARRAY(SELECT id FROM all_md_plan_ids),
+      plan_id_filter := ARRAY(SELECT ami.id FROM all_md_plan_ids ami),
       p_published := true,
-      p_limit := 1000
+      p_limit := 1000,
+      p_ignore_block_discovery := true
     )
   ),
 
@@ -886,18 +891,20 @@ all_md_plan_ids AS (
 builds AS (
   SELECT *
   FROM public.get_filtered_builds_v8(
-    build_id_filter := ARRAY(SELECT id FROM all_build_ids),
+    build_id_filter := ARRAY(SELECT abi.id FROM all_build_ids abi),
     p_published := TRUE,
-    limit_count := 1000
+    limit_count := 1000,
+    ignore_block_discovery := TRUE
   )
 ),
 
 md_plans AS (
   SELECT *
   FROM public.search_md_plans_v1(
-    plan_id_filter := ARRAY(SELECT id FROM all_md_plan_ids),
+    plan_id_filter := ARRAY(SELECT ami.id FROM all_md_plan_ids ami),
     p_published := TRUE,
-    p_limit := 1000
+    p_limit := 1000,
+    p_ignore_block_discovery := TRUE
   )
 ),
 
@@ -932,10 +939,7 @@ SELECT
     'flair', su.flair
   ) AS submitter,
 
-  jsonb_build_object(
-    'type', s.target_type,
-    'data', ac.data
-  ) AS data
+  ac.data
 
 FROM submissions s
 

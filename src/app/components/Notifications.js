@@ -14,15 +14,16 @@ function constructActorStr(actors) {
 
 const targetTypeMapping = {
     "build": "build",
-    "build_list": "curated list"
+    "collection": "collection",
+    "md_plan": "md plan"
 }
 
 const eventString = {
     "comment": "commented on your",
     "reply": "replied to your comment to the",
-    "build_list_submission": "made a submission to your",
-    "build_list_submission_approved": "approved your submission to the",
-    "build_list_submission_rejected": "rejected your submission to the",
+    "collection_submission": "made a submission to your",
+    "collection_submission_approved": "approved your submission to the",
+    "collection_submission_rejected": "rejected your submission to the",
 }
 
 function constructNotifMessage(notif) {
@@ -41,8 +42,11 @@ export default function Notification({ notif, updateNotif }) {
             case "build":
                 router.push(`/builds/${notif.target_id}`);
                 return;
-            case "build_list":
-                router.push(`/curated-lists/${notif.target_id}`);
+            case "collection":
+                router.push(`/collections/${notif.target_id}`);
+                return;
+            case "md_plan":
+                router.push(`/md-plans/${notif.target_id}`);
                 return;
             default:
                 return

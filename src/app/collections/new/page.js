@@ -1,7 +1,7 @@
 "use client";
 
-import CuratedListEditor from "../CollectionEditor";
+import CollectionEditor from "../CollectionEditor";
 
-export default function NewCuratedList() {
-  return <CuratedListEditor mode="create" />;
+export default function NewCollection() {
+  return <CollectionEditor mode="create" />;
 }

@@ -6,7 +6,7 @@ import { useState } from "react";
 import "./PlansSearchComponent.css";
 import NoPrefetchLink from "../NoPrefetchLink";
 
-export default function PlansSearchComponent({ options = {} }) {
+export default function PlansSearchComponent({ options = {}, inPage = false, setFilters }) {
     const [searchString, setSearchString] = useState(options.search || "");
     const [tags, setTags] = useState((options.tags || []).map(t => tagToTagSelectorOption(t)));
 
@@ -15,8 +15,12 @@ export default function PlansSearchComponent({ options = {} }) {
         if (searchString !== "") searchFilters.search = searchString;
         if (tags.length > 0) searchFilters.tags = tags.map(t => t.value);
 
-        const params = new URLSearchParams(searchFilters);
-        window.location.href = `/md-plans/search?${params.toString()}`;
+        if (inPage) {
+            setFilters(searchFilters);
+        } else {
+            const params = new URLSearchParams(searchFilters);
+            window.location.href = `/md-plans/search?${params.toString()}`;
+        }
     };
 
     return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
@@ -28,7 +32,10 @@ export default function PlansSearchComponent({ options = {} }) {
         </div>
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginTop: "0.2rem" }}>
             <button style={{ fontSize: "1.2rem", cursor: "pointer" }} onClick={applyFilters}>Search MD Plans</button>
-            or <NoPrefetchLink className="text-link" href={"/md-plans/new"}>create an md plan</NoPrefetchLink>
+            {!inPage ?
+                <span>or <NoPrefetchLink className="text-link" href={"/md-plans/new"}>create an md plan</NoPrefetchLink></span> :
+                null
+            }
         </div>
     </div>
 }

@@ -365,12 +365,12 @@ export default function MdPlanEditor({ mode, mdPlanId }) {
             youtube_video_id: youtubeVideoId,
             is_published: isPublished,
             block_discovery: blockDiscovery,
-            build_ids: builds.map(build => build.id),
             tags: tagsConverted
         }
 
         setSaving(true);
         if (user) {
+            planData.build_ids = builds.map(build => build.id);
             if (mode === "edit") {
                 const data = await updateMdPlan(mdPlanId, planData);
                 router.push(`/md-plans/${data}`);
@@ -379,11 +379,14 @@ export default function MdPlanEditor({ mode, mdPlanId }) {
                 router.push(`/md-plans/${data}`);
             }
         } else {
+            planData.builds = builds;
             planData.created_at = createdAt ?? Date.now();
             planData.updated_at = Date.now();
-            if (mode === "edit") planData.id = Number(buildId);
+            planData.like_count = 0;
+            planData.comment_count = 0;
+            if (mode === "edit") planData.id = Number(mdPlanId);
 
-            const data = await mdPlansStore.save(planData)
+            const data = await mdPlansStore.save(planData);
             router.push(`/md-plans/${data}`);
         }
     }
@@ -507,8 +510,7 @@ export default function MdPlanEditor({ mode, mdPlanId }) {
             {mode === "edit" ? "Editing" : "Creating"} Run Plan
         </h2>
         {!user ?
-            // <div style={{ color: "rgba(255, 99, 71, 0.85)" }}>When not logged in, md plans are saved locally on this device. After logging in, you can sync them to your account. Run plans that are not synced cannot be accessed while logged in.</div>
-            <div style={{ color: "rgba(255, 99, 71, 0.85)" }}>When not logged in, md plans are saved locally on this device. MD plans are currently not syncable on login.</div>
+            <div style={{ color: "rgba(255, 99, 71, 0.85)" }}>When not logged in, md plans are saved locally on this device. After logging in, you can sync them to your account. Run plans that are not synced cannot be accessed while logged in.</div>
             : null
         }
         <span style={{ fontSize: "1.2rem" }}>Title</span>

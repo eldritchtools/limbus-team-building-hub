@@ -7,7 +7,7 @@ import { prepareBuildFilters } from "../builds/search/SearchBuildsContent";
 import { getFilteredBuilds } from "../database/builds";
 import { tabStyle } from "../styles";
 
-export default function SelectBuildModal({ isOpen, onClose, onSelectBuild }) {
+export default function SelectBuildModal({ isOpen, onClose, onSelectBuild, allowDrafts = false }) {
     const { user } = useAuth();
     const [filters, setFilters] = useState({});
     const [searchBuilds, setSearchBuilds] = useState([]);
@@ -33,6 +33,11 @@ export default function SelectBuildModal({ isOpen, onClose, onSelectBuild }) {
                         const data = await getFilteredBuilds({ "user_id": user.id, "ignore_block_discovery": true }, true, "recency", false, page, 24);
                         setSearchBuilds(data || []);
                     }
+                } else if (searchMode === "draft") {
+                    if (user) {
+                        const data = await getFilteredBuilds({ "user_id": user.id, "ignore_block_discovery": true }, false, "recency", false, page, 24);
+                        setSearchBuilds(data || []);
+                    }
                 }
                 setLoading(false);
             } catch (err) {
@@ -49,6 +54,10 @@ export default function SelectBuildModal({ isOpen, onClose, onSelectBuild }) {
             <div style={{ display: "flex", flexDirection: "row", gap: "1rem", alignSelf: "center", marginTop: "0.5rem", marginBottom: "0.5rem" }}>
                 <div style={{ ...tabStyle, color: searchMode === "search" ? "#ddd" : "#777" }} onClick={() => setSearchMode("search")}>Search Builds</div>
                 <div style={{ ...tabStyle, color: searchMode === "user" ? "#ddd" : "#777" }} onClick={() => setSearchMode("user")}>My Published Builds</div>
+                {allowDrafts ?
+                    <div style={{ ...tabStyle, color: searchMode === "draft" ? "#ddd" : "#777" }} onClick={() => setSearchMode("draft")}>My Drafts</div> :
+                    null
+                }
             </div>
             {searchMode === "search" ?
                 <BuildsSearchComponent options={filters} inPage={true} setFilters={setFilters} /> :

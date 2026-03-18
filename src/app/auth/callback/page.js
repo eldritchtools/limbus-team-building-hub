@@ -2,8 +2,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/database/authProvider';
-// import { buildsStore, listsStore, savedListsStore, savesStore } from '@/app/database/localDB';
-import { buildsStore, savesStore } from '@/app/database/localDB';
+import { buildsStore, listsStore, mdPlansStore, savedListsStore, savedMdPlansStore, savesStore } from '@/app/database/localDB';
 
 export default function AuthCallback() {
     const router = useRouter();
@@ -30,10 +29,12 @@ export default function AuthCallback() {
         const checkLocalData = async () => {
             const builds = await buildsStore.getAll();
             const saves = await savesStore.getAll();
-            // const lists = await listsStore.getAll();
-            // const savedLists = await savedListsStore.getAll();
+            const lists = await listsStore.getAll();
+            const savedLists = await savedListsStore.getAll();
+            const mdPlans = await mdPlansStore.getAll();
+            const savedMdPlans = await savedMdPlansStore.getAll();
 
-            if (builds.length !== 0 || saves.length !== 0) { //|| lists.length !== 0 || savedLists.length !== 0) {
+            if (builds.length !== 0 || saves.length !== 0 || lists.length !== 0 || savedLists.length !== 0 || mdPlans.length !== 0 || savedMdPlans.length !== 0) {
                 (async () => {
                     router.replace('/login/setup');
                 })();

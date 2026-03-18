@@ -7,7 +7,7 @@ import Collection from "../components/Collection";
 import { searchCollections } from "../database/collections";
 
 export default function CollectionsPage() {
-    const [lists, setLists] = useState([]);
+    const [collections, setCollections] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState(null);
     const [refreshCounter, setRefreshCounter] = useState(0);
@@ -18,7 +18,7 @@ export default function CollectionsPage() {
         if (["popular", "recent", "random"].includes(mode)) {
             setActiveTab(mode);
         } else {
-            const saved = localStorage.getItem("listsActiveTab");
+            const saved = localStorage.getItem("collectionsActiveTab");
             setActiveTab(saved ?? "popular");
         }
     }, [searchParams]);
@@ -28,7 +28,7 @@ export default function CollectionsPage() {
 
         let canceled = false;
 
-        const fetchLists = async () => {
+        const fetchCollections = async () => {
             try {
                 setLoading(true);
                 const data = activeTab === "popular" ?
@@ -37,7 +37,7 @@ export default function CollectionsPage() {
                         await searchCollections({}, true, "new", 1, 10) :
                         await searchCollections({}, true, "random", 1, 10)
                 if (!canceled) {
-                    setLists(data || []);
+                    setCollections(data || []);
                 }
             } catch (err) {
                 if (!canceled) console.error(err);
@@ -46,8 +46,8 @@ export default function CollectionsPage() {
             }
         };
 
-        fetchLists();
-        localStorage.setItem("listsActiveTab", activeTab);
+        fetchCollections();
+        localStorage.setItem("collectionsActiveTab", activeTab);
         return () => {
             canceled = true;
         };
@@ -73,12 +73,12 @@ export default function CollectionsPage() {
             <div style={{ color: "#9ca3af" }}>
                 {"Loading collections..."}
             </div> :
-            (lists.length === 0 ?
+            (collections.length === 0 ?
                 <div>
                     No published collections.
                 </div> :
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    {lists.map(list => <Collection key={list.id} collection={collection} />)}
+                    {collections.map(collection => <Collection key={collection.id} collection={collection} />)}
                 </div>
             )}
     </div>;

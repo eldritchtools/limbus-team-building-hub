@@ -101,7 +101,7 @@ export default function ProfilePage({ params }) {
                 </p>;
             } else {
                 return <div key={"content"} style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    {collections.map(collection => <Collection key={list.id} collection={collection} />)}
+                    {collections.map(collection => <Collection key={collection.id} collection={collection} />)}
 
                     <div style={{ display: "flex", gap: "0.5rem", alignSelf: "end" }}>
                         <button className="page-button" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>
@@ -140,7 +140,7 @@ export default function ProfilePage({ params }) {
 
         <div style={{ display: "flex", marginTop: "0.5rem", marginBottom: "1rem", gap: "1rem", justifyContent: "center" }}>
             <div style={{ ...tabStyle, color: viewMode === "builds" ? "#ddd" : "#777" }} onClick={() => { setViewMode("builds"); setPage(1); }}>Builds</div>
-            {/* <div style={{ ...tabStyle, color: viewMode === "lists" ? "#ddd" : "#777" }} onClick={() => { setViewMode("collections"); setPage(1); }}>Collections</div> */}
+            <div style={{ ...tabStyle, color: viewMode === "collections" ? "#ddd" : "#777" }} onClick={() => { setViewMode("collections"); setPage(1); }}>Collections</div>
             <div style={{ ...tabStyle, color: viewMode === "md_plans" ? "#ddd" : "#777" }} onClick={() => { setViewMode("md_plans"); setPage(1); }}>MD Plans</div>
         </div>
 

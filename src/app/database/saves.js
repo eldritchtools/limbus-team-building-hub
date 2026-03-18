@@ -13,8 +13,8 @@ async function getSavedBuilds(user_id, page = 1, pageSize = 20) {
     return data;
 }
 
-async function getSavedCuratedLists(user_id, page = 1, pageSize = 10) {
-    const { data, error } = await getSupabase().rpc("get_saved_build_lists", {
+async function getSavedCollections(user_id, page = 1, pageSize = 10) {
+    const { data, error } = await getSupabase().rpc("get_saved_collections", {
         p_user_id: user_id,
         p_limit: pageSize,
         p_offset: (page - 1) * pageSize
@@ -36,4 +36,4 @@ async function getSavedMdPlans(user_id, page = 1, pageSize = 20) {
     return data;
 }
 
-export { getSavedBuilds, getSavedCuratedLists, getSavedMdPlans };
+export { getSavedBuilds, getSavedCollections, getSavedMdPlans };

@@ -150,7 +150,7 @@ function FloorItem({ floor }) {
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center", width: "100%" }}>
             {themePacksComponent}
             {giftsComponent}
-            <div style={{alignSelf: "start", marginTop: "1rem"}}>
+            <div style={{ alignSelf: "start", marginTop: "1rem" }}>
                 <MarkdownRenderer content={floor.note} />
             </div>
         </div>
@@ -212,9 +212,14 @@ export default function MdPlanPage({ params }) {
 
     const handleDeletePlan = async () => {
         setDeleting(true);
-        const data = await deleteMdPlan(id);
-        if (data && data.deleted) {
-            router.push(`/md-plans`);
+        if (isLocalId(id)) {
+            await mdPlansStore.remove(Number(id));
+            router.push(`/my-profile`);
+        } else {
+            const data = await deleteMdPlan(id);
+            if (data && data.deleted) {
+                router.push(`/md-plans`);
+            }
         }
         setDeleting(false);
     }
@@ -366,7 +371,7 @@ export default function MdPlanPage({ params }) {
                                 </button> : null
                         }
                         {
-                            user && user.id === plan.user_id ?
+                            (user && user.id === plan.user_id) || isLocalId(id) ?
                                 <button onClick={() => setDeleteOpen(true)}>
                                     <DeleteSolid text={"Delete"} />
                                 </button> : null

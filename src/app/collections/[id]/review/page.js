@@ -13,6 +13,7 @@ import { useBreakpoint } from "@eldritchtools/shared-components";
 import BuildEntry from "@/app/components/BuildEntry";
 import "./Submission.css";
 import NoPrefetchLink from "@/app/NoPrefetchLink";
+import MdPlan from "@/app/components/MdPlan";
 
 function Submission({ submission, submissionIds, inList, handleApprove, handleReject, approved, rejected, submitting }) {
     const [editing, setEditing] = useState(false);
@@ -36,7 +37,7 @@ function Submission({ submission, submissionIds, inList, handleApprove, handleRe
                 {submission.submitter_note}
             </div>
             <span style={{ fontSize: "1rem", color: "#aaa" }}>
-                On approving a submission, the build will be added to your curated list and all other submissions for the same build will be rejected. The description and ordering of builds can be adjusted by editing the curated list afterwards.
+                On approving a submission, the item will be added to your collection and all other submissions for the same item will be rejected. The description and ordering of items can be adjusted by editing the collection afterwards.
             </span>
             <div style={{ display: "flex" }}>
                 <button disabled={submitting} onClick={() => { handleApprove(submission.submission_id, note, submissionIds); setEditing(false); }}>Approve</button>
@@ -57,28 +58,35 @@ function Submission({ submission, submissionIds, inList, handleApprove, handleRe
             {approved || rejected ?
                 null :
                 <div style={{ display: "flex" }}>
-                    <button disabled={submitting} onClick={(e) => {e.stopPropagation(); handleReject(submission.submission_id);}}>Reject</button>
+                    <button disabled={submitting} onClick={(e) => { e.stopPropagation(); handleReject(submission.submission_id); }}>Reject</button>
                 </div>
             }
         </div>
     }
 }
 
-function SubmissionSet({ build, submissions, inList, handleApprove, handleReject, handleRejectAll, approvedIds, rejectedIds, submitting }) {
+function SubmissionSet({ type, data, submissions, inList, handleApprove, handleReject, handleRejectAll, approvedIds, rejectedIds, submitting }) {
     const submissionIds = useMemo(() => submissions.map(x => x.submission_id), [submissions]);
     const anyApproved = useMemo(() => submissions.find(x => approvedIds.has(x.submission_id)) !== undefined, [submissions, approvedIds]);
 
     return <div style={{ display: "flex", flexDirection: "column", gap: "1rem", alignItems: "center", width: "100%" }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem" }}>
-            <BuildEntry build={build} size={"M"} complete={false} clickable={false} />
+            {type === "build" ?
+                <BuildEntry build={data} size={"M"} complete={false} clickable={false}/> :
+                type === "md_plan" ?
+                    <MdPlan plan={data} complete={false} clickable={false}/> :
+                    null
+            }
             {inList ?
                 <span style={{ fontSize: "1rem", color: "#aaa" }}>
-                    This build is already in this curated list. Submissions can only be rejected.
+                    This item is already in this collection. Submissions can only be rejected.
                 </span> :
                 null
             }
             <div>
-                <button disabled={submitting || anyApproved} onClick={() => handleRejectAll(build.id, submissionIds)}>Reject All Submissions for this Build</button>
+                <button disabled={submitting || anyApproved} onClick={() => handleRejectAll(type, data.id, submissionIds)}>
+                    Reject All Submissions for this Item
+                </button>
             </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -99,10 +107,10 @@ function SubmissionSet({ build, submissions, inList, handleApprove, handleReject
     </div>
 }
 
-export default function ReviewCuratedListPage({ params }) {
+export default function ReviewCollectionPage({ params }) {
     const { id } = React.use(params);
-    const [curatedList, setCuratedList] = useState(null);
-    const [listLoading, setListLoading] = useState(true);
+    const [collection, setCollection] = useState(null);
+    const [collectionLoading, setCollectionLoading] = useState(true);
     const [submissions, setSubmissions] = useState(null);
     const [submissionsLoading, setSubmissionsLoading] = useState(true);
     const [setIndex, setSetIndex] = useState(0);
@@ -117,25 +125,25 @@ export default function ReviewCuratedListPage({ params }) {
     useEffect(() => {
         if (isLocalId(id) || !user) router.back();
 
-        const handleList = list => {
-            if (!list) router.back();
-            if (list.username) {
-                setCuratedList(list);
-                setListLoading(false);
+        const handleCollection = collection => {
+            if (!collection) router.back();
+            if (collection.username) {
+                setCollection(collection);
+                setCollectionLoading(false);
             }
         }
 
-        getCollection(id).then(handleList).catch(_err => {
-            router.push(`/curated-lists/${listId}`);
+        getCollection(id).then(handleCollection).catch(_err => {
+            router.push(`/collections/${id}`);
         });
 
         const handleSubmissions = submissions => {
-            setSubmissions(submissions);
+            setSubmissions(submissions.filter(x => x.data));
             setSubmissionsLoading(false);
         }
 
         getCollectionSubmissions(id).then(handleSubmissions).catch(_err => {
-            router.push(`/curated-lists/${listId}`);
+            router.push(`/collections/${id}`);
         });
     }, [id, router, user]);
 
@@ -154,50 +162,51 @@ export default function ReviewCuratedListPage({ params }) {
         setSubmitting(false);
     }
 
-    const handleRejectAll = async (buildId, submissionIds) => {
+    const handleRejectAll = async (targetType, targetId, submissionIds) => {
         setSubmitting(true);
-        await rejectCollectionSubmissionsForTarget(id, buildId);
+        await rejectCollectionSubmissionsForTarget(id, targetType, targetId);
         setRejected(p => new Set([...p, ...submissionIds]));
         setSubmitting(false);
     }
 
     const submissionsSorted = useMemo(() => {
-        if (!curatedList || !submissions) return {};
+        if (!collection || !submissions) return {};
         const sorted = {};
         submissions.forEach(submission => {
-            if (submission.build_id in sorted) {
-                const { build: rem, ...rest } = submission;
-                sorted[submission.build_id].submissions.push(rest);
+            if (submission.target_id in sorted) {
+                const { target_type: type, data: rem, ...rest } = submission;
+                sorted[submission.target_id].submissions.push(rest);
             } else {
-                const { build: build, ...rest } = submission;
-                sorted[submission.build_id] = {
-                    build: build,
+                const { target_type: type, data: data, ...rest } = submission;
+                sorted[submission.target_id] = {
+                    type: type,
+                    data: data,
                     submissions: [rest],
-                    inList: curatedList.items.find(x => x.build.id === submission.build_id) !== undefined
+                    inList: collection.items.find(x => x.data.id === submission.target_id) !== undefined
                 };
             }
         });
         return Object.entries(sorted);
-    }, [curatedList, submissions]);
+    }, [collection, submissions]);
 
-    return listLoading || submissionsLoading ?
+    return collectionLoading || submissionsLoading ?
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontSize: "1.5rem", fontWeight: "bold" }}>
             Loading...
         </div> :
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", containerType: "inline-size" }}>
             <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
                 <h2 style={{ fontSize: "1.2rem", margin: 0 }}>
-                    Reviewing Submissions for Curated List
+                    Reviewing Submissions for Collection
                 </h2>
                 <h2 style={{ display: "flex", fontSize: "1.2rem", fontWeight: "bold", alignItems: "center" }}>
-                    {curatedList.title}
+                    {collection.title}
                 </h2>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ fontSize: "0.9rem", marginBottom: "0.5rem", color: "#ddd" }}>
-                        <span>by <Username username={curatedList.username} flair={curatedList.user_flair} /> • </span>
-                        <ReactTimeAgo date={curatedList.published_at ?? curatedList.created_at} locale="en-US" timeStyle="mini" />
-                        {curatedList.updated_at !== (curatedList.published_at ?? curatedList.created_at) ?
-                            <span> • Last edited <ReactTimeAgo date={curatedList.updated_at} locale="en-US" timeStyle="mini" /></span> :
+                        <span>by <Username username={collection.username} flair={collection.user_flair} /> • </span>
+                        <ReactTimeAgo date={collection.published_at ?? collection.created_at} locale="en-US" timeStyle="mini" />
+                        {collection.updated_at !== (collection.published_at ?? collection.created_at) ?
+                            <span> • Last edited <ReactTimeAgo date={collection.updated_at} locale="en-US" timeStyle="mini" /></span> :
                             null}
                     </div>
                 </div>
@@ -206,10 +215,10 @@ export default function ReviewCuratedListPage({ params }) {
             <div style={{ height: "0.5rem" }} />
             <div style={{ display: "flex", flexDirection: "column", width: isMobile ? "100%" : "95%", alignSelf: "center", marginBottom: "1rem", gap: "1rem" }}>
                 <div style={{ display: "flex", flexDirection: "column", paddingRight: "0.5rem", gap: "0.5rem", width: "100%" }}>
-                    <span style={{ fontSize: "1.2rem" }}>Curated List Description</span>
+                    <span style={{ fontSize: "1.2rem" }}>Collection Description</span>
                     <div className={{ maxWidth: "48rem", marginLeft: "auto", marginRight: "auto" }}>
                         <div>
-                            <MarkdownRenderer content={curatedList.body} />
+                            <MarkdownRenderer content={collection.body} />
                         </div>
                     </div>
                 </div>
@@ -228,7 +237,8 @@ export default function ReviewCuratedListPage({ params }) {
 
                     <SubmissionSet
                         key={submissionsSorted[setIndex][0]}
-                        build={submissionsSorted[setIndex][1].build}
+                        type={submissionsSorted[setIndex][1].type}
+                        data={submissionsSorted[setIndex][1].data}
                         submissions={submissionsSorted[setIndex][1].submissions}
                         inList={submissionsSorted[setIndex][1].inList}
                         handleApprove={handleApprove}
@@ -247,8 +257,8 @@ export default function ReviewCuratedListPage({ params }) {
             </div>
 
             <div>
-                <NoPrefetchLink href={`/curated-lists/${id}`} className="toggle-button" style={{ color: "#ddd", textDecoration: "none", fontSize: "1.2rem" }}>
-                    Return to curated list
+                <NoPrefetchLink href={`/collections/${id}`} className="toggle-button" style={{ color: "#ddd", textDecoration: "none", fontSize: "1.2rem" }}>
+                    Return to collection
                 </NoPrefetchLink>
             </div>
         </div>

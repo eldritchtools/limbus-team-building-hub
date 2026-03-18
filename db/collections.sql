@@ -1205,10 +1205,12 @@ CREATE OR REPLACE FUNCTION public.get_saved_collections(
 )
 RETURNS TABLE (
   id uuid,
+  user_id uuid,
   username TEXT,
   user_flair TEXT,
   title text,
   short_desc text,
+  submission_mode collection_submission_mode,
   created_at timestamptz,
   published_at timestamptz,
   tags TEXT[],
@@ -1225,8 +1227,8 @@ BEGIN
   -- get all saved collection IDs for the user
   SELECT COALESCE(ARRAY_AGG(target_id), ARRAY[]::UUID[])
   INTO saved_ids
-  FROM public.saves
-  WHERE user_id = p_user_id
+  FROM public.saves s
+  WHERE s.user_id = p_user_id
     AND target_type = 'collection';
 
   IF saved_ids = '{}' THEN
@@ -1250,76 +1252,6 @@ BEGIN
     );
 END;
 $$;
-
-INSERT INTO public.collections (
-  id,
-  user_id,
-  title,
-  body,
-  short_desc,
-  submission_mode,
-  is_published,
-  block_discovery,
-  created_at,
-  updated_at,
-  published_at,
-  view_count,
-  like_count,
-  comment_count,
-  search_vector,
-  pinned_comment_id,
-  score
-)
-SELECT
-  bl.id,
-  bl.user_id,
-  bl.title,
-  bl.body,
-  bl.short_desc,
-  bl.submission_mode::text::collection_submission_mode,
-  bl.is_published,
-  bl.block_discovery,
-  bl.created_at,
-  bl.updated_at,
-  bl.published_at,
-  bl.view_count,
-  bl.like_count,
-  bl.comment_count,
-  bl.search_vector,
-  bl.pinned_comment_id,
-  bl.score
-FROM public.build_lists bl;
-
-INSERT INTO public.collection_tags (
-  collection_id,
-  tag_id
-)
-SELECT
-  blt.list_id,
-  blt.tag_id
-FROM public.build_list_tags blt;
-
-INSERT INTO public.collection_items (
-  collection_id,
-  target_type,
-  target_id,
-  note,
-  position,
-  submitted_by
-)
-SELECT
-  bli.list_id,
-  'build'::target_type_enum,
-  bli.build_id,
-  bli.note,
-  bli.position,
-  bli.submitted_by
-FROM public.build_list_items bli;
-
-UPDATE public.likes
-SET target_type = 'collection'
-WHERE target_type = 'build_list';
-
 
 CREATE OR REPLACE FUNCTION public.update_target_stats()
 RETURNS TRIGGER

@@ -155,7 +155,7 @@ export default function ProfilePage() {
                     } else {
                         const fetchCollections = async () => {
                             const collections = await listsStore.getAll();
-                            setCollections(collections.map(x => ({ ...x, items: x.items.map(build => build.build) })));
+                            setCollections(collections);
                         }
                         fetchCollections();
                     }
@@ -216,7 +216,7 @@ export default function ProfilePage() {
                         const fetchSaves = async () => {
                             const saves = await savedMdPlansStore.getAll();
                             searchMdPlans({ "md_plan_ids": saves.map(x => x.id) }, true, "recency", false, page, 24)
-                                .then(b => { setBuilds(b); setPlansLoading(false); })
+                                .then(b => { setPlans(b); setPlansLoading(false); })
                         }
                         fetchSaves();
                     }

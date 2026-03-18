@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRequestsCache } from "../database/RequestsCacheProvider";
 import { useAuth } from "../database/authProvider";
-import { mdPlansStore, savedListsStore, savesStore } from "../database/localDB";
+import { savedListsStore, savedMdPlansStore, savesStore } from "../database/localDB";
 import { SaveOutline, SaveSolid } from "./Symbols";
 
 function NormalSaveButton({ targetType, targetId, user, buildEntryVersion, iconSize, shortText=false }) {
@@ -48,7 +48,7 @@ function LocalSaveButton({ targetType, targetId, buildEntryVersion, iconSize, sh
         switch(targetType) {
             case "build": return savesStore;
             case "collection": return savedListsStore;
-            case "md_plan": return mdPlansStore;
+            case "md_plan": return savedMdPlansStore;
             default: return null;
         }
     }, [targetType])

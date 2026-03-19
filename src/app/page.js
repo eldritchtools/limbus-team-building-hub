@@ -52,12 +52,14 @@ export default function Home() {
                 Use the sidebar or click on the links below to get started.
             </p>
             <div style={{ border: "1px solid #aaa", borderRadius: "0.5rem", overflowX: "auto", maxWidth: "100%" }}>
-                <div style={{ display: "flex", flexWrap: "nowrap", width: "max-content", gap: "1rem", padding: "1rem", boxSizing: "border-box" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, auto)", width: "max-content", gap: "1rem", padding: "1rem", boxSizing: "border-box" }}>
                     <NoPrefetchLink className="text-link" href={"/builds"}>Team Builds</NoPrefetchLink>
-                    <NoPrefetchLink className="text-link" href={"/builds/new"}>Create a build</NoPrefetchLink>
                     <NoPrefetchLink className="text-link" href={"/md-plans"}>MD Plans</NoPrefetchLink>
                     <NoPrefetchLink className="text-link" href={"/collections"}>Collections</NoPrefetchLink>
                     <NoPrefetchLink className="text-link" href={"/identities"}>Identities</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/builds/new"}>New Build</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/md-plans/new"}>New Plan</NoPrefetchLink>
+                    <NoPrefetchLink className="text-link" href={"/collections/new"}>New Collection</NoPrefetchLink>
                     <NoPrefetchLink className="text-link" href={"/egos"}>E.G.Os</NoPrefetchLink>
                 </div>
             </div>

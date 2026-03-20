@@ -108,7 +108,7 @@ function FloorItem({ floor }) {
         border: "1px #aaa solid", borderRadius: "1rem", padding: "0.5rem", boxSizing: "border-box"
     }}>
         <h3 style={{ margin: 0 }}>Theme Packs</h3>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center", overflowY: "auto" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center", overflowY: "auto", overflowX: "hidden" }}>
             {floor.themePacks.map(pack =>
                 <ThemePackImg key={pack} id={pack} displayName={true} scale={packScale} />
             )}
@@ -130,7 +130,7 @@ function FloorItem({ floor }) {
     if (isMobile)
         return <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", fontSize: "1.2rem" }}>
-                Floor: {floor.label}
+                Floor: {floor.label.length > 0 ? floor.label : floor.floorSet}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center", width: "100%" }}>
                 <div style={{ display: "flex", gap: "0.2rem" }}>
@@ -145,7 +145,7 @@ function FloorItem({ floor }) {
 
     return <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", fontSize: "1.2rem" }}>
-            Floor: {floor.label}
+            Floor: {floor.label.length > 0 ? floor.label : floor.floorSet}
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center", width: "100%" }}>
             {themePacksComponent}

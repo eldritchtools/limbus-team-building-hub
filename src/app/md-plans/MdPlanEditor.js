@@ -617,7 +617,7 @@ export default function MdPlanEditor({ mode, mdPlanId }) {
         }
 
         <span style={{ fontSize: "1.2rem" }}>Floor Plan</span>
-        <span style={{ color: "#aaa" }}>Plans for each floor or set of floors. The floor set determines the available theme packs, while the label is shown to the viewers of the run plan.</span>
+        <span style={{ color: "#aaa" }}>Plans for each floor or set of floors. The floor set determines the available theme packs, while the label is shown to the viewers of the run plan (defaults to the floor set if not provided).</span>
         <FloorPlan
             difficulty={difficulty} floors={floors} setFloors={setFloors}
             addThemePacks={addThemePacks} removeThemePacks={removeThemePacks}

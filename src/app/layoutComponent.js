@@ -22,14 +22,7 @@ const paths = [
     { path: "/builds", title: "Team Builds" },
     { path: "/md-plans", title: "MD Plans" },
     { path: "/collections", title: "Collections" },
-    {
-        path: "/my-profile", title: "My Profile", subpaths: [
-            { path: "/builds/new", title: "New Build" },
-            { path: "/my-profile?tab=published", title: "My Builds" },
-            { path: "/my-profile?tab=drafts", title: "My Drafts" },
-            { path: "/my-profile?tab=saved", title: "Saved Builds" },
-        ]
-    },
+    { path: "/my-profile", title: "My Profile" },
     { path: "/identities", title: "Identities" },
     { path: "/egos", title: "E.G.Os" },
 ]

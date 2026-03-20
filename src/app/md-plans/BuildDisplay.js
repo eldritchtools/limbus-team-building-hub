@@ -80,7 +80,10 @@ export default function BuildDisplay({ builds, setBuilds, editable = false }) {
                     <button disabled={index === 0} onClick={() => setIndex(p => p - 1)}>←</button>
                     <button disabled={index === builds.length - 1} onClick={() => setIndex(p => p + 1)}>→</button>
                     <button onClick={() => setIndex(null)}>View all builds</button>
-                    <button onClick={() => router.push(`/builds/${build.id}`)}>Go to build page</button>
+                    {!editable ?
+                        <button onClick={() => router.push(`/builds/${build.id}`)}>Go to build page</button> :
+                        null
+                    }
                 </> :
                     null
                 }

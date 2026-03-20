@@ -17,7 +17,7 @@ function isLocalId(id) {
     return !uuidRegex.test(id);
 }
 
-export default function Collection({ collection }) {
+export default function Collection({ collection, complete = true }) {
     const { user } = useAuth();
 
     return <div className="collection">
@@ -56,13 +56,16 @@ export default function Collection({ collection }) {
                 </div> :
                 null
             }
-            <div style={{ display: "flex", gap: "0.5rem", pointerEvents: "all" }}>
-                <LikeButton targetType={"collection"} targetId={collection.id} likeCount={collection.like_count} iconSize={20} />
-                <CommentButton targetPath={"collections"} targetId={collection.id} count={collection.comment_count} iconSize={20} />
-                <SaveButton targetType={"collection"} targetId={collection.id} iconSize={20} />
-                {collection.submission_mode === "open" ? <ContributeButton collectionId={collection.id} iconSize={20} /> : null}
-                {user?.id === collection.user_id ? <ReviewButton collectionId={collection.id} iconSize={20} /> : null}
-            </div>
+            {complete ?
+                <div style={{ display: "flex", gap: "0.5rem", pointerEvents: "all" }}>
+                    <LikeButton targetType={"collection"} targetId={collection.id} likeCount={collection.like_count} iconSize={20} />
+                    <CommentButton targetPath={"collections"} targetId={collection.id} count={collection.comment_count} iconSize={20} />
+                    <SaveButton targetType={"collection"} targetId={collection.id} iconSize={20} />
+                    {collection.submission_mode === "open" ? <ContributeButton collectionId={collection.id} iconSize={20} /> : null}
+                    {user?.id === collection.user_id ? <ReviewButton collectionId={collection.id} iconSize={20} /> : null}
+                </div> :
+                null
+            }
         </div>
     </div>
 }

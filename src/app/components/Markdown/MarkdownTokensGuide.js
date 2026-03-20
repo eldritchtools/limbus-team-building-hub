@@ -13,6 +13,8 @@ const options = {
     "giftname": "giftname",
     "gifticons": "gifticons",
     "build": "build",
+    "mdplan": "mdplan",
+    "collection": "collection",
     "user": "user",
     "sinner": "sinner"
 }
@@ -25,6 +27,8 @@ const desc = {
     "giftname": "Reference an E.G.O Gift with {giftname:id} or {gn:id}. This will show the name of the gift and a tooltip with its description on hover. Clicking on the gift name will show a modal with more details on the gift. Gifts can be assigned enhancement levels by attaching it to the end of the id after a pipe e.g. {giftname:9001|2}. The token will fail to parse if the gift does not have that enhancement level.",
     "gifticons": "Reference E.G.O Gifts with {gifticons:id} or {gi:id}. This will show an icon of the gift and a tooltip with its description on hover. Clicking on the gift icon will show a modal with more details on the gift. This token supports multiple gifts by inputting {gifticons:id1:id2:...} (Insert to text will not automatically handle this). Gifts can be assigned enhancement levels by attaching it to the end of the id after a pipe e.g. {giftname:9001|2}. The token will fail to parse if the gift does not have that enhancement level.",
     "build": "Reference a build with {build:id}. This will show the name of the build and a tooltip with its search overview on hover. You can find the id of a build on its url or using the share feature on its page. Copying the full url below will automatically isolate the id.",
+    "mdplan": "Reference an md plan with {mdplan:id}. This will show the name of the md plan and a tooltip with its search overview on hover. You can find the id of an md plan on its url. Copying the full url below will automatically isolate the id.",
+    "collection": "Reference a collection with {collection:id}. This will show the name of the collection and a tooltip with its search overview on hover. You can find the id of a collection on its url. Copying the full url below will automatically isolate the id.",
     "user": "Reference a user with {user:username}. This will show a link to the user's profile. Note that if the user changes their username, this will break. Usernames are also case-sensitive.",
     "sinner": "Reference a sinner with {sinner:id}. This will show the name of the sinner. Useful if you want to accurately type Ryōshū."
 }
@@ -113,6 +117,32 @@ function InputGuide({ type, editorRef, onChange, guideValue, setGuideValue }) {
             </div>
         </GuideBase>
     }
+    if (type === "mdplan") {
+        const handleTestMdPlan = () => {
+            const planId = value.split("/").at(-1);
+            setGuideValue(planId);
+        }
+
+        return <GuideBase type={type} editorRef={editorRef} onChange={onChange} guideValue={guideValue} setGuideValue={setGuideValue}>
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <input value={value} onChange={e => setValue(e.target.value)} style={{ width: "20rem" }} />
+                <button onClick={handleTestMdPlan}>Test MD Plan</button>
+            </div>
+        </GuideBase>
+    }
+    if (type === "collection") {
+        const handleTestCollection = () => {
+            const collectionId = value.split("/").at(-1);
+            setGuideValue(collectionId);
+        }
+
+        return <GuideBase type={type} editorRef={editorRef} onChange={onChange} guideValue={guideValue} setGuideValue={setGuideValue}>
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <input value={value} onChange={e => setValue(e.target.value)} style={{ width: "20rem" }} />
+                <button onClick={handleTestCollection}>Test Collection</button>
+            </div>
+        </GuideBase>
+    }
     if (type === "user") {
         const handleTestUser = () => {
             setGuideValue(value);
@@ -133,7 +163,7 @@ function GuideAssembler({ guideTab, editorRef, onChange, guideValue, setGuideVal
     if (["identity", "ego", "status", "keyword", "giftname", "gifticons", "sinner"].includes(guideTab))
         return <SelectorGuide type={guideTab} editorRef={editorRef} onChange={onChange} guideValue={guideValue} setGuideValue={setGuideValue} />
 
-    if (["build", "user"].includes(guideTab))
+    if (["build", "mdplan", "collection", "user"].includes(guideTab))
         return <InputGuide type={guideTab} editorRef={editorRef} onChange={onChange} guideValue={guideValue} setGuideValue={setGuideValue} />
 
     return null;

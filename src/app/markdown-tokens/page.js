@@ -14,6 +14,10 @@ export default function MarkdownTokens() {
     const [gift, setGift] = useState(null);
     const [buildString, setBuildString] = useState("");
     const [buildTestString, setBuildTestString] = useState("");
+    const [mdPlanString, setMdPlanString] = useState("");
+    const [mdPlanTestString, setMdPlanTestString] = useState("");
+    const [collectionString, setCollectionString] = useState("");
+    const [collectionTestString, setCollectionTestString] = useState("");
     const [username, setUsername] = useState("");
     const [usernameTestString, setUsernameTestString] = useState("");
     const [sinner, setSinner] = useState(null);
@@ -21,6 +25,16 @@ export default function MarkdownTokens() {
     const handleTestBuild = () => {
         const buildId = buildString.split("/").at(-1);
         setBuildTestString(`{build:${buildId}}`);
+    }
+
+    const handleTestMdPlan = () => {
+        const planId = mdPlanString.split("/").at(-1);
+        setMdPlanTestString(`{mdplan:${planId}}`);
+    }
+
+    const handleTestCollection = () => {
+        const collectionId = collectionString.split("/").at(-1);
+        setCollectionTestString(`{collection:${collectionId}}`);
     }
 
     const handleTestUsername = () => {
@@ -170,6 +184,58 @@ export default function MarkdownTokens() {
                     <div>Result:</div>
                     <div style={{ border: "1px #777 solid", padding: "0.2rem" }}>
                         <MarkdownRenderer content={buildTestString} />
+                    </div>
+                </div> :
+                null
+            }
+        </div>
+        <h2 style={headerStyle}>Md Plan</h2>
+        <div>
+            Reference an md plan using <code>{"{mdplan:id}"}</code>, which will show a link to the md plan&apos;s page consisting of its name. Hovering over the link will show a tooltip for the md plan.
+            <br /> <br />
+            You can find an md plan&apos;s id in the URL of its respective page. Only published md plans will work.
+            <br /> <br />
+            You can input the md plan&apos;s id below to test it. You can paste the entire url and it will automatically strip out the unnecessary parts.
+            <br /> <br />
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+                <input value={mdPlanString} onChange={e => setMdPlanString(e.target.value)} style={{ width: "20rem" }} />
+                <button onClick={handleTestMdPlan}>Test MD Plan</button>
+            </div>
+
+            {mdPlanTestString.length > 0 ?
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
+                    <div>Token:</div>
+                    <code style={{ border: "1px #777 solid", padding: "0.2rem" }}>{mdPlanTestString}</code>
+                    <div style={{ fontSize: "1.2rem" }}>→</div>
+                    <div>Result:</div>
+                    <div style={{ border: "1px #777 solid", padding: "0.2rem" }}>
+                        <MarkdownRenderer content={mdPlanTestString} />
+                    </div>
+                </div> :
+                null
+            }
+        </div>
+        <h2 style={headerStyle}>Collection</h2>
+        <div>
+            Reference a collection using <code>{"{collection:id}"}</code>, which will show a link to the collection&apos;s page consisting of its name. Hovering over the link will show a tooltip for the collection.
+            <br /> <br />
+            You can find a collection&apos;s id in the URL of its respective page. Only published collections will work.
+            <br /> <br />
+            You can input the collection&apos;s id below to test it. You can paste the entire url and it will automatically strip out the unnecessary parts.
+            <br /> <br />
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+                <input value={collectionString} onChange={e => setCollectionString(e.target.value)} style={{ width: "20rem" }} />
+                <button onClick={handleTestCollection}>Test Collection</button>
+            </div>
+
+            {collectionTestString.length > 0 ?
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
+                    <div>Token:</div>
+                    <code style={{ border: "1px #777 solid", padding: "0.2rem" }}>{collectionTestString}</code>
+                    <div style={{ fontSize: "1.2rem" }}>→</div>
+                    <div>Result:</div>
+                    <div style={{ border: "1px #777 solid", padding: "0.2rem" }}>
+                        <MarkdownRenderer content={collectionTestString} />
                     </div>
                 </div> :
                 null

@@ -21,6 +21,10 @@ import { isTouchDevice } from "@eldritchtools/shared-components";
 import TooltipLink from "../TooltipLink";
 import { convertMarkdownAlias } from "./MarkdownAliases";
 import NoPrefetchLink from "@/app/NoPrefetchLink";
+import { searchCollections } from "@/app/database/collections";
+import { searchMdPlans } from "@/app/database/mdPlans";
+import Collection from "../Collection";
+import MdPlan from "../MdPlan";
 
 function tokenExtractionPlugin() {
     return (tree) => {
@@ -180,6 +184,56 @@ function BuildItem({ id }) {
             </span>
 }
 
+function CollectionItem({ id }) {
+    const [collection, setCollection] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [invalid, setInvalid] = useState(false);
+
+    useEffect(() => {
+        setLoading(true);
+        searchCollections({ "collection_ids": [id] }, true).then(x => {
+            if (x.length > 0) setCollection(x[0]);
+            else setInvalid(true);
+            setLoading(false);
+        })
+    }, [id])
+
+    return loading ?
+        <span>{"{collection loading...}"}</span> :
+        invalid ?
+            <span>{`{collection:${id}}`}</span> :
+            <span>
+                <TooltipLink href={`/collections/${id}`} tooltipId={`markdown-collection-tooltip`} tooltipContent={encodeURIComponent(JSON.stringify(collection))}>
+                    {collection.title}
+                </TooltipLink>
+            </span>
+}
+
+function MdPlanItem({ id }) {
+    const [plan, setPlan] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [invalid, setInvalid] = useState(false);
+
+    useEffect(() => {
+        setLoading(true);
+        searchMdPlans({ planIds: [id] }, true).then(x => {
+            if (x.length > 0) setPlan(x[0]);
+            else setInvalid(true);
+            setLoading(false);
+        })
+    }, [id])
+
+    return loading ?
+        <span>{"{md plan loading...}"}</span> :
+        invalid ?
+            <span>{`{mdplan:${id}}`}</span> :
+            <span>
+                <TooltipLink href={`/md-plans/${id}`} tooltipId={`markdown-mdplan-tooltip`} tooltipContent={encodeURIComponent(JSON.stringify(plan))}>
+                    {plan.title}
+                </TooltipLink>
+            </span>
+}
+
 export default function MarkdownRenderer({ content }) {
     const renderedMarkdown = useMemo(() => {
         return <ReactMarkdown
@@ -209,6 +263,10 @@ export default function MarkdownRenderer({ content }) {
                             return <GiftIconsItem vals={tokenValues} />
                         case "build":
                             return <BuildItem id={tokenValues[0]} />;
+                        case "collection":
+                            return <CollectionItem id={tokenValues[0]} />;
+                        case "mdplan":
+                            return <MdPlanItem id={tokenValues[0]} />;
                         case "user":
                             return <NoPrefetchLink href={`/profiles/${tokenValues[0]}`}>{tokenValues[0]}</NoPrefetchLink>;
                         case "sinner":
@@ -261,8 +319,38 @@ export default function MarkdownRenderer({ content }) {
             render={({ content }) => {
                 const build = JSON.parse(decodeURIComponent(content));
                 if (build)
-                    return <div style={{ ...tooltipStyle, width: isTouchDevice() ? "332px" : "500px" }}>
-                        <BuildEntry build={build} size={"M"} />
+                    return <div style={{ ...tooltipStyle, width: isTouchDevice() ? "332px" : "460px" }}>
+                        <BuildEntry build={build} size={"M"} complete={false} />
+                    </div>
+                return null;
+            }}
+            getTooltipContainer={() => document.body}
+            style={{ backgroundColor: "transparent", zIndex: "9999" }}
+            clickable={isTouchDevice()}
+        />
+
+        <Tooltip
+            id="markdown-collection-tooltip"
+            render={({ content }) => {
+                const collection = JSON.parse(decodeURIComponent(content));
+                if (collection)
+                    return <div style={{ ...tooltipStyle, width: isTouchDevice() ? "350px" : "750px" }}>
+                        <Collection collection={collection} complete={false} />
+                    </div>
+                return null;
+            }}
+            getTooltipContainer={() => document.body}
+            style={{ backgroundColor: "transparent", zIndex: "9999" }}
+            clickable={isTouchDevice()}
+        />
+
+        <Tooltip
+            id="markdown-mdplan-tooltip"
+            render={({ content }) => {
+                const plan = JSON.parse(decodeURIComponent(content));
+                if (plan)
+                    return <div style={{ ...tooltipStyle, width: isTouchDevice() ? "175px" : "250px" }}>
+                        <MdPlan plan={plan} complete={false} />
                     </div>
                 return null;
             }}

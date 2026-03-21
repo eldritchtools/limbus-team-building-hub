@@ -12,6 +12,11 @@ async function getPopularBuilds(page = 1, pageSize = 20) {
 async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", strictFiltering = false, page = 1, pageSize = 20) {
     const start = (page - 1) * pageSize;
 
+    const convertSortBy = () => {
+        if(["recency", "recent"].includes(sortBy)) return "new";
+        return sortBy;
+    }
+
     const options = {};
     if ("query" in filters) options["p_query"] = filters["query"];
     if ("build_ids" in filters) options["build_id_filter"] = filters["build_ids"];
@@ -28,7 +33,7 @@ async function getFilteredBuilds(filters, isPublished = true, sortBy = "score", 
     if ("ignore_block_discovery" in filters) options["p_ignore_block_discovery"] = filters["ignore_block_discovery"];
     if ("include_egos" in filters) options["p_include_egos"] = filters["include_egos"];
     options.p_published = isPublished;
-    options.p_sort_by = sortBy;
+    options.p_sort_by = convertSortBy(sortBy);
     options.p_strict_filter = strictFiltering;
     options.p_limit = pageSize;
     options.p_offset = start;

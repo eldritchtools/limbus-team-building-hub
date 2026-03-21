@@ -59,7 +59,7 @@ export default function ProfilePage({ params }) {
                 .then(c => { setCollections(c); setCollectionsLoading(false); })
         } else if (viewMode === "md_plans") {
             setMdPlansLoading(true);
-            searchMdPlans({ "username_exact": parsedUsername, ignoreBlockDiscovery: true, sortBy: "new", published: true, limit: 20, offset: (page - 1) * 20 })
+            searchMdPlans({ username: parsedUsername, ignoreBlockDiscovery: true, sortBy: "new", published: true, limit: 20, offset: (page - 1) * 20 })
                 .then(p => { setMdPlans(p); setMdPlansLoading(false); })
         }
     }, [parsedUsername, page, viewMode]);

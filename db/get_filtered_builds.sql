@@ -1,9 +1,8 @@
-CREATE OR REPLACE FUNCTION public.get_filtered_builds_v8(
-  title_filter TEXT DEFAULT NULL,
-  username_filter TEXT DEFAULT NULL,
+CREATE OR REPLACE FUNCTION public.search_builds_v9(
+  p_query TEXT DEFAULT NULL,
+  build_id_filter UUID[] DEFAULT NULL,
   username_exact_filter TEXT DEFAULT NULL,
   user_id_filter UUID DEFAULT NULL,
-  build_id_filter UUID[] DEFAULT NULL,
   tag_filter TEXT[] DEFAULT NULL,
   identity_filter INT[] DEFAULT NULL,
   identity_exclude INT[] DEFAULT NULL,
@@ -11,13 +10,13 @@ CREATE OR REPLACE FUNCTION public.get_filtered_builds_v8(
   ego_exclude INT[] DEFAULT NULL,
   keyword_filter INT[] DEFAULT NULL,
   keyword_exclude INT[] DEFAULT NULL,
+  p_sort_by TEXT DEFAULT NULL,
+  p_limit INTEGER DEFAULT 20,
+  p_offset INTEGER DEFAULT 0,
   p_published BOOLEAN DEFAULT TRUE,
-  sort_by TEXT DEFAULT 'score',
-  limit_count INTEGER DEFAULT 20,
-  offset_count INTEGER DEFAULT 0,
-  strict_filter BOOLEAN DEFAULT FALSE,
-  ignore_block_discovery BOOLEAN DEFAULT FALSE,
-  include_egos BOOLEAN DEFAULT FALSE
+  p_strict_filter BOOLEAN DEFAULT FALSE,
+  p_ignore_block_discovery BOOLEAN DEFAULT FALSE,
+  p_include_egos BOOLEAN DEFAULT FALSE
 )
 RETURNS TABLE (
   id UUID,
@@ -38,103 +37,157 @@ RETURNS TABLE (
   identity_ids INT[],
   keyword_ids INT[],
   ego_ids INT[]
-) AS $$
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_sort TEXT;
+  v_tsquery tsquery;
 BEGIN
+
+  -- Determine sort mode
+  IF p_sort_by IS NOT NULL THEN
+    v_sort := p_sort_by;
+  ELSIF p_query IS NOT NULL THEN
+    v_sort := 'search';
+  ELSE
+    v_sort := 'new';
+  END IF;
+
+  -- Build tsquery
+  IF p_query IS NOT NULL THEN
+    v_tsquery := plainto_tsquery('english', p_query);
+  END IF;
+
   RETURN QUERY
-  SELECT 
+
+  WITH builds AS (
+    SELECT
+      b.id,
+      b.title,
+      b.created_at,
+      b.updated_at,
+      b.published_at,
+      b.like_count,
+      b.comment_count,
+      b.deployment_order,
+      b.active_sinners,
+      b.score,
+      b.is_published,
+      u.username,
+      u.flair,
+      b.extra_opts,
+      b.identity_ids,
+      b.keyword_ids,
+      CASE WHEN p_include_egos THEN b.ego_ids ELSE NULL END AS ego_ids,
+      b.search_vector,
+
+      CASE
+        WHEN v_sort = 'search' AND v_tsquery IS NOT NULL THEN ts_rank(b.search_vector, v_tsquery)
+        WHEN v_sort = 'new' THEN EXTRACT(EPOCH FROM COALESCE(b.published_at, b.created_at))
+        WHEN v_sort = 'popular' THEN b.score
+        WHEN v_sort = 'random' THEN RANDOM()
+      END AS sort_value
+
+    FROM public.builds b
+    JOIN public.users u ON b.user_id = u.id
+
+    WHERE
+      b.is_published = p_published
+      AND (build_id_filter IS NULL OR b.id = ANY(build_id_filter))
+      AND (username_exact_filter IS NULL OR u.username = username_exact_filter)
+      AND (user_id_filter IS NULL OR b.user_id = user_id_filter)
+      AND (v_tsquery IS NULL OR b.search_vector @@ v_tsquery)
+      AND (p_ignore_block_discovery = TRUE OR b.block_discovery = FALSE)
+
+      -- tag filter
+      AND (
+        tag_filter IS NULL OR EXISTS (
+          SELECT 1
+          FROM public.build_tags bt2
+          JOIN public.tags t2 ON bt2.tag_id = t2.id
+          WHERE bt2.build_id = b.id
+          AND t2.name = ANY(tag_filter)
+        )
+      )
+
+      -- identity filters
+      AND (
+        identity_filter IS NULL
+        OR (
+          (p_strict_filter = FALSE AND b.identity_ids && identity_filter)
+          OR (p_strict_filter = TRUE AND b.identity_ids @> identity_filter)
+        )
+      )
+      AND (
+        identity_exclude IS NULL
+        OR NOT (b.identity_ids && identity_exclude)
+      )
+
+      -- ego filters
+      AND (
+        ego_filter IS NULL
+        OR (
+          (p_strict_filter = FALSE AND b.ego_ids && ego_filter)
+          OR (p_strict_filter = TRUE AND b.ego_ids @> ego_filter)
+        )
+      )
+      AND (
+        ego_exclude IS NULL
+        OR NOT (b.ego_ids && ego_exclude)
+      )
+
+      -- keyword filters
+      AND (
+        keyword_filter IS NULL
+        OR (
+          (p_strict_filter = FALSE AND b.keyword_ids && keyword_filter)
+          OR (p_strict_filter = TRUE AND b.keyword_ids @> keyword_filter)
+        )
+      )
+      AND (
+        keyword_exclude IS NULL
+        OR NOT (b.keyword_ids && keyword_exclude)
+      )
+
+    ORDER BY sort_value DESC
+    LIMIT p_limit OFFSET p_offset
+  ),
+
+  build_tags AS (
+    SELECT
+      bt.build_id,
+      ARRAY_AGG(DISTINCT t.name) AS tags
+    FROM public.build_tags bt
+    JOIN public.tags t ON t.id = bt.tag_id
+    GROUP BY bt.build_id
+  )
+
+  SELECT
     b.id,
     b.title,
     b.created_at,
-    b.published_at,
     b.updated_at,
+    b.published_at,
     b.like_count,
     b.comment_count,
     b.deployment_order,
     b.active_sinners,
     b.score,
     b.is_published,
-    u.username,
-    u.flair,
-    ARRAY_AGG(DISTINCT t.name) AS tags,
+    b.username,
+    b.flair AS user_flair,
+    COALESCE(bt.tags, ARRAY[]::TEXT[]) AS tags,
     b.extra_opts,
     b.identity_ids,
     b.keyword_ids,
-    CASE WHEN include_egos THEN b.ego_ids ELSE NULL END
-  FROM public.builds AS b
-  JOIN public.users AS u ON b.user_id = u.id
-  LEFT JOIN public.build_tags AS bt ON b.id = bt.build_id
-  LEFT JOIN public.tags AS t ON bt.tag_id = t.id
-  WHERE
-    (title_filter IS NULL OR b.title ILIKE '%' || title_filter || '%')
-    AND (username_filter IS NULL OR u.username ILIKE '%' || username_filter || '%')
-    AND (username_exact_filter IS NULL OR u.username = username_exact_filter)
-    AND (user_id_filter IS NULL OR b.user_id = user_id_filter)
-    AND (build_id_filter IS NULL OR b.id = ANY(build_id_filter))
-    AND b.is_published = p_published
-    AND (
-        ignore_block_discovery = TRUE
-        OR b.block_discovery = FALSE
-    )
-    AND (
-      tag_filter IS NULL
-      OR (
-        (strict_filter = FALSE AND EXISTS (
-            SELECT 1 FROM public.build_tags AS bt2
-            JOIN public.tags AS t2 ON bt2.tag_id = t2.id
-            WHERE bt2.build_id = b.id AND t2.name = ANY(tag_filter)
-        ))
-        OR
-        (strict_filter = TRUE AND (
-            SELECT COUNT(*) 
-            FROM public.build_tags AS bt2
-            JOIN public.tags AS t2 ON bt2.tag_id = t2.id
-            WHERE bt2.build_id = b.id AND t2.name = ANY(tag_filter)
-        ) = array_length(tag_filter, 1))
-      )
-    )
-    AND (
-      identity_filter IS NULL
-      OR (
-        (strict_filter = FALSE AND b.identity_ids && identity_filter)
-        OR (strict_filter = TRUE AND b.identity_ids @> identity_filter)
-      )
-    )
-    AND (
-      identity_exclude IS NULL
-      OR NOT (b.identity_ids && identity_exclude)
-    )
-    AND (
-      ego_filter IS NULL
-      OR (
-        (strict_filter = FALSE AND b.ego_ids && ego_filter)
-        OR (strict_filter = TRUE AND b.ego_ids @> ego_filter)
-      )
-    )
-    AND (
-      ego_exclude IS NULL
-      OR NOT (b.ego_ids && ego_exclude)
-    )
-    AND (
-      keyword_filter IS NULL
-      OR (
-        (strict_filter = FALSE AND b.keyword_ids && keyword_filter)
-        OR (strict_filter = TRUE AND b.keyword_ids @> keyword_filter)
-      )
-    )
-    AND (
-      keyword_exclude IS NULL
-      OR NOT (b.keyword_ids && keyword_exclude)
-    )
-  GROUP BY 
-    b.id, u.username, u.flair
-  ORDER BY
-    CASE 
-      WHEN sort_by = 'recency' THEN EXTRACT(EPOCH FROM COALESCE(b.published_at, b.created_at))
-      WHEN sort_by = 'likes' THEN b.like_count
-      WHEN sort_by = 'comments' THEN b.comment_count
-      WHEN sort_by = 'random' THEN RANDOM()
-      ELSE b.score
-    END DESC
-  LIMIT limit_count OFFSET offset_count;
+    b.ego_ids
+
+  FROM builds b
+  LEFT JOIN build_tags bt ON bt.build_id = b.id
+
+  ORDER BY b.sort_value DESC;
+
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;

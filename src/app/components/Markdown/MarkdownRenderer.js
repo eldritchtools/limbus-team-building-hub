@@ -166,7 +166,7 @@ function BuildItem({ id }) {
 
     useEffect(() => {
         setLoading(true);
-        getFilteredBuilds({ "build_ids": [id] }, true).then(x => {
+        getFilteredBuilds({ "build_ids": [id], "ignore_block_discovery": true }, true).then(x => {
             if (x.length > 0) setBuild(x[0]);
             else setInvalid(true);
             setLoading(false);
@@ -191,7 +191,7 @@ function CollectionItem({ id }) {
 
     useEffect(() => {
         setLoading(true);
-        searchCollections({ "collection_ids": [id] }, true).then(x => {
+        searchCollections({ "collection_ids": [id], "ignore_block_discovery": true }, true).then(x => {
             if (x.length > 0) setCollection(x[0]);
             else setInvalid(true);
             setLoading(false);
@@ -216,7 +216,7 @@ function MdPlanItem({ id }) {
 
     useEffect(() => {
         setLoading(true);
-        searchMdPlans({ planIds: [id] }, true).then(x => {
+        searchMdPlans({ planIds: [id], ignoreBlockDiscovery: true }, true).then(x => {
             if (x.length > 0) setPlan(x[0]);
             else setInvalid(true);
             setLoading(false);

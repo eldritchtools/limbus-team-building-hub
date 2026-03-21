@@ -56,7 +56,7 @@ export default function ProfilePage({ params }) {
         } else if (viewMode === "collections") {
             setCollectionsLoading(true);
             searchCollections({ "username_exact": parsedUsername, "ignore_block_discovery": true }, true, "new", page, 10)
-                .then(c => { setCollections(l); setCollectionsLoading(false); })
+                .then(c => { setCollections(c); setCollectionsLoading(false); })
         } else if (viewMode === "md_plans") {
             setMdPlansLoading(true);
             searchMdPlans({ "username_exact": parsedUsername, ignoreBlockDiscovery: true, sortBy: "new", published: true, limit: 20, offset: (page - 1) * 20 })

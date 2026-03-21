@@ -8,7 +8,8 @@ import BuildsGrid from "../../components/BuildsGrid";
 
 export function prepareBuildFilters(filters) {
     return Object.entries(filters).reduce((acc, [f, v]) => {
-        if (f === "title" || f === "username" || f === "tags") acc[f] = v;
+        if (f === "search") acc["query"] = v;
+        else if (f === "tags") acc[f] = v;
         else if (f === "identities" || f === "egos") {
             const [include, exclude] = v.reduce(([i, e], x) => {
                 if (x[0] === "-") e.push(parseInt(x.slice(1)));
@@ -35,8 +36,7 @@ export default function SearchBuildsContent() {
     const searchParams = useSearchParams();
 
     const filters = useMemo(() => searchParams.entries().reduce((acc, [f, v]) => {
-        if (f === "title") acc[f] = v;
-        else if (f === "username") acc[f] = v;
+        if (f === "search") acc["search"] = v;
         else if (f === "tags") acc[f] = v.split(",");
         else if (f === "identities" || f === "egos") acc[f] = v.split(",");
         else if (f === "keywords") acc[f] = v.split(",");

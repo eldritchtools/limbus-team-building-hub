@@ -8,7 +8,8 @@ import BuildsSearchComponent from "../builds/BuildsSearchComponent";
 
 function prepareBuildFilters(filters) {
     return Object.entries(filters).reduce((acc, [f, v]) => {
-        if (f === "title" || f === "username" || f === "tags") acc[f] = v;
+        if (f === "search") acc["query"] = v; 
+        else if(f === "tags") acc[f] = v;
         else if (f === "identities" || f === "egos") {
             const [include, exclude] = v.reduce(([i, e], x) => {
                 if (x[0] === "-") e.push(parseInt(x.slice(1)));
@@ -81,7 +82,7 @@ export default function SelectBuildModal({ isOpen, onClose, onSelectBuild }) {
                 {/* <div style={{ ...tabStyle, color: searchMode === "draft" ? "#ddd" : "#777" }} onClick={() => setSearchMode("draft")}>My Drafts</div> */}
             </div>
             {searchMode === "search" ?
-                <BuildsSearchComponent options={filters} setFilters={setFilters} /> :
+                <BuildsSearchComponent options={filters} inPage={true} setFilters={setFilters} /> :
                 (!user ?
                     <span>Locally saved builds are not supported.</span> :
                     null

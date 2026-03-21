@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION update_build_with_tags_v3(
+CREATE OR REPLACE FUNCTION update_build_with_tags_v4(
   p_build_id UUID,
   p_user_id UUID,
   p_title TEXT,
@@ -25,6 +25,7 @@ DECLARE
   _tag_ids INT[];
   owner_id UUID;
   was_published BOOLEAN;
+  v_username TEXT;
 BEGIN
   -- verify ownership
   SELECT user_id INTO owner_id FROM public.builds WHERE id = p_build_id;
@@ -35,12 +36,17 @@ BEGIN
     RAISE EXCEPTION 'Unauthorized to edit this build';
   END IF;
 
+  -- get username
+  SELECT username INTO v_username
+  FROM public.users
+  WHERE id = p_user_id;
+
   SELECT is_published
   INTO was_published
   FROM public.builds
   WHERE id = p_build_id;
 
-  -- update build core fields
+  -- update build core fields + search vector
   UPDATE public.builds
   SET
     title = p_title,
@@ -60,10 +66,19 @@ BEGIN
       THEN NOW()
       ELSE published_at
     END,
-    updated_at = NOW()
+    updated_at = NOW(),
+
+    -- 🔥 recompute search vector
+    search_vector = to_tsvector(
+      'english',
+      coalesce(p_title,'') || ' ' ||
+      coalesce(p_body,'') || ' ' ||
+      coalesce(v_username,'')
+    )
+
   WHERE id = p_build_id;
 
-  -- ensure tags exist and collect their IDs
+  -- ensure tags exist
   _tag_ids := ARRAY[]::INT[];
   FOREACH tag_name IN ARRAY p_tags LOOP
     INSERT INTO public.tags (name)

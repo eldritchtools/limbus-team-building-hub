@@ -7,7 +7,7 @@ async function getNotifications(userId, limit = null) {
 
     if (limit) options.p_limit = limit;
 
-    const { data, error } = await getSupabase().rpc('get_user_notifications_v2', options);
+    const { data, error } = await getSupabase().rpc('get_user_notifications_v3', options);
 
     if (error) throw error;
     return data;

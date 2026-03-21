@@ -5,7 +5,7 @@ async function searchCollections(filters, isPublished = true, sortBy = "score", 
 
     const options = {};
     if ("query" in filters) options["p_query"] = filters["query"];
-    if ("collection_ids" in filters) options["collection_id_filter"] = filters["collection_id"];
+    if ("collection_ids" in filters) options["collection_id_filter"] = filters["collection_ids"];
     if ("user_id" in filters) options["user_id_filter"] = filters["user_id"];
     if ("username_exact" in filters) options["username_exact_filter"] = filters["username_exact"];
     if ("tags" in filters) options["tag_filter"] = filters["tags"];

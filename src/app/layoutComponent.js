@@ -37,7 +37,7 @@ function MigrationNotice() {
 
     if (hidden) return null;
 
-    return <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+    return <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "1rem" }}>
         <div style={{ backgroundColor: "#262626", borderBottom: "1px solid #333", maxWidth: "1200px", boxShadow: "0 4px 16px rgba(0,0,0,0.4)" }}>
             <div style={{ padding: "8px 16px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#d1d1d1" }}>

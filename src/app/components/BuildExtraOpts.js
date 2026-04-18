@@ -56,6 +56,7 @@ function decodeBuildExtraOpts(string, parts=null) {
 
     return string.split("|").reduce((acc, part) => {
         const [type, vals] = part.split(":");
+        if (parts && !parts.includes(type)) return acc;
         switch (type) {
             case "iu":
                 if (parts && !parts.includes("iu")) return acc;

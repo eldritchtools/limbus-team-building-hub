@@ -29,7 +29,7 @@ function isLocalId(id) {
 export default function BuildEntry({ build, size, complete = true, clickable = true }) {
     const extraProps = {};
     if (build.extra_opts) {
-        const extraOpts = decodeBuildExtraOpts(build.extra_opts, ["iu"])
+        const extraOpts = decodeBuildExtraOpts(build.extra_opts, ["iu"]);
         if (extraOpts.identityUpties) extraProps.identityUpties = extraOpts.identityUpties;
     }
 

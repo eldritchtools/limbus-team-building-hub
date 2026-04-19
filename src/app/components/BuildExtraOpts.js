@@ -70,6 +70,8 @@ function decodeBuildExtraOpts(string, parts=null) {
                 if (parts && !parts.includes("et")) return acc;
                 acc.egoThreadspins = decodePart2(vals, 12, 5);
                 return acc;
+            default:
+                return acc;
         }
     }, {});
 }
